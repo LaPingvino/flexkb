@@ -339,12 +339,15 @@ func handleModules(w http.ResponseWriter, _ *http.Request, root model.DataRoot) 
 	writeJSON(w, out)
 }
 
-// apiLevel pairs a level value with the dimension that contributed it.
-// Source is one of: "transformation", "position", "letter", "substitution",
-// "" (no value). The frontend uses this to color the cell.
+// apiLevel pairs a level value with the dimension that contributed it
+// and the specific module name. Source is one of: "transformation",
+// "position", "letter", "substitution", "" (no value). Module is the
+// file name of the contributing module (e.g. "qwerty", "intl") and is
+// "" exactly when Source is "".
 type apiLevel struct {
 	Value  string `json:"value"`
 	Source string `json:"source"`
+	Module string `json:"module,omitempty"`
 }
 
 type apiCompose struct {
@@ -424,121 +427,36 @@ type trackedLayout struct {
 	Includes []string
 }
 
-// composeWithSources runs four staged composes (trans-only → +positional
-// → +letter → +substitution) and diffs each stage against the previous
-// to figure out which dimension contributed each level. This reuses the
-// existing compose pipeline without modification — every diff is one
-// pass, and we get clean per-cell provenance for the UI to color by.
+// composeWithSources runs the composition once and uses the per-level
+// provenance the compose package now records natively. Replaces the
+// previous 4-pass-diff trick — same shape of result, less work, and
+// the popover/legend can now show the *specific* module that
+// contributed each level (e.g. "letter from intl"), not just the
+// broad stage category.
 func composeWithSources(root model.DataRoot, spec model.LayoutSpec) (trackedLayout, []string, error) {
-	phys, err := root.Physical(spec.Physical)
+	res, err := compose.Compose(root, spec)
 	if err != nil {
 		return trackedLayout{}, nil, err
 	}
-	trans, err := root.Transformation(spec.Transformation)
-	if err != nil {
-		return trackedLayout{}, nil, err
-	}
-	adds := make([]model.Addition, 0, len(spec.Additions))
-	for _, n := range spec.Additions {
-		a, err := root.Addition(n)
-		if err != nil {
-			return trackedLayout{}, nil, err
-		}
-		adds = append(adds, a)
-	}
-	subs := make([]model.Substitution, 0, len(spec.Substitutions))
-	for _, n := range spec.Substitutions {
-		s, err := root.Substitution(n)
-		if err != nil {
-			return trackedLayout{}, nil, err
-		}
-		subs = append(subs, s)
-	}
-
-	// Split each addition into a positional-only and a letter-only variant
-	// so we can compose the two stages independently.
-	addsPos := make([]model.Addition, 0, len(adds))
-	for _, a := range adds {
-		if len(a.Overlays) == 0 {
-			continue
-		}
-		addsPos = append(addsPos, model.Addition{
-			Name:     a.Name,
-			Overlays: a.Overlays,
-			Includes: a.Includes,
-		})
-	}
-
-	r1 := compose.ComposeFromPartsWithSubs(spec, phys, trans, nil, nil)
-	r2 := compose.ComposeFromPartsWithSubs(spec, phys, trans, addsPos, nil)
-	r3 := compose.ComposeFromPartsWithSubs(spec, phys, trans, adds, nil)
-	r4 := compose.ComposeFromPartsWithSubs(spec, phys, trans, adds, subs)
-
 	out := trackedLayout{
-		Keys:     r4.Layout.Keys,
+		Keys:     res.Layout.Keys,
 		Symbols:  map[string][]apiLevel{},
-		Includes: r4.Layout.Includes,
+		Includes: res.Layout.Includes,
 	}
-
-	for _, k := range r4.Layout.Keys {
-		final := levelsOf(r4.Layout.Symbols, k)
-		afterLetter := levelsOf(r3.Layout.Symbols, k)
-		afterPos := levelsOf(r2.Layout.Symbols, k)
-		afterTrans := levelsOf(r1.Layout.Symbols, k)
-		row := make([]apiLevel, len(final))
-		for i, v := range final {
-			row[i] = apiLevel{Value: v, Source: classifyLevel(i, v, afterLetter, afterPos, afterTrans)}
+	for _, k := range res.Layout.Keys {
+		sym := res.Layout.Symbols[k]
+		srcs := res.Sources[k]
+		row := make([]apiLevel, len(sym.Levels))
+		for i, v := range sym.Levels {
+			var s compose.LevelSource
+			if i < len(srcs) {
+				s = srcs[i]
+			}
+			row[i] = apiLevel{Value: v, Source: s.Stage, Module: s.Module}
 		}
 		out.Symbols[k] = row
 	}
-	return out, r4.Warnings, nil
-}
-
-func levelsOf(symbols map[string]model.KeySymbols, k string) []string {
-	s, ok := symbols[k]
-	if !ok {
-		return nil
-	}
-	return s.Levels
-}
-
-func levelAt(levels []string, i int) string {
-	if i < 0 || i >= len(levels) {
-		return ""
-	}
-	return levels[i]
-}
-
-// classifyLevel walks the four stages backwards to identify which
-// dimension first put the final value at this level. If the value is
-// already present after substitutions but the level before substitutions
-// holds the same value (modulo no rewrite), credit upstream stages.
-// Empty final values are dimensionless.
-func classifyLevel(i int, final string, afterLetter, afterPos, afterTrans []string) string {
-	if final == "" {
-		return ""
-	}
-	letter := levelAt(afterLetter, i)
-	pos := levelAt(afterPos, i)
-	trans := levelAt(afterTrans, i)
-
-	// Substitution: final differs from pre-substitution (afterLetter).
-	if final != letter {
-		return "substitution"
-	}
-	// Letter overlay: letter-stage differs from positional-only stage.
-	if letter != pos {
-		return "letter"
-	}
-	// Positional overlay: positional-stage differs from transformation-only.
-	if pos != trans {
-		return "position"
-	}
-	// Otherwise it's whatever the transformation already produced.
-	if trans != "" {
-		return "transformation"
-	}
-	return ""
+	return out, res.Warnings, nil
 }
 
 // handleComposeSpec previews a user-built LayoutSpec without writing

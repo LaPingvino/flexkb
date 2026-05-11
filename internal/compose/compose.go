@@ -32,12 +32,29 @@ var extensionKeys = map[string]bool{
 	"AE13": true, // JIS 109: extra top-row key
 }
 
+// LevelSource records which composition stage and which specific
+// module produced one level value on one key. Stages are the canonical
+// four — transformation, position, letter, substitution — and Module
+// is the file name of the contributing transformation / addition /
+// substitution (e.g. "qwerty", "intl", "latin-cyrillic-phonetic").
+// Used by the GUI inspector to show "level 3 came from `intl`" rather
+// than just "letter overlay", and available to any caller that wants
+// per-level provenance without re-running composition.
+type LevelSource struct {
+	Stage  string // "transformation" / "position" / "letter" / "substitution" / ""
+	Module string // contributing module name; "" if Stage is also ""
+}
+
 // Result carries the composed layout plus any non-fatal warnings raised
 // during composition (e.g. transformation referencing a key the physical
 // doesn't have).
+//
+// Sources is a parallel map to Layout.Symbols: Sources[k][i] describes
+// where Layout.Symbols[k].Levels[i] came from. Always populated.
 type Result struct {
 	Layout   model.ComposedLayout
 	Warnings []string
+	Sources  map[string][]LevelSource
 }
 
 // Compose resolves a LayoutSpec against the data root. It loads the named
@@ -79,8 +96,13 @@ func ComposeFromParts(spec model.LayoutSpec, phys model.Physical, trans model.Tr
 
 // ComposeFromPartsWithSubs does the actual merge once parts have been
 // resolved. Split out so tests can drive composition with in-memory data.
+//
+// Tracks per-level provenance into r.Sources alongside the composed
+// symbols: every time a stage writes a non-empty value into a level,
+// we record (stage, module) for that (key, level). Empty values
+// pass through unchanged and so does their source record.
 func ComposeFromPartsWithSubs(spec model.LayoutSpec, phys model.Physical, trans model.Transformation, adds []model.Addition, subs []model.Substitution) Result {
-	r := Result{}
+	r := Result{Sources: map[string][]LevelSource{}}
 	out := model.ComposedLayout{
 		Name:        spec.Name,
 		Description: spec.Description,
@@ -94,10 +116,38 @@ func ComposeFromPartsWithSubs(spec model.LayoutSpec, phys model.Physical, trans 
 		keyAllowed[k] = true
 	}
 
-	// Stage 1: seed from transformation. Keys not on the physical are
-	// silently dropped if they're known cross-physical "extension" keys
-	// (LSGT on ISO, AB11/AE13 on JIS). Warn for the rest — that's the case
-	// that catches typos like ADO1 (zero vs O).
+	// writeLevels merges overlay levels into key k's current levels and
+	// records (stage, module) for every level the overlay actually set.
+	// Out-parameter style on r.Sources keeps the existing stages tidy.
+	writeLevels := func(k string, overlayLevels []string, stage, module string) {
+		cur := out.Symbols[k].Levels
+		merged := mergeLevels(cur, overlayLevels)
+		out.Symbols[k] = model.KeySymbols{Levels: merged}
+		// Sources: extend to merged length, copy existing, mark levels
+		// the overlay populated.
+		curSrc := r.Sources[k]
+		newSrc := make([]LevelSource, len(merged))
+		copy(newSrc, curSrc) // existing sources preserved where overlay didn't write
+		for i := 0; i < len(merged); i++ {
+			ov := ""
+			if i < len(overlayLevels) {
+				ov = overlayLevels[i]
+			}
+			if ov != "" {
+				newSrc[i] = LevelSource{Stage: stage, Module: module}
+			}
+		}
+		r.Sources[k] = newSrc
+	}
+
+	// Stage 1: seed from transformation. We tag provenance with the
+	// transformation's Slug (the file basename) rather than the YAML
+	// `name:` field — that's what users pick in the GUI / layouts file,
+	// so it's what makes most sense in the inspector.
+	transSlug := trans.Slug
+	if transSlug == "" {
+		transSlug = trans.Name
+	}
 	for k, sym := range trans.Keys {
 		if !keyAllowed[k] {
 			if !extensionKeys[k] {
@@ -105,10 +155,24 @@ func ComposeFromPartsWithSubs(spec model.LayoutSpec, phys model.Physical, trans 
 			}
 			continue
 		}
-		out.Symbols[k] = model.KeySymbols{Levels: append([]string(nil), sym.Levels...)}
+		levels := append([]string(nil), sym.Levels...)
+		out.Symbols[k] = model.KeySymbols{Levels: levels}
+		src := make([]LevelSource, len(levels))
+		for i, v := range levels {
+			if v != "" {
+				src[i] = LevelSource{Stage: "transformation", Module: transSlug}
+			}
+		}
+		r.Sources[k] = src
 	}
 
-	// Stage 2: apply position-based addition overlays in order.
+	// Stage 2: positional addition overlays in declaration order.
+	addSlug := func(a model.Addition) string {
+		if a.Slug != "" {
+			return a.Slug
+		}
+		return a.Name
+	}
 	for _, a := range adds {
 		for k, overlay := range a.Overlays {
 			if !keyAllowed[k] {
@@ -117,25 +181,13 @@ func ComposeFromPartsWithSubs(spec model.LayoutSpec, phys model.Physical, trans 
 				}
 				continue
 			}
-			cur := out.Symbols[k]
-			merged := mergeLevels(cur.Levels, overlay.Levels)
-			out.Symbols[k] = model.KeySymbols{Levels: merged}
+			writeLevels(k, overlay.Levels, "position", addSlug(a))
 		}
 		out.Includes = append(out.Includes, a.Includes...)
 	}
 
-	// Stage 2b: apply letter-following overlays.
-	//
-	// Priority spans every addition's overlays globally — so a user can
-	// stack additions and have a high-priority overlay in one win against
-	// a normal-priority overlay in another. Example: a "polish-intl"
-	// addition with high-priority `l -> lstroke` overrides the regular
-	// intl's normal-priority `l -> oslash` because high-prio applies
-	// first and claims the L key before low-prio runs.
-	//
-	// Primary letter lookup; if the primary isn't at level 1 of any key,
-	// walk the overlay's Fallback list in order. First match wins. Gives
-	// "rough fit" coverage on uncommon bases.
+	// Stage 2b: letter-following overlays. Priority + claimedRank exactly
+	// as before; the only addition is the source tag.
 	type entry struct {
 		addName string
 		letter  string
@@ -144,7 +196,7 @@ func ComposeFromPartsWithSubs(spec model.LayoutSpec, phys model.Physical, trans 
 	var allEntries []entry
 	for _, a := range adds {
 		for letter, ov := range a.LetterOverlays {
-			allEntries = append(allEntries, entry{a.Name, letter, ov})
+			allEntries = append(allEntries, entry{addSlug(a), letter, ov})
 		}
 	}
 	if len(allEntries) > 0 {
@@ -159,10 +211,6 @@ func ComposeFromPartsWithSubs(spec model.LayoutSpec, phys model.Physical, trans 
 		sort.SliceStable(allEntries, func(i, j int) bool {
 			return allEntries[i].overlay.PriorityRank() > allEntries[j].overlay.PriorityRank()
 		})
-		// claimedRank[k] = rank of the overlay that last applied to key k.
-		// Subsequent overlays with strictly LOWER rank yield. Equal-rank
-		// overlays apply in addition-order (later wins) so you can still
-		// layer narrow patches at the same priority.
 		claimedRank := map[string]int{}
 		for _, e := range allEntries {
 			keys := byLetter[strings.ToLower(e.letter)]
@@ -182,9 +230,7 @@ func ComposeFromPartsWithSubs(spec model.LayoutSpec, phys model.Physical, trans 
 				if prev, ok := claimedRank[k]; ok && rank < prev {
 					continue
 				}
-				cur := out.Symbols[k]
-				merged := mergeLevels(cur.Levels, e.overlay.Levels)
-				out.Symbols[k] = model.KeySymbols{Levels: merged}
+				writeLevels(k, e.overlay.Levels, "letter", e.addName)
 				if rank > claimedRank[k] {
 					claimedRank[k] = rank
 				}
@@ -192,17 +238,28 @@ func ComposeFromPartsWithSubs(spec model.LayoutSpec, phys model.Physical, trans 
 		}
 	}
 
-	// Stage 3: apply substitutions as a final character-level pass. Each
-	// substitution rewrites symbols in-place; later substitutions see the
-	// already-rewritten values, allowing chains (e.g. apply Latin→Cyrillic
-	// then a Cyrillic-respelling).
+	// Stage 3: substitutions. If a sub rewrites a value, the level's
+	// source becomes (substitution, sub.Name). Chained subs: the final
+	// substitution that actually changed the value wins.
 	if len(subs) > 0 {
 		for k, sym := range out.Symbols {
 			newLevels := make([]string, len(sym.Levels))
+			src := r.Sources[k]
+			if len(src) < len(sym.Levels) {
+				// Defensive: extend if compose ever produced ragged sources.
+				ext := make([]LevelSource, len(sym.Levels))
+				copy(ext, src)
+				src = ext
+			}
 			for i, lv := range sym.Levels {
-				newLevels[i] = applySubs(lv, subs)
+				after, by := applySubsTraced(lv, subs)
+				newLevels[i] = after
+				if by != "" {
+					src[i] = LevelSource{Stage: "substitution", Module: by}
+				}
 			}
 			out.Symbols[k] = model.KeySymbols{Levels: newLevels}
+			r.Sources[k] = src
 		}
 	}
 
@@ -221,6 +278,31 @@ func applySubs(sym string, subs []model.Substitution) string {
 		}
 	}
 	return out
+}
+
+// applySubsTraced returns the rewritten value and the slug of the last
+// substitution that actually changed it (empty if no substitution
+// matched). Used by ComposeFromPartsWithSubs to record provenance.
+// We prefer the file-basename slug ("~latin-cyrillic-phonetic") over
+// the YAML name ("Latin → Cyrillic (phonetic)") so the GUI inspector
+// matches what the user picks in the substitutions dropdown.
+func applySubsTraced(sym string, subs []model.Substitution) (string, string) {
+	if sym == "" {
+		return sym, ""
+	}
+	out := sym
+	by := ""
+	for _, s := range subs {
+		if mapped, ok := s.Map[out]; ok && mapped != out {
+			out = mapped
+			if s.Slug != "" {
+				by = s.Slug
+			} else {
+				by = s.Name
+			}
+		}
+	}
+	return out, by
 }
 
 // mergeLevels overlays b on top of a. Result length is max(len(a), len(b)).

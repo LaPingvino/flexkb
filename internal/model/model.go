@@ -66,6 +66,11 @@ type Physical struct {
 	// Keys is the ordered list of XKB key codes (e.g. TLDE, AE01..AE12,
 	// AD01..AD12, AC01..AC11, BKSL, LSGT, AB01..AB10) present on this shell.
 	Keys []string `yaml:"keys,flow"`
+	// Slug is the file basename (e.g. "ansi"), set at load time by
+	// DataRoot lookups. Not serialized — derived from the YAML's
+	// filename, not its body. Used wherever we need a short canonical
+	// identifier for the module (composition provenance, picker UI).
+	Slug string `yaml:"-"`
 }
 
 // Transformation defines the *base* level-1/level-2 symbol assignment for
@@ -86,6 +91,9 @@ type Transformation struct {
 	Script string `yaml:"script,omitempty"`
 	// Keys maps an XKB key code to the (typically 2-level) base symbol list.
 	Keys map[string]KeySymbols `yaml:"keys"`
+	// Slug is the file basename (e.g. "qwerty"). Set at load time;
+	// see Physical.Slug.
+	Slug string `yaml:"-"`
 }
 
 // Substitution is a character-level replacement table applied as a final
@@ -109,6 +117,10 @@ type Substitution struct {
 	Description string            `yaml:"description,omitempty"`
 	// Map is source-symbol → target-symbol. Apply forward by default.
 	Map map[string]string `yaml:"map"`
+	// Slug is the file basename (e.g. "latin-cyrillic-phonetic").
+	// Inverse substitutions get the "~"-prefixed slug to make their
+	// direction obvious in provenance output. Set at load time.
+	Slug string `yaml:"-"`
 }
 
 // Inverse returns a substitution with source/target swapped. If two source
@@ -125,6 +137,7 @@ func (s Substitution) Inverse() Substitution {
 		Name:        s.Name + " (inverse)",
 		Description: "inverse of " + s.Name,
 		Map:         inv,
+		Slug:        "~" + s.Slug,
 	}
 }
 
@@ -176,6 +189,9 @@ type Addition struct {
 	// Includes are raw xkb `include "..."` lines appended to the symbols
 	// block — e.g. `level3(ralt_switch)` to enable AltGr.
 	Includes []string `yaml:"includes,omitempty"`
+	// Slug is the file basename (e.g. "intl"). Set at load time; see
+	// Physical.Slug.
+	Slug string `yaml:"-"`
 }
 
 // LayoutSpec is a recipe for one named output variant: pick a physical, a

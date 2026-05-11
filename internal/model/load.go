@@ -67,18 +67,21 @@ func (r DataRoot) loadOne(subdir, name string, out any) error {
 func (r DataRoot) Physical(name string) (Physical, error) {
 	var p Physical
 	err := r.loadOne("physical", name, &p)
+	p.Slug = name
 	return p, err
 }
 
 func (r DataRoot) Transformation(name string) (Transformation, error) {
 	var t Transformation
 	err := r.loadOne("transformations", name, &t)
+	t.Slug = name
 	return t, err
 }
 
 func (r DataRoot) Addition(name string) (Addition, error) {
 	var a Addition
 	err := r.loadOne("additions", name, &a)
+	a.Slug = name
 	return a, err
 }
 
@@ -94,6 +97,7 @@ func (r DataRoot) Substitution(name string) (Substitution, error) {
 	if err := r.loadOne("substitutions", name, &s); err != nil {
 		return s, err
 	}
+	s.Slug = name
 	if inverse {
 		return s.Inverse(), nil
 	}

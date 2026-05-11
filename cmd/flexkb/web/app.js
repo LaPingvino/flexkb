@@ -860,7 +860,9 @@ function renderKey(code, levels, cmpLevels) {
     const c = document.createElement("span");
     c.className = `cell l${i} ${lvl.source ? "src-" + lvl.source : "src-empty"}`;
     c.textContent = displayValue(lvl.value);
-    c.title = lvl.value ? `level ${i+1} (${lvl.source || "—"}): ${lvl.value}` : `level ${i+1} (empty)`;
+    c.title = lvl.value
+      ? `level ${i+1} (${lvl.source || "—"}${lvl.module ? " · " + lvl.module : ""}): ${lvl.value}`
+      : `level ${i+1} (empty)`;
     el.appendChild(c);
   }
   el.addEventListener("click", (e) => {
@@ -909,7 +911,7 @@ function openKeyPopover(anchorEl, code, levels, data, cmpLevels, cmp) {
       if (lvl.source) {
         const s = document.createElement("div");
         s.className = "src src-" + lvl.source;
-        s.textContent = sourceLabel(lvl.source);
+        s.textContent = sourceLabel(lvl.source) + (lvl.module ? ` · ${lvl.module}` : "");
         body.appendChild(s);
       }
     }
