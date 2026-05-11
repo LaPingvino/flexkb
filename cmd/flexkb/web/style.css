@@ -454,6 +454,32 @@ section.tab.hidden { display: none; }
 
 .key { cursor: pointer; }
 .key:hover { border-color: #388bfd; }
+.key.diff { outline: 2px solid var(--warn); outline-offset: -2px; }
+.key.diff-add { outline: 2px solid var(--ok); outline-offset: -2px; }
+.key.diff-remove { outline: 2px solid var(--err); outline-offset: -2px; }
+.key.diff-key-missing { opacity: 0.4; }
+
+.compare-row { margin-top: -0.4rem; }
+.diff-summary {
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  color: var(--fg-dim);
+  align-self: flex-end;
+  margin-bottom: 0.45rem;
+}
+.diff-summary .num { color: var(--warn-fg); }
+
+.key-popover .compare-side {
+  margin-top: 0.5rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid var(--border);
+}
+.key-popover .compare-side h5 {
+  margin: 0 0 0.3rem;
+  font-size: 0.78rem;
+  color: var(--fg-dim);
+  font-family: ui-monospace, monospace;
+}
 
 .key-popover {
   position: absolute;

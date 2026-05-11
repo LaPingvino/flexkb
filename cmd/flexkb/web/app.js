@@ -46,6 +46,9 @@ const metaEl = document.getElementById("meta");
 const kbEl = document.getElementById("keyboard");
 const warnEl = document.getElementById("warnings");
 const browseSource = document.getElementById("browseSource");
+const cmpFile = document.getElementById("cmpFile");
+const cmpVariant = document.getElementById("cmpVariant");
+const diffSummary = document.getElementById("diffSummary");
 const bEditBtn = document.getElementById("bEdit");
 const bActivateBtn = document.getElementById("bActivate");
 const bShowXKBBtn = document.getElementById("bShowXKB");
@@ -57,6 +60,7 @@ async function loadLayouts() {
   const res = await fetch("/api/layouts");
   layouts = await res.json();
   fileSelect.innerHTML = "";
+  cmpFile.innerHTML = '<option value="">— none —</option>';
   for (const lf of layouts) {
     const opt = document.createElement("option");
     opt.value = lf.file;
@@ -64,9 +68,11 @@ async function loadLayouts() {
     const tag = lf.sourceKind ? ` [${lf.sourceKind}]` : "";
     opt.textContent = `${lf.file}${tag}${defVar ? " — " + defVar.description : ""}`;
     fileSelect.appendChild(opt);
+    cmpFile.appendChild(opt.cloneNode(true));
   }
   fileSelect.value = layouts[0]?.file || "";
   populateVariants();
+  populateCmpVariants();
 }
 
 function populateVariants() {
@@ -110,7 +116,70 @@ async function loadCompose() {
     metaEl.textContent = `error: ${await res.text()}`;
     return;
   }
-  renderInto({ meta: metaEl, kb: kbEl, warn: warnEl }, await res.json());
+  const data = await res.json();
+  // Pull the comparison side if a compare target is picked.
+  const cmp = await loadCompareCompose();
+  renderInto({ meta: metaEl, kb: kbEl, warn: warnEl }, data, cmp);
+  updateDiffSummary(data, cmp);
+}
+
+async function loadCompareCompose() {
+  const f = cmpFile.value;
+  const v = cmpVariant.value;
+  if (!f || !v) return null;
+  const res = await fetch(`/api/compose?file=${encodeURIComponent(f)}&variant=${encodeURIComponent(v)}`);
+  if (!res.ok) return null;
+  return await res.json();
+}
+
+function populateCmpVariants() {
+  const lf = layouts.find(l => l.file === cmpFile.value);
+  cmpVariant.innerHTML = "";
+  if (!lf) {
+    diffSummary.textContent = "";
+    return;
+  }
+  for (const v of lf.variants) {
+    const opt = document.createElement("option");
+    opt.value = v.name;
+    opt.textContent = `${v.name} — ${v.description}`;
+    cmpVariant.appendChild(opt);
+  }
+  const def = lf.variants.find(v => v.default) || lf.variants[0];
+  if (def) cmpVariant.value = def.name;
+}
+
+cmpFile.addEventListener("change", () => { populateCmpVariants(); loadCompose(); });
+cmpVariant.addEventListener("change", loadCompose);
+
+function updateDiffSummary(a, b) {
+  if (!b) { diffSummary.textContent = ""; return; }
+  let differing = 0, total = 0, onlyA = 0, onlyB = 0;
+  const aKeys = new Set(a.keys || []);
+  const bKeys = new Set(b.keys || []);
+  for (const k of aKeys) {
+    total++;
+    if (!bKeys.has(k)) { onlyA++; continue; }
+    if (!sameLevels(a.symbols[k], b.symbols[k])) differing++;
+  }
+  for (const k of bKeys) if (!aKeys.has(k)) onlyB++;
+  const parts = [];
+  parts.push(`<span class="num">${differing}</span> / ${total} keys differ`);
+  if (onlyA) parts.push(`<span class="num">${onlyA}</span> only in A`);
+  if (onlyB) parts.push(`<span class="num">${onlyB}</span> only in B`);
+  diffSummary.innerHTML = parts.join(" · ");
+}
+
+function sameLevels(a, b) {
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+  const n = Math.max(a.length, b.length);
+  for (let i = 0; i < n; i++) {
+    const av = (a[i] && a[i].value) || "";
+    const bv = (b[i] && b[i].value) || "";
+    if (av !== bv) return false;
+  }
+  return true;
 }
 
 // === Browse-tab actions ===
@@ -635,7 +704,7 @@ function renderModulesCard(title, items) {
 }
 
 // === Shared rendering ===
-function renderInto(targets, data) {
+function renderInto(targets, data, compareData) {
   const { meta, kb, warn } = targets;
   const recipeBits = [];
   if (data.physical) recipeBits.push(`physical: ${data.physical}`);
@@ -660,22 +729,34 @@ function renderInto(targets, data) {
 
   kb.innerHTML = "";
   lastCompose.set(kb, data);
+  // Store the compare side too so the click popover can use it.
+  if (compareData) lastCompose.set(kb, { ...data, _compare: compareData });
   const presentKeys = new Set(data.keys || []);
   for (const row of ROWS) {
     const rowEl = document.createElement("div");
     rowEl.className = "kbrow";
     for (const code of row) {
       if (!presentKeys.has(code)) continue;
-      rowEl.appendChild(renderKey(code, data.symbols[code] || []));
+      const cmpLevels = compareData ? (compareData.symbols[code] || null) : null;
+      rowEl.appendChild(renderKey(code, data.symbols[code] || [], cmpLevels));
     }
     if (rowEl.children.length) kb.appendChild(rowEl);
   }
 }
 
-function renderKey(code, levels) {
+function renderKey(code, levels, cmpLevels) {
   const el = document.createElement("div");
   el.className = "key";
   el.dataset.code = code;
+  // Diff outline if a compare-side is supplied and any level differs
+  // (or the compare side is missing this key entirely).
+  if (cmpLevels === undefined) {
+    // no compare mode — no outline
+  } else if (cmpLevels === null) {
+    el.classList.add("diff-add"); // present on A, absent on B
+  } else if (!sameLevels(levels, cmpLevels)) {
+    el.classList.add("diff");
+  }
   const codeEl = document.createElement("span");
   codeEl.className = "code";
   codeEl.textContent = code;
@@ -692,7 +773,8 @@ function renderKey(code, levels) {
     e.stopPropagation();
     const kbContainer = el.closest("section.tab")?.querySelector(".keyboard");
     const data = kbContainer ? lastCompose.get(kbContainer) : null;
-    openKeyPopover(el, code, levels, data);
+    const cmp = data && data._compare ? data._compare : null;
+    openKeyPopover(el, code, levels, data, cmpLevels, cmp);
   });
   return el;
 }
@@ -700,7 +782,7 @@ function renderKey(code, levels) {
 // === Per-key provenance popover ===
 const keyPopover = document.getElementById("keyPopover");
 
-function openKeyPopover(anchorEl, code, levels, data) {
+function openKeyPopover(anchorEl, code, levels, data, cmpLevels, cmp) {
   if (!data) return;
   keyPopover.innerHTML = "";
   const h = document.createElement("h4");
@@ -718,7 +800,7 @@ function openKeyPopover(anchorEl, code, levels, data) {
     body.className = "body";
     if (!lvl.value) {
       const p = document.createElement("span");
-      p.style.color = "#586069";
+      p.style.color = "var(--fg-faint)";
       p.textContent = "(empty — pass-through)";
       body.appendChild(p);
     } else {
@@ -749,6 +831,38 @@ function openKeyPopover(anchorEl, code, levels, data) {
   if (data.substitutions && data.substitutions.length) bits.push(`substitutions: <span class="dim">[${data.substitutions.map(escapeHTML).join(", ")}]</span>`);
   recipe.innerHTML = bits.join("<br>");
   keyPopover.appendChild(recipe);
+
+  // Compare side (if active) — show what the other variant has for the same key.
+  if (cmpLevels !== undefined) {
+    const cmpDiv = document.createElement("div");
+    cmpDiv.className = "compare-side";
+    const h5 = document.createElement("h5");
+    if (cmpLevels === null) {
+      h5.textContent = `Compare: ${cmp?.file || cmpFile.value}(${cmp?.variant || cmpVariant.value}) — key not present`;
+      cmpDiv.appendChild(h5);
+    } else {
+      h5.textContent = `Compare: ${cmp?.file || cmpFile.value}(${cmp?.variant || cmpVariant.value})`;
+      cmpDiv.appendChild(h5);
+      for (let i = 0; i < 4; i++) {
+        const av = (levels[i] && levels[i].value) || "";
+        const bv = (cmpLevels[i] && cmpLevels[i].value) || "";
+        const row = document.createElement("div");
+        row.className = "lvl";
+        const num = document.createElement("span");
+        num.className = "num";
+        num.textContent = `L${i+1}`;
+        row.appendChild(num);
+        const body = document.createElement("div");
+        body.className = "body";
+        const txt = av === bv ? "≡ same" : (bv ? `${displayValue(bv)}  ${bv}` : "(empty)");
+        body.textContent = txt;
+        if (av !== bv) body.style.color = "var(--warn-fg)";
+        row.appendChild(body);
+        cmpDiv.appendChild(row);
+      }
+    }
+    keyPopover.appendChild(cmpDiv);
+  }
 
   // Position the popover near the clicked key, clamping to viewport.
   const rect = anchorEl.getBoundingClientRect();

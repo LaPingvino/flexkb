@@ -34,6 +34,17 @@
         </label>
         <div class="layer-tag" id="browseSource"></div>
       </div>
+      <div class="picker compare-row">
+        <label>
+          <span>Compare with file <em>(optional — highlights diff)</em></span>
+          <select id="cmpFile"><option value="">— none —</option></select>
+        </label>
+        <label>
+          <span>Compare variant</span>
+          <select id="cmpVariant"></select>
+        </label>
+        <span class="diff-summary" id="diffSummary"></span>
+      </div>
       <div class="row actions">
         <button id="bEdit" title="Load this variant into the Compose tab">Edit in Compose →</button>
         <button id="bActivate" class="primary" title="setxkbmap to this variant in the current session">Activate</button>
