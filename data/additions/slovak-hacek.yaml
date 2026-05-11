@@ -1,0 +1,22 @@
+name: Slovak (haček + acute + ô + ä)
+description: |
+  Slovak shares most of Czech's haček repertoire (č, š, ž, ď, ť, ň, ľ, ŕ)
+  plus á, é, í, ó, ú, ý, ô (o-circumflex), ä. Letter-following so it
+  composes cleanly on QWERTY/Dvorak/Colemak.
+letter_overlays:
+  a: { levels: ["", "", aacute, Aacute] }
+  c: { levels: ["", "", ccaron, Ccaron] }
+  d: { levels: ["", "", dcaron, Dcaron] }
+  e: { levels: ["", "", eacute, Eacute] }
+  i: { levels: ["", "", iacute, Iacute] }
+  l: { levels: ["", "", lcaron, Lcaron] }
+  n: { levels: ["", "", ncaron, Ncaron] }
+  o: { levels: ["", "", oacute, Oacute] }
+  r: { levels: ["", "", racute, Racute] }
+  s: { levels: ["", "", scaron, Scaron] }
+  t: { levels: ["", "", tcaron, Tcaron] }
+  u: { levels: ["", "", uacute, Uacute] }
+  y: { levels: ["", "", yacute, Yacute] }
+  z: { levels: ["", "", zcaron, Zcaron] }
+includes:
+  - level3(ralt_switch)

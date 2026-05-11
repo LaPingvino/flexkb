@@ -108,18 +108,30 @@ func TestAdditionTransformationMatrix(t *testing.T) {
 			// against the PRE-addition state (transformation only),
 			// otherwise the overlay's own action (rewriting level 1)
 			// makes its lookup target vanish — false positive.
+			// Low-priority overlays are exempt: their "best-effort, skip
+			// silently" contract means a no-op is by design, not a bug.
+			// Also consider fallback tokens before declaring a no-op.
 			preState := compose.ComposeFromParts(spec, phys, trans, nil).Layout
-			for letter := range add.LetterOverlays {
+			for letter, ov := range add.LetterOverlays {
+				if ov.PriorityRank() < 1 {
+					continue
+				}
+				tokens := append([]string{letter}, ov.Fallback...)
 				found := false
-				for _, sym := range preState.Symbols {
-					if len(sym.Levels) > 0 && strings.EqualFold(sym.Levels[0], letter) {
-						found = true
+				for _, tok := range tokens {
+					for _, sym := range preState.Symbols {
+						if len(sym.Levels) > 0 && strings.EqualFold(sym.Levels[0], tok) {
+							found = true
+							break
+						}
+					}
+					if found {
 						break
 					}
 				}
 				if !found {
 					noopOverlays = append(noopOverlays,
-						fmt.Sprintf("addition %q on %q: letter_overlay for %q matches no key", aName, tName, letter))
+						fmt.Sprintf("addition %q on %q: letter_overlay for %q (and fallbacks) matches no key", aName, tName, letter))
 				}
 			}
 

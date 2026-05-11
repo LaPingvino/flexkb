@@ -1,0 +1,13 @@
+name: Faroese letters (æ ø å ð)
+description: |
+  Faroese uses æ, ø, å (like Danish/Norwegian) plus eth (ð). Letter-
+  following on ð; position-based on æ/ø/å following Nordic keyboard
+  convention.
+letter_overlays:
+  d: { levels: ["", "", eth, ETH] }
+overlays:
+  AD11: { levels: [aring, Aring] }
+  AC10: { levels: [oslash, Oslash] }
+  AC11: { levels: [ae, AE] }
+includes:
+  - level3(ralt_switch)

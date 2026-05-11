@@ -60,14 +60,18 @@ letter_overlays:
   # Dvorak (period on AD03). This is how the user's existing "AltGr+period,
   # then i = ı / dead_abovedot on I = İ" muscle memory keeps working
   # across transformations.
-  apostrophe:   { levels: [dead_acute, dead_diaeresis, apostrophe, quotedbl] }
-  semicolon:    { levels: ["", "", paragraph, degree] }
-  comma:        { levels: [comma, less, ccedilla, Ccedilla] }
-  period:       { levels: [period, greater, dead_abovedot, dead_caron] }
-  slash:        { levels: [slash, question, questiondown, dead_hook] }
-  minus:        { levels: [minus, underscore, yen, dead_belowdot] }
-  bracketleft:  { levels: ["", "", guillemotleft, leftdoublequotemark] }
-  bracketright: { levels: ["", "", guillemotright, rightdoublequotemark] }
+  # Punctuation tokens — letter-following with fallbacks for bases that
+  # don't expose the primary token at level 1 (AZERTY's brackets are
+  # behind AltGr; BÉPO/Turkish use different punctuation positions).
+  # First-match-wins on the fallback chain.
+  apostrophe:   { levels: [dead_acute, dead_diaeresis, apostrophe, quotedbl], fallback: [ugrave, eacute] }
+  semicolon:    { levels: ["", "", paragraph, degree], fallback: [comma, m] }
+  comma:        { levels: [comma, less, ccedilla, Ccedilla], fallback: [semicolon] }
+  period:       { levels: [period, greater, dead_abovedot, dead_caron], fallback: [semicolon, comma] }
+  slash:        { levels: [slash, question, questiondown, dead_hook], fallback: [exclam, colon] }
+  minus:        { levels: [minus, underscore, yen, dead_belowdot], fallback: [parenright, equal] }
+  bracketleft:  { levels: ["", "", guillemotleft, leftdoublequotemark], fallback: [parenleft, dollar] }
+  bracketright: { levels: ["", "", guillemotright, rightdoublequotemark], fallback: [parenright, asterisk] }
 
 includes:
   - level3(ralt_switch)

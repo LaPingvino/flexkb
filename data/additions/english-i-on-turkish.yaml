@@ -14,7 +14,11 @@ description: |
   pair-of-files pattern still gives the explicit "inverse toggle" the
   user requested.
 letter_overlays:
-  i:        { levels: ["", I] }
-  idotless: { levels: ["", Iabovedot] }
+  # Both overlays priority:low — this addition is meaningful only when
+  # composed on a Turkish base that actually has these keys. On any other
+  # base the overlays silently yield, so layering [english-i-on-turkish]
+  # on, say, plain QWERTY is a no-op rather than a noisy failure.
+  i:        { levels: ["", I], priority: low }
+  idotless: { levels: ["", Iabovedot], priority: low }
 includes:
   - level3(ralt_switch)

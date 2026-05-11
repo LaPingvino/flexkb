@@ -1,0 +1,19 @@
+name: Icelandic letters (þ ð æ ö á é í ó ú ý)
+description: |
+  Icelandic uses Old-Norse-descended thorn (þ) and eth (ð) plus the usual
+  Nordic æ and ö, with acute-accented vowels. Letter-following addition.
+letter_overlays:
+  t: { levels: ["", "", thorn, THORN] }
+  d: { levels: ["", "", eth, ETH] }
+  a: { levels: ["", "", aacute, Aacute] }
+  e: { levels: ["", "", eacute, Eacute] }
+  i: { levels: ["", "", iacute, Iacute] }
+  o: { levels: ["", "", oacute, Oacute] }
+  u: { levels: ["", "", uacute, Uacute] }
+  y: { levels: ["", "", yacute, Yacute] }
+overlays:
+  # æ and ö on the AC10/AC11 positions, mirroring the Icelandic keyboard.
+  AC10: { levels: [odiaeresis, Odiaeresis] }
+  AC11: { levels: [ae, AE] }
+includes:
+  - level3(ralt_switch)

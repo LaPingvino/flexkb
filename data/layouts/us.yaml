@@ -64,3 +64,24 @@ variants:
     physical: ansi
     transformation: norman
     additions: [intl]
+
+  # English + Esperanto. Esperanto has no country, so the canonical home
+  # is "stack the esperanto addition on top of whatever Latin base you
+  # already use."
+  - name: esperanto
+    description: English (US) + Esperanto supersignos
+    physical: ansi
+    transformation: qwerty
+    additions: [esperanto]
+
+  - name: dvorak-esperanto
+    description: English (Dvorak) + Esperanto supersignos
+    physical: ansi
+    transformation: dvorak
+    additions: [esperanto]
+
+  - name: intl-esperanto
+    description: English (intl + Esperanto supersignos)
+    physical: ansi
+    transformation: qwerty
+    additions: [intl, esperanto]

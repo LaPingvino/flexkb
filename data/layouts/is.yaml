@@ -1,0 +1,20 @@
+file: is
+variants:
+  - name: basic
+    description: Icelandic
+    physical: iso
+    transformation: qwerty
+    additions: [icelandic]
+    default: true
+
+  - name: dvorak
+    description: Icelandic (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [icelandic]
+
+  - name: colemak
+    description: Icelandic (Colemak)
+    physical: iso
+    transformation: colemak
+    additions: [icelandic]

@@ -1,0 +1,26 @@
+file: sk
+variants:
+  - name: basic
+    description: Slovak
+    physical: iso
+    transformation: qwertz
+    additions: [slovak-hacek]
+    default: true
+
+  - name: qwerty
+    description: Slovak (QWERTY)
+    physical: iso
+    transformation: qwerty
+    additions: [slovak-hacek]
+
+  - name: dvorak
+    description: Slovak (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [slovak-hacek]
+
+  - name: colemak
+    description: Slovak (Colemak)
+    physical: iso
+    transformation: colemak
+    additions: [slovak-hacek]

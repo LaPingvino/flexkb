@@ -1,0 +1,26 @@
+name: Esperanto accented letters (ĉ ĝ ĥ ĵ ŝ ŭ)
+description: |
+  Esperanto has six accented letters: ĉ, ĝ, ĥ, ĵ, ŝ (circumflex on c, g,
+  h, j, s) and ŭ (breve on u). Stack as an addition on top of any Latin
+  base — the supersignos sit on AltGr of the underlying Latin cognate
+  letter:
+
+    AltGr+c → ĉ   AltGr+g → ĝ   AltGr+h → ĥ
+    AltGr+j → ĵ   AltGr+s → ŝ   AltGr+u → ŭ
+
+  Esperanto has no country, so it's only meaningful as an addition layered
+  on top of another layout (typically the user's national one). Combine
+  with intl etc. via priority — priority `high` on the Esperanto overlays
+  if you want them to win over a stacked intl addition.
+
+  Composes cleanly on QWERTY/Dvorak/Colemak/Workman/Norman/AZERTY/BÉPO —
+  letter-following means each supersigno follows its underlying letter.
+letter_overlays:
+  c: { levels: ["", "", ccircumflex, Ccircumflex] }
+  g: { levels: ["", "", gcircumflex, Gcircumflex] }
+  h: { levels: ["", "", hcircumflex, Hcircumflex] }
+  j: { levels: ["", "", jcircumflex, Jcircumflex] }
+  s: { levels: ["", "", scircumflex, Scircumflex] }
+  u: { levels: ["", "", ubreve, Ubreve] }
+includes:
+  - level3(ralt_switch)

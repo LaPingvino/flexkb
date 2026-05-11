@@ -1,0 +1,14 @@
+file: fo
+variants:
+  - name: basic
+    description: Faroese
+    physical: iso
+    transformation: qwerty
+    additions: [faroese]
+    default: true
+
+  - name: dvorak
+    description: Faroese (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [faroese]
