@@ -1,0 +1,13 @@
+name: Irish letters (fada / sineadh fada)
+description: |
+  Irish uses acute accents (fada / síneadh fada) on vowels: á, é, í, ó, ú.
+  Letter-following so AltGr+vowel produces its fada form on any Latin
+  base.
+letter_overlays:
+  a: { levels: ["", "", aacute, Aacute] }
+  e: { levels: ["", "", eacute, Eacute] }
+  i: { levels: ["", "", iacute, Iacute] }
+  o: { levels: ["", "", oacute, Oacute] }
+  u: { levels: ["", "", uacute, Uacute] }
+includes:
+  - level3(ralt_switch)

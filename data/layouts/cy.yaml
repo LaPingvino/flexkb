@@ -1,0 +1,20 @@
+file: cy
+variants:
+  - name: basic
+    description: Welsh
+    physical: iso
+    transformation: qwerty
+    additions: [uk, welsh]
+    default: true
+
+  - name: dvorak
+    description: Welsh (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [welsh]
+
+  - name: colemak
+    description: Welsh (Colemak)
+    physical: iso
+    transformation: colemak
+    additions: [welsh]

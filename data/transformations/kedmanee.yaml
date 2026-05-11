@@ -1,0 +1,59 @@
+name: Kedmanee (Thai)
+script: thai
+description: |
+  Native Thai keyboard layout — Kedmanee, the de-facto Thai arrangement.
+  Consonants on the left side, vowels and tone marks on the right. Thai
+  has no upper/lowercase distinction; level 2 (Shift) gives less-frequent
+  characters and tone marks.
+keys:
+  TLDE: { levels: [underscore, percent] }
+  AE01: { levels: [Thai_lakkhangyao, plus] }
+  AE02: { levels: [slash, Thai_leknung] }
+  AE03: { levels: [minus, Thai_leksong] }
+  AE04: { levels: [Thai_phosamphao, Thai_leksam] }
+  AE05: { levels: [Thai_thothung, Thai_leksi] }
+  AE06: { levels: [Thai_sarau, Thai_sarauu] }
+  AE07: { levels: [Thai_saraii, Thai_baht] }
+  AE08: { levels: [Thai_khokhwai, Thai_lekha] }
+  AE09: { levels: [Thai_totao, Thai_lekhok] }
+  AE10: { levels: [Thai_chochan, Thai_lekchet] }
+  AE11: { levels: [Thai_khokhai, Thai_lekpaet] }
+  AE12: { levels: [Thai_chochang, Thai_lekkao] }
+
+  AD01: { levels: [Thai_maiyamok, Thai_leksun] }
+  AD02: { levels: [Thai_saraaimaimuan, Thai_quotedbl] }
+  AD03: { levels: [Thai_saraam, Thai_dochada] }
+  AD04: { levels: [Thai_phophan, Thai_thonangmontho] }
+  AD05: { levels: [Thai_saraa, Thai_thothong] }
+  AD06: { levels: [Thai_maihanakat, Thai_nikhahit] }
+  AD07: { levels: [Thai_saraii, Thai_maitri] }
+  AD08: { levels: [Thai_rorua, Thai_nonen] }
+  AD09: { levels: [Thai_nonu, Thai_paiyannoi] }
+  AD10: { levels: [Thai_yoyak, Thai_yoying] }
+  AD11: { levels: [Thai_bobaimai, Thai_thothan] }
+  AD12: { levels: [Thai_loling, comma] }
+
+  AC01: { levels: [Thai_fofan, Thai_ru] }
+  AC02: { levels: [Thai_hohip, Thai_khorakhang] }
+  AC03: { levels: [Thai_kokai, Thai_topatak] }
+  AC04: { levels: [Thai_dodek, Thai_sarao] }
+  AC05: { levels: [Thai_sarae, Thai_chochoe] }
+  AC06: { levels: [Thai_maitho, Thai_maitaikhu] }
+  AC07: { levels: [Thai_maiek, Thai_maichattawa] }
+  AC08: { levels: [Thai_saraaa, Thai_sorusi] }
+  AC09: { levels: [Thai_sosua, Thai_sosala] }
+  AC10: { levels: [Thai_wowaen, period] }
+  AC11: { levels: [Thai_ngongu, Thai_lu] }
+  BKSL: { levels: [Thai_khokhuat, Thai_khokhon] }
+
+  LSGT: { levels: [backslash, bar] }
+  AB01: { levels: [Thai_phophung, parenleft] }
+  AB02: { levels: [Thai_popla, parenright] }
+  AB03: { levels: [Thai_saraae, Thai_choching] }
+  AB04: { levels: [Thai_oang, Thai_honokhuk] }
+  AB05: { levels: [Thai_sarai, Thai_phinthu] }
+  AB06: { levels: [Thai_seosareu, Thai_thanthakhat] }
+  AB07: { levels: [Thai_thothahan, question] }
+  AB08: { levels: [Thai_moma, Thai_thothong] }
+  AB09: { levels: [Thai_saraaimaimalai, Thai_khomut] }
+  AB10: { levels: [Thai_fofa, Thai_topatak] }

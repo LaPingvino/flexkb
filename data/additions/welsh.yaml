@@ -1,0 +1,15 @@
+name: Welsh letters (circumflex'd vowels)
+description: |
+  Welsh uses circumflexed vowels — â, ê, î, ô, û, ŵ, ŷ ("to bach", little
+  roof). w and y are also vowels in Welsh, so they get the circumflex
+  treatment too. Letter-following so it works on QWERTY/Dvorak/Colemak.
+letter_overlays:
+  a: { levels: ["", "", acircumflex, Acircumflex] }
+  e: { levels: ["", "", ecircumflex, Ecircumflex] }
+  i: { levels: ["", "", icircumflex, Icircumflex] }
+  o: { levels: ["", "", ocircumflex, Ocircumflex] }
+  u: { levels: ["", "", ucircumflex, Ucircumflex] }
+  w: { levels: ["", "", wcircumflex, Wcircumflex] }
+  y: { levels: ["", "", ycircumflex, Ycircumflex] }
+includes:
+  - level3(ralt_switch)

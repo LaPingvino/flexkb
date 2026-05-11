@@ -1,0 +1,20 @@
+file: bd
+variants:
+  - name: phonetic
+    description: Bengali (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-bengali-phonetic]
+    default: true
+
+  - name: phonetic-dvorak
+    description: Bengali (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-bengali-phonetic]
+
+  - name: phonetic-colemak
+    description: Bengali (phonetic, Colemak base)
+    physical: iso
+    transformation: colemak
+    substitutions: [latin-bengali-phonetic]

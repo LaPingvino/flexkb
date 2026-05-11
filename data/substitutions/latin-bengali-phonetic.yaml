@@ -1,0 +1,60 @@
+name: Latin → Bengali (phonetic)
+description: |
+  Phonetic Bengali substitution. Each Latin letter maps to the closest
+  Bengali consonant or vowel. Bengali uses the same Brahmic-derived
+  pattern as Devanagari but with distinct codepoints (U098x range).
+  Full syllabic typing needs an IME on top; this provides the base
+  positions.
+map:
+  a: U0985   # অ
+  A: U0986   # আ
+  b: U09AC   # ব
+  B: U09AD   # ভ
+  c: U099A   # চ
+  C: U099B   # ছ
+  d: U09A6   # দ
+  D: U09A7   # ধ
+  e: U098F   # এ
+  E: U0990   # ঐ
+  f: U09AB   # ফ
+  F: U09AB
+  g: U0997   # গ
+  G: U0998   # ঘ
+  h: U09B9   # হ
+  H: U09B9
+  i: U0987   # ই
+  I: U0988   # ঈ
+  j: U099C   # জ
+  J: U099D   # ঝ
+  k: U0995   # ক
+  K: U0996   # খ
+  l: U09B2   # ল
+  L: U09B2
+  m: U09AE   # ম
+  M: U09AE
+  n: U09A8   # ন
+  N: U09A3   # ণ
+  o: U0993   # ও
+  O: U0994   # ঔ
+  p: U09AA   # প
+  P: U09AA
+  q: U0995
+  Q: U0995
+  r: U09B0   # র
+  R: U09B0
+  s: U09B8   # স
+  S: U09B6   # শ
+  t: U09A4   # ত
+  T: U09A5   # থ
+  u: U0989   # উ
+  U: U098A   # ঊ
+  v: U09AC   # ব (no v in Bengali; use ba)
+  V: U09AC
+  w: U09AC
+  W: U09AC
+  x: U0995
+  X: U0995
+  y: U09AF   # য
+  Y: U09AF
+  z: U099C   # জ (z → j)
+  Z: U099C

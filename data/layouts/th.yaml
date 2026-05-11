@@ -1,0 +1,25 @@
+file: th
+variants:
+  - name: basic
+    description: Thai (Kedmanee)
+    physical: iso
+    transformation: kedmanee
+    default: true
+
+  - name: phonetic
+    description: Thai (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-thai-phonetic]
+
+  - name: phonetic-dvorak
+    description: Thai (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-thai-phonetic]
+
+  - name: phonetic-colemak
+    description: Thai (phonetic, Colemak base)
+    physical: iso
+    transformation: colemak
+    substitutions: [latin-thai-phonetic]

@@ -1,0 +1,70 @@
+name: Latin → Thai (phonetic)
+description: |
+  Phonetic Thai substitution. Each Latin letter maps to its closest Thai
+  consonant or vowel by sound. There's no single standard convention —
+  this follows common romanization (RTGS-ish):
+
+    k → ก   kh → ข,ค   ng → ง   c → จ   ch → ฉ,ช   s → ซ,ส
+    y → ย   d → ด,ฎ   t → ต,ฏ   th → ท,ฐ   n → น,ณ
+    b → บ   p → ป   ph → ผ,พ   f → ฟ   m → ม   r → ร
+    l → ล   w → ว   h → ห   a → อ,ะ   i → อิ   u → อุ
+    e → เ   o → โ
+
+  Since flexkb substitutions are character-level (not multi-char), we use
+  the single-letter cognate for each Latin letter; multi-char romaniz-
+  ations like "kh" or "th" can't be expressed this way — users wanting
+  full Thai input should pair with an IME, or use the native Kedmanee
+  layout via th/basic.
+map:
+  a: Thai_saraaa
+  A: Thai_saraaa
+  b: Thai_bobaimai
+  B: Thai_bobaimai
+  c: Thai_chochan
+  C: Thai_chochan
+  d: Thai_dodek
+  D: Thai_dodek
+  e: Thai_sarae
+  E: Thai_sarae
+  f: Thai_fofan
+  F: Thai_fofan
+  g: Thai_kokai
+  G: Thai_kokai
+  h: Thai_hohip
+  H: Thai_hohip
+  i: Thai_sarai
+  I: Thai_sarai
+  j: Thai_chochan
+  J: Thai_chochan
+  k: Thai_kokai
+  K: Thai_kokai
+  l: Thai_loling
+  L: Thai_loling
+  m: Thai_moma
+  M: Thai_moma
+  n: Thai_nonu
+  N: Thai_nonu
+  o: Thai_sarao
+  O: Thai_sarao
+  p: Thai_popla
+  P: Thai_popla
+  q: Thai_khokhai
+  Q: Thai_khokhai
+  r: Thai_rorua
+  R: Thai_rorua
+  s: Thai_sosua
+  S: Thai_sosua
+  t: Thai_totao
+  T: Thai_totao
+  u: Thai_sarau
+  U: Thai_sarau
+  v: Thai_wowaen
+  V: Thai_wowaen
+  w: Thai_wowaen
+  W: Thai_wowaen
+  x: Thai_khokhai
+  X: Thai_khokhai
+  y: Thai_yoyak
+  Y: Thai_yoyak
+  z: Thai_sosua
+  Z: Thai_sosua

@@ -1,0 +1,20 @@
+file: ie
+variants:
+  - name: basic
+    description: Irish
+    physical: iso
+    transformation: qwerty
+    additions: [uk, irish]
+    default: true
+
+  - name: dvorak
+    description: Irish (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [irish]
+
+  - name: colemak
+    description: Irish (Colemak)
+    physical: iso
+    transformation: colemak
+    additions: [irish]
