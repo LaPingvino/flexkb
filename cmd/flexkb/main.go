@@ -22,6 +22,7 @@ import (
 	"github.com/lapingvino/flexkb/internal/bulkconvert"
 	"github.com/lapingvino/flexkb/internal/compose"
 	"github.com/lapingvino/flexkb/internal/model"
+	"github.com/lapingvino/flexkb/internal/rulespatch"
 	"github.com/lapingvino/flexkb/internal/xkbparser"
 	"github.com/lapingvino/flexkb/internal/xkbwriter"
 )
@@ -244,7 +245,29 @@ func runBuild(args []string) {
 	for _, n := range names {
 		check(generateOne(root, n, symbolsDir))
 	}
+
+	// Step 4: patch the rules registry so GUI keyboard pickers list our
+	// variants. Missing rules files are silently skipped.
+	infos := []rulespatch.LayoutInfo{}
+	for _, n := range names {
+		lf, err := root.LayoutFile(n)
+		check(err)
+		info := rulespatch.LayoutInfo{File: lf.File, Description: lf.File}
+		for _, v := range lf.Variants {
+			if v.Default && info.Description == lf.File {
+				info.Description = v.Description
+			}
+			info.Variants = append(info.Variants, rulespatch.VariantInfo{
+				Name:        v.Name,
+				Description: v.Description,
+			})
+		}
+		infos = append(infos, info)
+	}
+	check(rulespatch.EnsureRules(out, infos))
+
 	fmt.Printf("built complete xkb tree in %s (%d modular layout file(s), rest copied from %s)\n", out, len(names), xkb)
+	fmt.Printf("patched rules registry so %d flexkb layout file(s) surface in GUI pickers\n", len(infos))
 }
 
 func runVerify(args []string) {
