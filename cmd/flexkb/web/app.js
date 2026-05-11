@@ -55,6 +55,7 @@ unicodeSearchInput.addEventListener("input", () => {
 });
 
 async function openUnicodePicker() {
+  pickerTargetCell = null;
   unicodeOverlay.classList.remove("hidden");
   unicodeSearchInput.value = "";
   unicodeStatus.textContent = "";
@@ -63,7 +64,23 @@ async function openUnicodePicker() {
   unicodeSearchInput.focus();
 }
 
-function closeUnicodePicker() { unicodeOverlay.classList.add("hidden"); }
+// openUnicodePickerForCell opens the picker in "assign to a cell" mode.
+// When the user picks a glyph, it lands in the composeOverrides map at
+// the given (key, level) and the live preview re-renders to show it.
+async function openUnicodePickerForCell(key, level) {
+  pickerTargetCell = { key, level };
+  unicodeOverlay.classList.remove("hidden");
+  unicodeSearchInput.value = "";
+  unicodeStatus.textContent = `Picking a glyph for ${key} level ${level + 1} — click any character below to assign, or × to cancel.`;
+  unicodeStatus.className = "status ok";
+  await runUnicodeSearch();
+  unicodeSearchInput.focus();
+}
+
+function closeUnicodePicker() {
+  unicodeOverlay.classList.add("hidden");
+  pickerTargetCell = null;
+}
 
 async function runUnicodeSearch() {
   const q = unicodeSearchInput.value;
@@ -94,12 +111,23 @@ async function runUnicodeSearch() {
 
 async function copyUnicodeChar(c) {
   const token = `U${c.hex.padStart(4, "0")}`;
+  rememberRecentUnicode(c);
+  // Cell-assign mode — write into composeOverrides and close.
+  if (pickerTargetCell) {
+    const coord = `${pickerTargetCell.key}:${pickerTargetCell.level}`;
+    composeOverrides.set(coord, c.glyph);
+    unicodeStatus.textContent = `assigned ${c.glyph} (${token}) to ${pickerTargetCell.key} level ${pickerTargetCell.level + 1}`;
+    unicodeStatus.className = "status ok";
+    closeUnicodePicker();
+    composeLivePreview();
+    switchTab("compose");
+    return;
+  }
+  // Default mode — copy to clipboard.
   try {
     await navigator.clipboard.writeText(c.glyph);
     unicodeStatus.textContent = `copied ${c.glyph} to clipboard · xkb token: ${token}`;
     unicodeStatus.className = "status ok";
-    // Push to recent-used list (last 24, persisted in localStorage).
-    rememberRecentUnicode(c);
   } catch (e) {
     unicodeStatus.textContent = `copy failed: ${e.message}. Token: ${token}`;
     unicodeStatus.className = "status err";
@@ -604,6 +632,7 @@ const cFillStats = document.getElementById("cFillStats");
 let autofillCategories = []; // [{name, fillers}]
 let selectedAutofillCats = new Set();
 const cMeta = document.getElementById("cMeta");
+const cOverrideStats = document.getElementById("cOverrideStats");
 const cKb = document.getElementById("cKeyboard");
 const cWarn = document.getElementById("cWarnings");
 const cXkb = document.getElementById("cXkb");
@@ -611,6 +640,14 @@ const cXkb = document.getElementById("cXkb");
 let composeAdditions = [];
 let composeSubs = [];
 let modulesLoaded = false;
+// composeOverrides: per-cell user assignments accumulated by clicking
+// a cell in the Compose grid and picking a glyph in the Unicode picker.
+// Keyed as "AB01:2" → "♠"; applied on top of the server response by
+// applyComposeOverrides so the live preview reflects the edits without
+// requiring a server-side spec change. Save flow can later promote
+// these to a synthetic addition.
+let composeOverrides = new Map();
+let pickerTargetCell = null; // {key, level} when the picker is opened from a cell
 
 async function ensureComposeReady() {
   if (modulesLoaded) {
@@ -970,8 +1007,43 @@ async function composeLivePreview() {
     return;
   }
   const data = await res.json();
+  applyComposeOverrides(data);
   renderInto({ meta: cMeta, kb: cKb, warn: cWarn }, data);
   updateFillStats(data);
+  updateOverrideStats();
+}
+
+// applyComposeOverrides mutates the API response in-place so that
+// user-clicked cells override the server-computed levels. Stamps the
+// source as "override" so the popover/legend show clearly where the
+// content came from.
+function applyComposeOverrides(data) {
+  if (composeOverrides.size === 0) return;
+  for (const [coord, glyph] of composeOverrides.entries()) {
+    const [key, levelStr] = coord.split(":");
+    const lvl = parseInt(levelStr, 10);
+    if (!data.symbols[key]) data.symbols[key] = [];
+    while (data.symbols[key].length < lvl + 1) {
+      data.symbols[key].push({ value: "", source: "" });
+    }
+    // Encode picked glyph as a single Unicode codepoint string. The
+    // xkb writer will turn it into a U<hex> token when saved.
+    data.symbols[key][lvl] = { value: glyph, source: "override", module: "you" };
+  }
+}
+
+function updateOverrideStats() {
+  const n = composeOverrides.size;
+  if (n === 0) {
+    cOverrideStats.classList.add("hidden");
+    return;
+  }
+  cOverrideStats.classList.remove("hidden");
+  cOverrideStats.innerHTML = `<strong>${n}</strong> custom cell${n === 1 ? "" : "s"} <button id="cClearOverrides" title="Clear all custom cell assignments">clear</button>`;
+  document.getElementById("cClearOverrides").addEventListener("click", () => {
+    composeOverrides.clear();
+    composeLivePreview();
+  });
 }
 
 function updateFillStats(data) {
@@ -1145,6 +1217,24 @@ function renderKey(code, levels, cmpLevels) {
     const cmp = data && data._compare ? data._compare : null;
     openKeyPopover(el, code, levels, data, cmpLevels, cmp);
   });
+  // Per-cell click (not the whole key) opens the Unicode picker for
+  // that exact (key, level) — but only on the Compose tab where the
+  // user authoring flow lives. Browse-tab cells go through the
+  // provenance popover only.
+  for (let i = 0; i < el.children.length; i++) {
+    const child = el.children[i];
+    if (!child.classList || !child.classList.contains("cell")) continue;
+    const levelIdx = Array.from(child.classList).map(c => /^l(\d+)$/.exec(c)).find(Boolean);
+    if (!levelIdx) continue;
+    const lvl = parseInt(levelIdx[1], 10);
+    child.addEventListener("dblclick", (e) => {
+      e.stopPropagation();
+      // Only fire in the Compose tab.
+      const tab = el.closest("section.tab");
+      if (!tab || tab.dataset.tab !== "compose") return;
+      openUnicodePickerForCell(code, lvl);
+    });
+  }
   return el;
 }
 

@@ -209,6 +209,31 @@ body.theme-light .coverage .chip { background: var(--bg-panel); border-color: va
 .src-letter         { background: #2b1a4a; border-color: #a371f7; color: #d2a8ff; }
 .src-substitution   { background: #3d2106; border-color: #e3742d; color: #ffbb78; }
 .src-autofill       { background: #21262d; border-color: #8b949e; color: #c9d1d9; font-style: italic; }
+.src-override       { background: #2e1a47; border-color: #d2a8ff; color: #d2a8ff; outline: 1.5px solid #d2a8ff; }
+.override-stats {
+  background: var(--bg-panel);
+  border: 1px solid var(--letter);
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  margin-bottom: 0.7rem;
+  font-size: 0.85rem;
+  color: var(--letter-fg);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.override-stats.hidden { display: none; }
+.override-stats button {
+  background: transparent;
+  border: 1px solid var(--letter);
+  color: var(--letter-fg);
+  border-radius: 3px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.override-stats button:hover { background: var(--letter-bg); }
 .src-empty          { color: #586069; }
 
 .keyboard { display: flex; flex-direction: column; gap: 4px; margin-bottom: 1rem; }

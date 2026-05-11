@@ -6,15 +6,30 @@ description: |
   the letter, not the key position.
 
   Per-letter levels:
-    L1 = regional indicator (🇦 .. 🇿) — primary use
-    L2 = the underlying ASCII letter — Shift falls back to typing
+    L1 = regional indicator (🇦 .. 🇿) — primary use, for country flags
+    L2 = TAG LETTER (U+E0061..U+E007A) — invisible Unicode tag chars
+         used to encode subregion flag sequences (Wales 🏴󠁧󠁢󠁷󠁬󠁳󠁿,
+         Scotland 🏴󠁧󠁢󠁳󠁣󠁴󠁿, England 🏴󠁧󠁢󠁥󠁮󠁧󠁿). Always lowercase —
+         Unicode only defines tag letters for ASCII a-z.
     L3 = regional indicator again — AltGr also works for users who
          have AltGr-as-primary input habits
-    L4 = ASCII letter again
+    L4 = ASCII letter — fallback for accidental engagement of this
+         layer; user can still type letters via AltGr+Shift
 
-  Type two letters in sequence to form a flag — U+S → 🇺🇸, J+P →
-  🇯🇵, G+B → 🇬🇧. Fonts that don't support flag sequences show the
-  pair of regional indicators side-by-side, still meaningful.
+  Country flag (regional indicator pair): type two letters unshifted
+  → U+S → 🇺🇸, J+P → 🇯🇵, G+B → 🇬🇧.
+
+  Subregion flag: type the BLACK FLAG 🏴 (on digit row), then the
+  Shifted ISO 3166-2 letters in lowercase, then CANCEL TAG. Welsh
+  flag = 🏴 + Shift+G + Shift+B + Shift+W + Shift+L + Shift+S +
+  CANCEL TAG → 🏴󠁧󠁢󠁷󠁬󠁳󠁿.
+
+  CANCEL TAG (U+E007F) is on AC11 (where ' / " usually live) so it's
+  accessible at the end of a sequence.
+
+  Fonts without support for tag sequences will show the regional
+  indicators inline and the tag letters as nothing (or as boxes),
+  which is degraded but not destructive.
 
   Positional overlays on the digit row carry single-codepoint flag
   pictographs that don't have a letter mnemonic — checkered, white,
@@ -45,34 +60,43 @@ overlays:
   AE10: { levels: [U2694, U2694, U2694, U2694] }       # ⚔
   AE11: { levels: [U2696, U2696, U2696, U2696] }       # ⚖
   AE12: { levels: [U1F451, U1F451, U1F451, U1F451] }   # 👑
+  # CANCEL TAG terminator on AC11 — keep quotedbl on Shift as fallback.
+  AC11: { levels: [UE007F, quotedbl, UE007F, quotedbl] }
 
 # Letter rows — A..Z → regional indicators wherever each letter
 # lives. Lowercase keys match level-1 of the transformation; the
 # overlay sets all 4 levels (L1/L3 = flag, L2/L4 = the ASCII letter).
 letter_overlays:
-  a: { levels: [U1F1E6, A, U1F1E6, A] }
-  b: { levels: [U1F1E7, B, U1F1E7, B] }
-  c: { levels: [U1F1E8, C, U1F1E8, C] }
-  d: { levels: [U1F1E9, D, U1F1E9, D] }
-  e: { levels: [U1F1EA, E, U1F1EA, E] }
-  f: { levels: [U1F1EB, F, U1F1EB, F] }
-  g: { levels: [U1F1EC, G, U1F1EC, G] }
-  h: { levels: [U1F1ED, H, U1F1ED, H] }
-  i: { levels: [U1F1EE, I, U1F1EE, I] }
-  j: { levels: [U1F1EF, J, U1F1EF, J] }
-  k: { levels: [U1F1F0, K, U1F1F0, K] }
-  l: { levels: [U1F1F1, L, U1F1F1, L] }
-  m: { levels: [U1F1F2, M, U1F1F2, M] }
-  n: { levels: [U1F1F3, N, U1F1F3, N] }
-  o: { levels: [U1F1F4, O, U1F1F4, O] }
-  p: { levels: [U1F1F5, P, U1F1F5, P] }
-  q: { levels: [U1F1F6, Q, U1F1F6, Q] }
-  r: { levels: [U1F1F7, R, U1F1F7, R] }
-  s: { levels: [U1F1F8, S, U1F1F8, S] }
-  t: { levels: [U1F1F9, T, U1F1F9, T] }
-  u: { levels: [U1F1FA, U, U1F1FA, U] }
-  v: { levels: [U1F1FB, V, U1F1FB, V] }
-  w: { levels: [U1F1FC, W, U1F1FC, W] }
-  x: { levels: [U1F1FD, X, U1F1FD, X] }
-  y: { levels: [U1F1FE, Y, U1F1FE, Y] }
-  z: { levels: [U1F1FF, Z, U1F1FF, Z] }
+  # Levels: L1 regional indicator, L2 TAG LETTER, L3 regional
+  # indicator again, L4 ASCII letter.
+  a: { levels: [U1F1E6, UE0061, U1F1E6, A] }
+  b: { levels: [U1F1E7, UE0062, U1F1E7, B] }
+  c: { levels: [U1F1E8, UE0063, U1F1E8, C] }
+  d: { levels: [U1F1E9, UE0064, U1F1E9, D] }
+  e: { levels: [U1F1EA, UE0065, U1F1EA, E] }
+  f: { levels: [U1F1EB, UE0066, U1F1EB, F] }
+  g: { levels: [U1F1EC, UE0067, U1F1EC, G] }
+  h: { levels: [U1F1ED, UE0068, U1F1ED, H] }
+  i: { levels: [U1F1EE, UE0069, U1F1EE, I] }
+  j: { levels: [U1F1EF, UE006A, U1F1EF, J] }
+  k: { levels: [U1F1F0, UE006B, U1F1F0, K] }
+  l: { levels: [U1F1F1, UE006C, U1F1F1, L] }
+  m: { levels: [U1F1F2, UE006D, U1F1F2, M] }
+  n: { levels: [U1F1F3, UE006E, U1F1F3, N] }
+  o: { levels: [U1F1F4, UE006F, U1F1F4, O] }
+  p: { levels: [U1F1F5, UE0070, U1F1F5, P] }
+  q: { levels: [U1F1F6, UE0071, U1F1F6, Q] }
+  r: { levels: [U1F1F7, UE0072, U1F1F7, R] }
+  s: { levels: [U1F1F8, UE0073, U1F1F8, S] }
+  t: { levels: [U1F1F9, UE0074, U1F1F9, T] }
+  u: { levels: [U1F1FA, UE0075, U1F1FA, U] }
+  v: { levels: [U1F1FB, UE0076, U1F1FB, V] }
+  w: { levels: [U1F1FC, UE0077, U1F1FC, W] }
+  x: { levels: [U1F1FD, UE0078, U1F1FD, X] }
+  y: { levels: [U1F1FE, UE0079, U1F1FE, Y] }
+  z: { levels: [U1F1FF, UE007A, U1F1FF, Z] }
+
+# CANCEL TAG (U+E007F) needs a single positional home — terminator
+# for subregion flag sequences. Apostrophe key (AC11) is a natural
+# fit; L2 keeps quotedbl as a fallback.
+
