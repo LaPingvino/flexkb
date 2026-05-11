@@ -61,6 +61,8 @@ func main() {
 		runDropinCheck(args)
 	case "serve":
 		runServe(args)
+	case "gui":
+		runGui(args)
 	case "-h", "--help", "help":
 		usage()
 	default:
@@ -82,6 +84,7 @@ Usage:
   flexkb paths
   flexkb activate <layout-file> <variant>
   flexkb serve [--data DIR] [--addr host:port] [--open]
+  flexkb gui   [--data DIR] [--addr host:port] [--engine NAME]
 
 Commands:
   compose   Emit one variant to stdout (debug / preview).
@@ -109,8 +112,13 @@ Commands:
             preview UI. Pick a layout/variant in the browser, see the
             composed key grid color-coded by source dimension
             (transformation/positional overlay/letter overlay/sub).
-            --open launches xdg-open on the URL — used by the
-            installed /usr/share/applications/flexkb.desktop launcher.
+            --open launches xdg-open on the URL.
+  gui       Same server, but wrap it in a dedicated window. Engines:
+            webview (native GTK/webkit2gtk, needs -tags webview),
+            lorca (Chromium --app= mode, needs -tags lorca),
+            browser (xdg-open fallback, always available). --engine=
+            picks one, --list-engines shows what's compiled in.
+            Used by /usr/share/applications/flexkb.desktop.
 
 --data DIR overrides discovery and uses only DIR. Without it, flexkb walks
 the user/system/dev paths in order — see "flexkb paths" for the resolved

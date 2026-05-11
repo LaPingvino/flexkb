@@ -12,17 +12,28 @@ pkgname=flexkb
 pkgver=0.1.0
 pkgrel=1
 pkgdesc="Modular XKB layout generator and drop-in xkeyboard-config replacement"
-arch=('any')
+# CGO is enabled to link the webview engine, so the package is no
+# longer arch-independent.
+arch=('x86_64' 'aarch64')
 url="https://github.com/lapingvino/flexkb"
 license=('MIT')
-depends=()
+# Hard deps: webkit2gtk-4.1 is loaded by the `flexkb gui` webview engine
+# at runtime; the binary will fail to start without it. xdg-utils for the
+# browser-fallback engine (xdg-open).
+depends=('webkit2gtk-4.1' 'xdg-utils')
+# Optional: a Chromium-based browser unlocks the lorca engine
+# (`flexkb gui --engine=lorca`, a chromeless --app= window).
+optdepends=('chromium: enables `flexkb gui --engine=lorca` (chromeless app window)'
+            'google-chrome: enables `flexkb gui --engine=lorca`'
+            'microsoft-edge-stable-bin: enables `flexkb gui --engine=lorca`')
 # We provide xkeyboard-config so any package depending on it stays satisfied
 # (libxkbcommon, xorg-server, gnome-control-center, etc.).
 provides=("xkeyboard-config=${pkgver}.upstream-2.47")
 conflicts=('xkeyboard-config')
-# Build deps: go for the binary, xkeyboard-config for the fallback xkb tree
-# we'll mirror anything we haven't modularised yet from.
-makedepends=('go' 'xkeyboard-config')
+# Build deps: go for the binary, gcc/pkgconf for CGO+webkit headers,
+# xkeyboard-config for the fallback xkb tree we mirror anything-not-
+# yet-modularised from.
+makedepends=('go' 'gcc' 'pkgconf' 'xkeyboard-config')
 # When packaging from a checkout, set source to () and just run makepkg in
 # place; when releasing, point source at a git tag tarball.
 source=()
@@ -31,10 +42,14 @@ install=flexkb.install
 
 build() {
     cd "$startdir"
-    export CGO_ENABLED=0
+    # CGO_ENABLED=1 is required by the webview engine (webkit2gtk-4.1).
+    # The lorca engine has no link-time deps (just runs a system chromium
+    # at runtime) so it tags in cleanly alongside.
+    export CGO_ENABLED=1
     export GOFLAGS="-trimpath -mod=readonly -modcacherw"
     export GOCACHE="$srcdir/.gocache"
-    go build -ldflags "-s -w -X main.version=$pkgver" -o flexkb ./cmd/flexkb
+    go build -tags 'webview lorca' \
+        -ldflags "-s -w -X main.version=$pkgver" -o flexkb ./cmd/flexkb
 
     # Run our build pipeline: generate modular xkb files into pkg-staging/,
     # then copy everything else verbatim from the installed xkeyboard-config.

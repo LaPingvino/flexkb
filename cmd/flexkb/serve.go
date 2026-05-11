@@ -4,6 +4,10 @@
 // dimension each level came from (transformation / positional overlay /
 // letter overlay / substitution). MVP scope is read-only — edit/save and
 // activate are deferred to a follow-up.
+//
+// `flexkb gui` (see gui.go) reuses the server here and wraps it in a
+// dedicated window via a chosen rendering engine (webview / lorca /
+// browser). The server itself is engine-agnostic.
 package main
 
 import (
@@ -43,9 +47,27 @@ func runServe(args []string) {
 	}
 	root := makeRoot(paths)
 
-	sub, err := fs.Sub(webFS, "web")
+	url, errCh, err := startServer(root, addr)
 	check(err)
+	fmt.Printf("flexkb serve listening on %s\n", url)
+	fmt.Printf("data search path: %v\n", paths)
 
+	if openBrowser {
+		go openInBrowser(url)
+	}
+
+	check(<-errCh)
+}
+
+// startServer binds an HTTP listener and starts serving in a goroutine,
+// returning the resolved URL (useful when addr uses port :0 or omits
+// the host) and a channel that receives the serve error if the server
+// stops on its own. Used by both `serve` and `gui`.
+func startServer(root model.DataRoot, addr string) (string, <-chan error, error) {
+	sub, err := fs.Sub(webFS, "web")
+	if err != nil {
+		return "", nil, err
+	}
 	mux := http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.FS(sub)))
 	mux.HandleFunc("/api/layouts", func(w http.ResponseWriter, r *http.Request) {
@@ -54,27 +76,24 @@ func runServe(args []string) {
 	mux.HandleFunc("/api/compose", func(w http.ResponseWriter, r *http.Request) {
 		handleCompose(w, r, root)
 	})
-
-	// Pre-bind so we can print the resolved URL (helpful when addr is :0
-	// or just a port) and launch the browser only after the listener is up.
 	ln, err := net.Listen("tcp", addr)
-	check(err)
-	url := "http://" + ln.Addr().String()
-	fmt.Printf("flexkb serve listening on %s\n", url)
-	fmt.Printf("data search path: %v\n", paths)
-
-	if openBrowser {
-		go func() {
-			// Brief pause so the http.Serve goroutine has the accept
-			// loop running before xdg-open hands the URL to a browser.
-			time.Sleep(150 * time.Millisecond)
-			if err := exec.Command("xdg-open", url).Start(); err != nil {
-				fmt.Fprintf(os.Stderr, "warn: xdg-open %s failed: %v\n", url, err)
-			}
-		}()
+	if err != nil {
+		return "", nil, err
 	}
+	url := "http://" + ln.Addr().String()
+	errCh := make(chan error, 1)
+	go func() { errCh <- http.Serve(ln, mux) }()
+	return url, errCh, nil
+}
 
-	check(http.Serve(ln, mux))
+// openInBrowser hands the URL to xdg-open after a brief pause to give
+// the HTTP server's accept loop a moment to start. Used by `serve
+// --open` and as the fallback engine for `gui`.
+func openInBrowser(url string) {
+	time.Sleep(150 * time.Millisecond)
+	if err := exec.Command("xdg-open", url).Start(); err != nil {
+		fmt.Fprintf(os.Stderr, "warn: xdg-open %s failed: %v\n", url, err)
+	}
 }
 
 // apiVariant is the JSON shape we ship for the picker UI.
