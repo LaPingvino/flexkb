@@ -59,6 +59,8 @@ func main() {
 		runMigrateSuggest(args)
 	case "dropin-check":
 		runDropinCheck(args)
+	case "serve":
+		runServe(args)
 	case "-h", "--help", "help":
 		usage()
 	default:
@@ -79,6 +81,7 @@ Usage:
   flexkb list [--data DIR]
   flexkb paths
   flexkb activate <layout-file> <variant>
+  flexkb serve [--data DIR] [--addr host:port]
 
 Commands:
   compose   Emit one variant to stdout (debug / preview).
@@ -102,6 +105,10 @@ Commands:
    check    one. Fails (exit 1) if any file, xkb_symbols block, or rules
             registry layout/variant from upstream is missing in built.
             Called by the PKGBUILD check() to enforce drop-in compat.
+  serve     Start an HTTP server (default localhost:7878) with a live
+            preview UI. Pick a layout/variant in the browser, see the
+            composed key grid color-coded by source dimension
+            (transformation/positional overlay/letter overlay/sub).
 
 --data DIR overrides discovery and uses only DIR. Without it, flexkb walks
 the user/system/dev paths in order — see "flexkb paths" for the resolved

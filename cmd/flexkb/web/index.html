@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>flexkb — live preview</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>flexkb</h1>
+    <p class="tag">live layout preview</p>
+  </header>
+
+  <main>
+    <section class="picker">
+      <label>
+        <span>Layout file</span>
+        <select id="file"></select>
+      </label>
+      <label>
+        <span>Variant</span>
+        <select id="variant"></select>
+      </label>
+    </section>
+
+    <section class="meta" id="meta"></section>
+
+    <section class="legend">
+      <span class="src-transformation">transformation</span>
+      <span class="src-position">positional overlay</span>
+      <span class="src-letter">letter overlay</span>
+      <span class="src-substitution">substitution</span>
+    </section>
+
+    <section class="keyboard" id="keyboard"></section>
+
+    <section class="warnings" id="warnings"></section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
