@@ -1,0 +1,13 @@
+name: Estonian letters
+description: |
+  Estonian overlay — ä, ö, õ, ü, š, ž. Letter-following on AltGr.
+letter_overlays:
+  a: { levels: ["", "", adiaeresis, Adiaeresis] }
+  o: { levels: ["", "", odiaeresis, Odiaeresis] }
+  u: { levels: ["", "", udiaeresis, Udiaeresis] }
+  s: { levels: ["", "", scaron, Scaron] }
+  z: { levels: ["", "", zcaron, Zcaron] }
+  # õ on AltGr+q by Estonian convention
+  q: { levels: ["", "", otilde, Otilde] }
+includes:
+  - level3(ralt_switch)

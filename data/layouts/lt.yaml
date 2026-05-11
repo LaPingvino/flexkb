@@ -1,0 +1,20 @@
+file: lt
+variants:
+  - name: basic
+    description: Lithuanian
+    physical: iso
+    transformation: qwerty
+    additions: [lithuanian]
+    default: true
+
+  - name: dvorak
+    description: Lithuanian (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [lithuanian]
+
+  - name: colemak
+    description: Lithuanian (Colemak)
+    physical: iso
+    transformation: colemak
+    additions: [lithuanian]

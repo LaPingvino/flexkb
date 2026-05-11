@@ -1,15 +1,18 @@
-name: Turkish i↔İ case pair
+name: Turkish i↔İ case pair (with AltGr fallback to plain I and ı)
 description: |
-  Override the i-key's level-2 to produce İ (Iabovedot) instead of plain
-  I. Turkish's lowercase 'i' uppercases to 'İ', not 'I'; the dotless ı
+  Override the i-key's level-2 to produce İ (Iabovedot) instead of plain I.
+  Turkish's lowercase 'i' uppercases to 'İ', not 'I'; the dotless ı
   uppercases to 'I'. This addition gives you Turkish-style case pairing
   on top of any Latin transformation that has plain `i` at level 1.
 
-  Note: doesn't touch the dotless ı, since stock Latin transformations
-  don't have idotless at level 1. Use Turkish-Q or Turkish-F as base
-  if you need both pairs.
+  Preserves access to plain I and ı (idotless) via AltGr so the user can
+  still type ASCII i/I forms when needed (URLs, code, etc.):
+    Shift+i     → İ (Turkish)
+    AltGr+i     → ı (Turkish dotless lowercase)
+    AltGr+Shift → I (plain ASCII)
 
-  Worked example of using letter_overlays to fix case-pair edge cases —
-  see internal/model/model.go LetterOverlays doc for the full rationale.
+  Worked example of using letter_overlays to fix case-pair edge cases.
 letter_overlays:
-  i: { levels: ["", Iabovedot] }
+  i: { levels: ["", Iabovedot, idotless, I] }
+includes:
+  - level3(ralt_switch)

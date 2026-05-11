@@ -1,0 +1,13 @@
+name: Croatian/Bosnian/Serbian-Latin letters
+description: |
+  South Slavic Latin overlay — č, ć, đ, š, ž. Used for Croatian, Bosnian,
+  and Serbian-Latin. Letter-following on AltGr level.
+letter_overlays:
+  c: { levels: ["", "", cacute, Cacute] }
+  # Croatian convention: čš are letters with caron — placed on AltGr+s,c,z
+  # by xkb tradition. Letter-following keeps it consistent across bases.
+  s: { levels: ["", "", scaron, Scaron] }
+  z: { levels: ["", "", zcaron, Zcaron] }
+  d: { levels: ["", "", dstroke, Dstroke] }
+includes:
+  - level3(ralt_switch)

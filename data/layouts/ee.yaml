@@ -1,0 +1,14 @@
+file: ee
+variants:
+  - name: basic
+    description: Estonian
+    physical: iso
+    transformation: qwerty
+    additions: [estonian]
+    default: true
+
+  - name: dvorak
+    description: Estonian (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [estonian]

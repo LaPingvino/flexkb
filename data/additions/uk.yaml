@@ -1,0 +1,12 @@
+name: UK punctuation (£, €, hash)
+description: |
+  British layout overlay — £ on shifted 3, € on AltGr+4, hash on backslash,
+  @ and " swapped from US (Shift+2 = @ on US, " on UK; Shift+' = @ on UK).
+overlays:
+  AE03: { levels: ["3", sterling, EuroSign] }
+  AE04: { levels: ["4", dollar, EuroSign] }
+  AE02: { levels: ["2", quotedbl] }
+  AC11: { levels: [apostrophe, at] }
+  BKSL: { levels: [numbersign, asciitilde] }
+includes:
+  - level3(ralt_switch)

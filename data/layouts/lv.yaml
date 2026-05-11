@@ -1,0 +1,14 @@
+file: lv
+variants:
+  - name: basic
+    description: Latvian
+    physical: iso
+    transformation: qwerty
+    additions: [latvian]
+    default: true
+
+  - name: dvorak
+    description: Latvian (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [latvian]

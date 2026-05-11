@@ -1,0 +1,21 @@
+name: Vietnamese tone marks (Telex-style)
+description: |
+  Vietnamese has six tones marked by diacritics: ngang (level), huyền
+  (à grave), sắc (á acute), hỏi (ả hook), ngã (ã tilde), nặng (ạ
+  belowdot). This addition places the dead keys for each tone on AltGr
+  level over the home row. Real Vietnamese typing needs an IME for the
+  full Telex / VNI input methods; this is a starting overlay.
+overlays:
+  # F-row dead keys for tone marks
+  AC04: { levels: ["", "", dead_grave] }       # f → tone huyền (`)
+  AC05: { levels: ["", "", dead_acute] }       # g → tone sắc (´)
+  AC06: { levels: ["", "", dead_hook] }        # h → tone hỏi (̉)
+  AC07: { levels: ["", "", dead_tilde] }       # j → tone ngã (˜)
+  AC08: { levels: ["", "", dead_belowdot] }    # k → tone nặng (̣)
+letter_overlays:
+  a: { levels: ["", "", abreve, Abreve] }
+  d: { levels: ["", "", dstroke, Dstroke] }
+  e: { levels: ["", "", ecircumflex, Ecircumflex] }
+  o: { levels: ["", "", ocircumflex, Ocircumflex] }
+includes:
+  - level3(ralt_switch)

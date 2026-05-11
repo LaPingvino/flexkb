@@ -1,0 +1,8 @@
+file: ba
+variants:
+  - name: basic
+    description: Bosnian
+    physical: iso
+    transformation: qwertz
+    additions: [croatian]
+    default: true

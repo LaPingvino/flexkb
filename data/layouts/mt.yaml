@@ -1,0 +1,14 @@
+file: mt
+variants:
+  - name: basic
+    description: Maltese
+    physical: iso
+    transformation: qwerty
+    additions: [maltese]
+    default: true
+
+  - name: dvorak
+    description: Maltese (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [maltese]

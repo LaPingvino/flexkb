@@ -1,0 +1,13 @@
+name: Canadian French letters
+description: |
+  Canadian French overlay — é, è, à, ç, ê, î, ô, û on AltGr level.
+  Letter-following so it works on QWERTY/Dvorak/Colemak bases.
+letter_overlays:
+  e: { levels: ["", "", eacute, Eacute] }
+  a: { levels: ["", "", agrave, Agrave] }
+  u: { levels: ["", "", ugrave, Ugrave] }
+  c: { levels: ["", "", ccedilla, Ccedilla] }
+  i: { levels: ["", "", icircumflex, Icircumflex] }
+  o: { levels: ["", "", ocircumflex, Ocircumflex] }
+includes:
+  - level3(ralt_switch)

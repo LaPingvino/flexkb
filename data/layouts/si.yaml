@@ -1,0 +1,14 @@
+file: si
+variants:
+  - name: basic
+    description: Slovenian
+    physical: iso
+    transformation: qwertz
+    additions: [croatian]
+    default: true
+
+  - name: dvorak
+    description: Slovenian (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [croatian]

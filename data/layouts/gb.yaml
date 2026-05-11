@@ -1,0 +1,26 @@
+file: gb
+variants:
+  - name: basic
+    description: English (UK)
+    physical: iso
+    transformation: qwerty
+    additions: [uk]
+    default: true
+
+  - name: dvorak
+    description: English (UK, Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [uk]
+
+  - name: colemak
+    description: English (UK, Colemak)
+    physical: iso
+    transformation: colemak
+    additions: [uk]
+
+  - name: intl
+    description: English (UK, intl., with dead keys)
+    physical: iso
+    transformation: qwerty
+    additions: [uk, intl]

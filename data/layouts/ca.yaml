@@ -1,0 +1,26 @@
+file: ca
+variants:
+  - name: basic
+    description: Canadian English with French accents
+    physical: iso
+    transformation: qwerty
+    additions: [canadian-french]
+    default: true
+
+  - name: fr
+    description: Canadian French (AZERTY base)
+    physical: iso
+    transformation: azerty
+    additions: [canadian-french, french-accents]
+
+  - name: dvorak
+    description: Canadian (Dvorak, with French accents)
+    physical: iso
+    transformation: dvorak
+    additions: [canadian-french]
+
+  - name: colemak
+    description: Canadian (Colemak, with French accents)
+    physical: iso
+    transformation: colemak
+    additions: [canadian-french]

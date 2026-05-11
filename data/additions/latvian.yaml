@@ -1,0 +1,17 @@
+name: Latvian letters
+description: |
+  Latvian overlay — ā, č, ē, ģ, ī, ķ, ļ, ņ, š, ū, ž. Letter-following.
+letter_overlays:
+  a: { levels: ["", "", amacron, Amacron] }
+  c: { levels: ["", "", ccaron, Ccaron] }
+  e: { levels: ["", "", emacron, Emacron] }
+  g: { levels: ["", "", gcedilla, Gcedilla] }
+  i: { levels: ["", "", imacron, Imacron] }
+  k: { levels: ["", "", kcedilla, Kcedilla] }
+  l: { levels: ["", "", lcedilla, Lcedilla] }
+  n: { levels: ["", "", ncedilla, Ncedilla] }
+  s: { levels: ["", "", scaron, Scaron] }
+  u: { levels: ["", "", umacron, Umacron] }
+  z: { levels: ["", "", zcaron, Zcaron] }
+includes:
+  - level3(ralt_switch)

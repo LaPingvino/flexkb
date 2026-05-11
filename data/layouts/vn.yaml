@@ -1,0 +1,14 @@
+file: vn
+variants:
+  - name: basic
+    description: Vietnamese
+    physical: iso
+    transformation: qwerty
+    additions: [vietnamese-tone]
+    default: true
+
+  - name: dvorak
+    description: Vietnamese (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [vietnamese-tone]

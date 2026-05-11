@@ -1,0 +1,16 @@
+name: Lithuanian letters
+description: |
+  Lithuanian overlay — ą, č, ę, ė, į, š, ų, ū, ž. Letter-following.
+letter_overlays:
+  a: { levels: ["", "", aogonek, Aogonek] }
+  c: { levels: ["", "", ccaron, Ccaron] }
+  e: { levels: ["", "", eogonek, Eogonek] }
+  i: { levels: ["", "", iogonek, Iogonek] }
+  s: { levels: ["", "", scaron, Scaron] }
+  u: { levels: ["", "", uogonek, Uogonek] }
+  y: { levels: ["", "", umacron, Umacron] }
+  z: { levels: ["", "", zcaron, Zcaron] }
+  # ė is the "e with dot above" — placed on AltGr+x by convention
+  x: { levels: ["", "", eabovedot, Eabovedot] }
+includes:
+  - level3(ralt_switch)

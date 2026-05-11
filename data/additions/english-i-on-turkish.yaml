@@ -1,15 +1,20 @@
-name: ASCII i/I pairing (counterpart of Turkish i/İ)
+name: ASCII i/I pairing on Turkish base (with AltGr fallback to Turkish forms)
 description: |
   The inverse of turkish-i-pair. Applies on top of a Turkish base
-  (Turkish-Q or Turkish-F) to force ASCII case pairing for the i/ı keys:
-  Shift+i → I instead of İ, Shift+ı → I (already true on Turkish-F).
-  Useful when a Turkish typist wants to enter English text without
-  swapping layouts — the muscle memory stays Turkish, the casing comes
-  out ASCII.
+  (Turkish-Q or Turkish-F) to force ASCII case pairing for the i and ı
+  keys. The Turkish forms remain accessible via AltGr:
 
-  Pair of two files (turkish-i-pair forward, english-i-on-turkish reverse)
-  is the explicit form of "inverse toggle" — flexkb doesn't auto-invert
-  letter_overlays since the inverse isn't always well-defined.
+    Shift+i     → I (ASCII)
+    AltGr+i     → İ (Turkish dotted uppercase)
+    AltGr+ı     → ı (lowercase passthrough — same as level 1)
+
+  Useful when a Turkish typist wants to enter English text without
+  swapping layouts.
+
+  Pair-of-files pattern (turkish-i-pair / english-i-on-turkish) is the
+  explicit form of "inverse toggle".
 letter_overlays:
-  i:        { levels: ["", I] }
-  idotless: { levels: ["", I] }
+  i:        { levels: ["", I, Iabovedot, Iabovedot] }
+  idotless: { levels: ["", I, idotless, idotless] }
+includes:
+  - level3(ralt_switch)

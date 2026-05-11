@@ -1,0 +1,10 @@
+name: Maltese letters
+description: |
+  Maltese overlay — ċ, ġ, ħ, ż (consonants with overdot or stroke).
+letter_overlays:
+  c: { levels: ["", "", cabovedot, Cabovedot] }
+  g: { levels: ["", "", gabovedot, Gabovedot] }
+  h: { levels: ["", "", hstroke, Hstroke] }
+  z: { levels: ["", "", zabovedot, Zabovedot] }
+includes:
+  - level3(ralt_switch)

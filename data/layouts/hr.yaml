@@ -1,0 +1,14 @@
+file: hr
+variants:
+  - name: basic
+    description: Croatian
+    physical: iso
+    transformation: qwertz
+    additions: [croatian]
+    default: true
+
+  - name: dvorak
+    description: Croatian (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [croatian]
