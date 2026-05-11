@@ -18,3 +18,17 @@ variants:
     physical: iso
     transformation: qwerty
     additions: [turkish-i-pair]
+
+  # The other direction: a Turkish-Q typist wanting ASCII iI casing for
+  # entering English/code without leaving the Turkish layout.
+  - name: q-ascii-i
+    description: Turkish (Q, with ASCII i/I instead of i/İ)
+    physical: iso
+    transformation: turkish-q
+    additions: [english-i-on-turkish]
+
+  - name: f-ascii-i
+    description: Turkish (F, with ASCII i/I instead of i/İ)
+    physical: iso
+    transformation: turkish-f
+    additions: [english-i-on-turkish]
