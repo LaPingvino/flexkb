@@ -38,6 +38,31 @@ variants:
     substitutions: [latin-cyrillic-phonetic]
     additions: [russian-phonetic-extras]
 
+  - name: phonetic-norman
+    description: Russian (phonetic, on Norman base)
+    physical: ansi
+    transformation: norman
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras]
+
+  # Demonstrates a hotfix substitution: list narrow overrides BEFORE the
+  # broad substitution so they pre-empt it. Here, w produces ж instead of
+  # colliding with v on в.
+  - name: phonetic-w-zhe
+    description: Russian (phonetic, QWERTY, w as ж)
+    physical: ansi
+    transformation: qwerty
+    substitutions: [hotfix-russian-w-as-zhe, latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras]
+
+  # Multiple hotfixes chain: q→щ AND w→ж, both pre-empting the broad map.
+  - name: phonetic-q-shcha-w-zhe
+    description: Russian (phonetic, QWERTY, q as щ + w as ж)
+    physical: ansi
+    transformation: qwerty
+    substitutions: [hotfix-russian-q-as-shcha, hotfix-russian-w-as-zhe, latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras]
+
   # Inverse: take Russian ЙЦУКЕН muscle memory and produce Latin text.
   - name: latin-via-ycuken
     description: Latin via ЙЦУКЕН positions (inverse phonetic)

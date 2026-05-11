@@ -1,0 +1,25 @@
+file: ara
+variants:
+  - name: basic
+    description: Arabic
+    physical: iso
+    transformation: arabic-101
+    default: true
+
+  - name: phonetic
+    description: Arabic (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-arabic-phonetic]
+
+  - name: phonetic-dvorak
+    description: Arabic (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-arabic-phonetic]
+
+  - name: phonetic-colemak
+    description: Arabic (phonetic, Colemak base)
+    physical: iso
+    transformation: colemak
+    substitutions: [latin-arabic-phonetic]

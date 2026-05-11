@@ -35,6 +35,10 @@ overlays:
   AC02: { levels: ["", "", ssharp, section] }
   AC03: { levels: ["", "", eth, ETH] }
   AC04: { levels: ["", "", ediaeresis, Ediaeresis] }
+  # AC05 and AC06 don't gain new level3/4 characters — xkb pads them with
+  # the base letter so all keys are uniformly 4 levels deep.
+  AC05: { levels: ["", "", g, G] }
+  AC06: { levels: ["", "", h, H] }
   AC07: { levels: ["", "", idiaeresis, Idiaeresis] }
   AC08: { levels: ["", "", oe, OE] }
   AC09: { levels: ["", "", oslash, Oslash] }
@@ -44,12 +48,19 @@ overlays:
   AB01: { levels: ["", "", ae, AE] }
   AB02: { levels: ["", "", periodcentered, dead_stroke] }
   AB03: { levels: ["", "", copyright, cent] }
+  # Same pad-with-base-letter trick for AB04 / AB05.
+  AB04: { levels: ["", "", v, V] }
+  AB05: { levels: ["", "", b, B] }
   AB06: { levels: ["", "", ntilde, Ntilde] }
   AB07: { levels: ["", "", mu, plusminus] }
   AB08: { levels: [comma, less, ccedilla, Ccedilla] }
   AB09: { levels: [period, greater, dead_abovedot, dead_caron] }
   AB10: { levels: [slash, question, questiondown, dead_hook] }
   BKSL: { levels: [backslash, bar, notsign, brokenbar] }
+  # xkb's us(intl) defines LSGT for ISO hardware running on the ANSI base.
+  # We mirror that — composed against ANSI, the extension-keys rule drops
+  # it silently; on ISO it's there.
+  LSGT: { levels: [backslash, bar, backslash, bar] }
 
 includes:
   - level3(ralt_switch)

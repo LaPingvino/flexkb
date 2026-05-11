@@ -1,0 +1,25 @@
+file: il
+variants:
+  - name: basic
+    description: Hebrew
+    physical: iso
+    transformation: hebrew-standard
+    default: true
+
+  - name: phonetic
+    description: Hebrew (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-hebrew-phonetic]
+
+  - name: phonetic-dvorak
+    description: Hebrew (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-hebrew-phonetic]
+
+  - name: phonetic-colemak
+    description: Hebrew (phonetic, Colemak base)
+    physical: iso
+    transformation: colemak
+    substitutions: [latin-hebrew-phonetic]

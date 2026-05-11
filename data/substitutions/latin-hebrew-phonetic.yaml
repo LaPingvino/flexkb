@@ -1,0 +1,60 @@
+name: Latin → Hebrew (phonetic)
+description: |
+  Phonetic Hebrew substitution. Apply over any Latin transformation to get
+  a Hebrew-phonetic layout that follows the Latin letter positions
+  underneath. Several letters have multiple sound-cognates; we pick the
+  most common convention (a→aleph, b→bet, c→tsade-or-kaph — we go kaph
+  since "c" is /k/-like in English).
+map:
+  a: hebrew_aleph
+  A: hebrew_aleph
+  b: hebrew_bet
+  B: hebrew_bet
+  c: hebrew_kaph
+  C: hebrew_kaph
+  d: hebrew_dalet
+  D: hebrew_dalet
+  e: hebrew_he
+  E: hebrew_he
+  f: hebrew_pe
+  F: hebrew_pe
+  g: hebrew_gimel
+  G: hebrew_gimel
+  h: hebrew_chet
+  H: hebrew_chet
+  i: hebrew_yod
+  I: hebrew_yod
+  j: hebrew_yod
+  J: hebrew_yod
+  k: hebrew_kaph
+  K: hebrew_kaph
+  l: hebrew_lamed
+  L: hebrew_lamed
+  m: hebrew_mem
+  M: hebrew_mem
+  n: hebrew_nun
+  N: hebrew_nun
+  o: hebrew_ayin
+  O: hebrew_ayin
+  p: hebrew_pe
+  P: hebrew_pe
+  q: hebrew_qoph
+  Q: hebrew_qoph
+  r: hebrew_resh
+  R: hebrew_resh
+  s: hebrew_samech
+  S: hebrew_samech
+  t: hebrew_tet
+  T: hebrew_tet
+  u: hebrew_waw
+  U: hebrew_waw
+  v: hebrew_waw
+  V: hebrew_waw
+  w: hebrew_waw
+  W: hebrew_waw
+  x: hebrew_chet
+  X: hebrew_chet
+  y: hebrew_yod
+  Y: hebrew_yod
+  z: hebrew_zain
+  Z: hebrew_zain

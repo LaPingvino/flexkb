@@ -1,0 +1,58 @@
+name: Hebrew (standard)
+description: |
+  Native Hebrew keyboard layout. Hebrew letters at level 1; level 2 mirrors
+  level 1 since Hebrew has no case distinction (xkb adds Latin capitals at
+  level 2 via FOUR_LEVEL_SEMIALPHABETIC for Caps-Lock English-toggle
+  behaviour — flexkb doesn't model key types yet, so we omit those).
+keys:
+  TLDE: { levels: [semicolon, asciitilde] }
+  AE01: { levels: ["1", exclam] }
+  AE02: { levels: ["2", at] }
+  AE03: { levels: ["3", numbersign] }
+  AE04: { levels: ["4", dollar] }
+  AE05: { levels: ["5", percent] }
+  AE06: { levels: ["6", asciicircum] }
+  AE07: { levels: ["7", ampersand] }
+  AE08: { levels: ["8", asterisk] }
+  AE09: { levels: ["9", parenright] }
+  AE10: { levels: ["0", parenleft] }
+  AE11: { levels: [minus, underscore] }
+  AE12: { levels: [equal, plus] }
+
+  AD01: { levels: [slash, slash] }
+  AD02: { levels: [apostrophe, apostrophe] }
+  AD03: { levels: [hebrew_qoph, hebrew_qoph] }
+  AD04: { levels: [hebrew_resh, hebrew_resh] }
+  AD05: { levels: [hebrew_aleph, hebrew_aleph] }
+  AD06: { levels: [hebrew_tet, hebrew_tet] }
+  AD07: { levels: [hebrew_waw, hebrew_waw] }
+  AD08: { levels: [hebrew_finalnun, hebrew_finalnun] }
+  AD09: { levels: [hebrew_finalmem, hebrew_finalmem] }
+  AD10: { levels: [hebrew_pe, hebrew_pe] }
+  AD11: { levels: [bracketright, braceright] }
+  AD12: { levels: [bracketleft, braceleft] }
+
+  AC01: { levels: [hebrew_shin, hebrew_shin] }
+  AC02: { levels: [hebrew_dalet, hebrew_dalet] }
+  AC03: { levels: [hebrew_gimel, hebrew_gimel] }
+  AC04: { levels: [hebrew_kaph, hebrew_kaph] }
+  AC05: { levels: [hebrew_ayin, hebrew_ayin] }
+  AC06: { levels: [hebrew_yod, hebrew_yod] }
+  AC07: { levels: [hebrew_chet, hebrew_chet] }
+  AC08: { levels: [hebrew_lamed, hebrew_lamed] }
+  AC09: { levels: [hebrew_finalkaph, hebrew_finalkaph] }
+  AC10: { levels: [hebrew_finalpe, colon] }
+  AC11: { levels: [comma, quotedbl] }
+  BKSL: { levels: [backslash, bar] }
+
+  LSGT: { levels: [backslash, bar] }
+  AB01: { levels: [hebrew_zain, hebrew_zain] }
+  AB02: { levels: [hebrew_samech, hebrew_samech] }
+  AB03: { levels: [hebrew_bet, hebrew_bet] }
+  AB04: { levels: [hebrew_he, hebrew_he] }
+  AB05: { levels: [hebrew_nun, hebrew_nun] }
+  AB06: { levels: [hebrew_mem, hebrew_mem] }
+  AB07: { levels: [hebrew_zade, hebrew_zade] }
+  AB08: { levels: [hebrew_taw, greater] }
+  AB09: { levels: [hebrew_finalzade, less] }
+  AB10: { levels: [period, question] }

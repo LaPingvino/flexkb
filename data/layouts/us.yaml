@@ -32,3 +32,8 @@ variants:
     physical: ansi
     transformation: qwerty
     additions: [eurosign-5]
+
+  - name: norman
+    description: English (Norman)
+    physical: ansi
+    transformation: norman

@@ -1,0 +1,20 @@
+file: es
+variants:
+  - name: basic
+    description: Spanish
+    physical: iso
+    transformation: qwerty
+    additions: [spanish]
+    default: true
+
+  - name: dvorak
+    description: Spanish (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [spanish]
+
+  - name: colemak
+    description: Spanish (Colemak)
+    physical: iso
+    transformation: colemak
+    additions: [spanish]

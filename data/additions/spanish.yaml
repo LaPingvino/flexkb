@@ -1,0 +1,11 @@
+name: Spanish letters and accents
+description: |
+  Spanish layout additions: ñ on AC10 (the semicolon slot in QWERTY),
+  dead_acute, ¿/¡, inverted punctuation, and EuroSign on E.
+overlays:
+  AC10: { levels: [ntilde, Ntilde] }
+  AC11: { levels: [dead_acute, dead_diaeresis] }
+  AB10: { levels: [minus, underscore, questiondown, exclamdown] }
+  AD03: { levels: ["", "", EuroSign] }
+includes:
+  - level3(ralt_switch)

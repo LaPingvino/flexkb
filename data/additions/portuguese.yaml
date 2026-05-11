@@ -1,0 +1,10 @@
+name: Portuguese accents and ç
+description: |
+  Portuguese accents: ç on AC10, dead_tilde + dead_acute, EuroSign on E.
+overlays:
+  AC10: { levels: [ccedilla, Ccedilla] }
+  AC11: { levels: [dead_tilde, dead_circumflex] }
+  AD11: { levels: [dead_acute, dead_grave] }
+  AD03: { levels: ["", "", EuroSign] }
+includes:
+  - level3(ralt_switch)

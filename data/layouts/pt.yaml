@@ -1,0 +1,20 @@
+file: pt
+variants:
+  - name: basic
+    description: Portuguese
+    physical: iso
+    transformation: qwerty
+    additions: [portuguese]
+    default: true
+
+  - name: dvorak
+    description: Portuguese (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [portuguese]
+
+  - name: colemak
+    description: Portuguese (Colemak)
+    physical: iso
+    transformation: colemak
+    additions: [portuguese]

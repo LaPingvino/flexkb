@@ -1,0 +1,59 @@
+name: Latin → Arabic (phonetic)
+description: |
+  Phonetic Arabic substitution. Apply over any Latin transformation to
+  type Arabic by sound-cognate keys. Arabic has letters with no Latin
+  cognate (ع, غ, ص, ض, ط, ظ, ق, ح, خ); we map those to letters where
+  the convention is established (g→غ, q→ق, etc).
+map:
+  a: Arabic_alef
+  A: Arabic_alef
+  b: Arabic_beh
+  B: Arabic_beh
+  c: Arabic_sad      # convention: c → ص
+  C: Arabic_sad
+  d: Arabic_dal
+  D: Arabic_dal
+  e: Arabic_ain      # ع often transliterated as 'a or "e"
+  E: Arabic_ain
+  f: Arabic_feh
+  F: Arabic_feh
+  g: Arabic_ghain    # غ, transliterated gh
+  G: Arabic_ghain
+  h: Arabic_hah
+  H: Arabic_hah
+  i: Arabic_yeh
+  I: Arabic_yeh
+  j: Arabic_jeem
+  J: Arabic_jeem
+  k: Arabic_kaf
+  K: Arabic_kaf
+  l: Arabic_lam
+  L: Arabic_lam
+  m: Arabic_meem
+  M: Arabic_meem
+  n: Arabic_noon
+  N: Arabic_noon
+  o: Arabic_waw
+  O: Arabic_waw
+  p: Arabic_peh
+  P: Arabic_peh
+  q: Arabic_qaf
+  Q: Arabic_qaf
+  r: Arabic_ra
+  R: Arabic_ra
+  s: Arabic_seen
+  S: Arabic_seen
+  t: Arabic_teh
+  T: Arabic_teh
+  u: Arabic_waw
+  U: Arabic_waw
+  v: Arabic_veh
+  V: Arabic_veh
+  w: Arabic_waw
+  W: Arabic_waw
+  x: Arabic_khah     # خ, transliterated kh
+  X: Arabic_khah
+  y: Arabic_yeh
+  Y: Arabic_yeh
+  z: Arabic_zain
+  Z: Arabic_zain

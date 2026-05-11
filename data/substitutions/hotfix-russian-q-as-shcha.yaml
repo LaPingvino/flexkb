@@ -1,0 +1,8 @@
+name: Hotfix — Russian q → щ
+description: |
+  Some Russian phonetic typists prefer q → щ (shcha) rather than the
+  default q → я (ya). Place BEFORE latin-cyrillic-phonetic to override
+  just that one mapping.
+map:
+  q: Cyrillic_shcha
+  Q: Cyrillic_SHCHA

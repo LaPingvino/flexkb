@@ -1,0 +1,57 @@
+name: Arabic (101 layout)
+description: |
+  Standard Arabic 101 keyboard arrangement. Level 1 = Arabic letter,
+  level 2 = Arabic diacritic / punctuation. This is the de-facto Arabic
+  typing standard; users may also choose phonetic via the substitution.
+keys:
+  TLDE: { levels: [Arabic_thal, Arabic_shadda] }
+  AE01: { levels: ["1", exclam] }
+  AE02: { levels: ["2", at] }
+  AE03: { levels: ["3", numbersign] }
+  AE04: { levels: ["4", dollar] }
+  AE05: { levels: ["5", percent] }
+  AE06: { levels: ["6", asciicircum] }
+  AE07: { levels: ["7", ampersand] }
+  AE08: { levels: ["8", asterisk] }
+  AE09: { levels: ["9", parenright] }
+  AE10: { levels: ["0", parenleft] }
+  AE11: { levels: [minus, underscore] }
+  AE12: { levels: [equal, plus] }
+
+  AD01: { levels: [Arabic_dad, Arabic_fatha] }
+  AD02: { levels: [Arabic_sad, Arabic_fathatan] }
+  AD03: { levels: [Arabic_theh, Arabic_damma] }
+  AD04: { levels: [Arabic_qaf, Arabic_dammatan] }
+  AD05: { levels: [Arabic_feh, UFEF9] }
+  AD06: { levels: [Arabic_ghain, Arabic_hamzaunderalef] }
+  AD07: { levels: [Arabic_ain, grave] }
+  AD08: { levels: [Arabic_ha, division] }
+  AD09: { levels: [Arabic_khah, multiply] }
+  AD10: { levels: [Arabic_hah, Arabic_semicolon] }
+  AD11: { levels: [Arabic_jeem, less] }
+  AD12: { levels: [Arabic_dal, greater] }
+
+  AC01: { levels: [Arabic_sheen, Arabic_kasra] }
+  AC02: { levels: [Arabic_seen, Arabic_kasratan] }
+  AC03: { levels: [Arabic_yeh, bracketright] }
+  AC04: { levels: [Arabic_beh, bracketleft] }
+  AC05: { levels: [Arabic_lam, UFEF7] }
+  AC06: { levels: [Arabic_alef, Arabic_hamzaonalef] }
+  AC07: { levels: [Arabic_teh, Arabic_tatweel] }
+  AC08: { levels: [Arabic_noon, Arabic_comma] }
+  AC09: { levels: [Arabic_meem, slash] }
+  AC10: { levels: [Arabic_kaf, colon] }
+  AC11: { levels: [Arabic_tah, quotedbl] }
+  BKSL: { levels: [backslash, bar] }
+
+  LSGT: { levels: [bar, ellipsis] }
+  AB01: { levels: [Arabic_hamzaonyeh, asciitilde] }
+  AB02: { levels: [Arabic_hamza, Arabic_sukun] }
+  AB03: { levels: [Arabic_hamzaonwaw, braceright] }
+  AB04: { levels: [Arabic_ra, braceleft] }
+  AB05: { levels: [UFEFB, UFEF5] }
+  AB06: { levels: [Arabic_alefmaksura, Arabic_maddaonalef] }
+  AB07: { levels: [Arabic_tehmarbuta, apostrophe] }
+  AB08: { levels: [Arabic_waw, comma] }
+  AB09: { levels: [Arabic_zain, period] }
+  AB10: { levels: [Arabic_thah, Arabic_question_mark] }

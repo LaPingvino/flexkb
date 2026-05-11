@@ -1,0 +1,14 @@
+name: Hotfix — Russian w → ж
+description: |
+  Tiny override substitution. Place BEFORE latin-cyrillic-phonetic in a
+  LayoutSpec's substitutions list so this runs first; the main phonetic
+  substitution then skips the already-rewritten 'w' (its key is no longer
+  in scope).
+
+  Use when you'd rather have 'w' produce ж (zhe) than collide with 'v'
+  on в (ve). Same trick generalises: any small "I disagree with one
+  cognate choice" can ship as a hotfix substitution rather than a fork
+  of the big map.
+map:
+  w: Cyrillic_zhe
+  W: Cyrillic_ZHE
