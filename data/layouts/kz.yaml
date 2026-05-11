@@ -1,0 +1,22 @@
+file: kz
+variants:
+  - name: basic
+    description: Kazakh (Cyrillic ЙЦУКЕН base + Kazakh extras)
+    physical: iso
+    transformation: ycuken
+    additions: [kazakh-extras]
+    default: true
+
+  - name: phonetic
+    description: Kazakh (phonetic Cyrillic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras, kazakh-extras]
+
+  - name: phonetic-dvorak
+    description: Kazakh (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras, kazakh-extras]

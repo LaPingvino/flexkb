@@ -1,0 +1,25 @@
+name: Kazakh Cyrillic extras
+description: |
+  Kazakh Cyrillic adds: ә, ғ, қ, ң, ө, ұ, ү, һ, і to the standard Russian
+  Cyrillic set. Letter-following on the underlying Cyrillic cognate
+  letters so the extras track wherever the Russian Cyrillic letter lives.
+scripts: [cyrillic]
+letter_overlays:
+  Cyrillic_a:    { levels: ["", "", U04D9, U04D8] }    # ә Ә
+  Cyrillic_A:    { levels: ["", "", U04D9, U04D8] }
+  Cyrillic_ghe:  { levels: ["", "", U0493, U0492] }    # ғ Ғ
+  Cyrillic_GHE:  { levels: ["", "", U0493, U0492] }
+  Cyrillic_ka:   { levels: ["", "", U049B, U049A] }    # қ Қ
+  Cyrillic_KA:   { levels: ["", "", U049B, U049A] }
+  Cyrillic_en:   { levels: ["", "", U04A3, U04A2] }    # ң Ң
+  Cyrillic_EN:   { levels: ["", "", U04A3, U04A2] }
+  Cyrillic_o:    { levels: ["", "", U04E9, U04E8] }    # ө Ө
+  Cyrillic_O:    { levels: ["", "", U04E9, U04E8] }
+  Cyrillic_u:    { levels: ["", "", U04B1, U04B0] }    # ұ Ұ — straight-bar
+  Cyrillic_U:    { levels: ["", "", U04B1, U04B0] }
+  Cyrillic_i:    { levels: ["", "", U0456, U0406] }    # і І — Ukrainian i, reused
+  Cyrillic_I:    { levels: ["", "", U0456, U0406] }
+  Cyrillic_ha:   { levels: ["", "", U04BB, U04BA] }    # һ Һ
+  Cyrillic_HA:   { levels: ["", "", U04BB, U04BA] }
+includes:
+  - level3(ralt_switch)

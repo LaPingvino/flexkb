@@ -1,0 +1,22 @@
+file: ir
+variants:
+  - name: basic
+    description: Persian (Arabic-101 base + Persian extras)
+    physical: iso
+    transformation: arabic-101
+    additions: [persian-extras]
+    default: true
+
+  - name: phonetic
+    description: Persian (Arabic phonetic, QWERTY base + Persian extras)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-arabic-phonetic]
+    additions: [persian-extras]
+
+  - name: phonetic-dvorak
+    description: Persian (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-arabic-phonetic]
+    additions: [persian-extras]

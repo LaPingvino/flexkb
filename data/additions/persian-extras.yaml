@@ -1,0 +1,15 @@
+name: Persian (Farsi) extras on Arabic base
+description: |
+  Persian extends the Arabic alphabet with پ (peh), چ (tcheh), ژ (jeh),
+  گ (gaf), and uses Arabic_yeh-style ی differently from Arabic_yeh.
+  Letter-following on the Arabic-base letters where Persian wants
+  alternate forms. Pair with the arabic-101 transformation for native
+  Persian typing.
+scripts: [arabic]
+letter_overlays:
+  Arabic_beh:    { levels: ["", "", Arabic_peh, Arabic_peh] }
+  Arabic_jeem:   { levels: ["", "", Arabic_tcheh, Arabic_tcheh] }
+  Arabic_zain:   { levels: ["", "", Arabic_jeh, Arabic_jeh] }
+  Arabic_kaf:    { levels: ["", "", Arabic_gaf, Arabic_gaf] }
+includes:
+  - level3(ralt_switch)

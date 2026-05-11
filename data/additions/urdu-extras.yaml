@@ -1,0 +1,19 @@
+name: Urdu extras on Arabic base
+description: |
+  Urdu extends the Arabic alphabet with several letters: ٹ (tteh), ڈ
+  (ddal), ڑ (rreh), ں (noon-ghunna), ھ (heh doachashmee), پ (peh),
+  چ (tcheh), ژ (jeh), گ (gaf). Letter-following on the underlying
+  Arabic cognate letters.
+scripts: [arabic]
+letter_overlays:
+  Arabic_teh:    { levels: ["", "", U0679, U0679] }
+  Arabic_dal:    { levels: ["", "", U0688, U0688] }
+  Arabic_ra:     { levels: ["", "", U0691, U0691] }
+  Arabic_noon:   { levels: ["", "", U06BA, U06BA] }
+  Arabic_ha:     { levels: ["", "", U06BE, U06BE] }
+  Arabic_beh:    { levels: ["", "", Arabic_peh, Arabic_peh] }
+  Arabic_jeem:   { levels: ["", "", Arabic_tcheh, Arabic_tcheh] }
+  Arabic_zain:   { levels: ["", "", Arabic_jeh, Arabic_jeh] }
+  Arabic_kaf:    { levels: ["", "", Arabic_gaf, Arabic_gaf] }
+includes:
+  - level3(ralt_switch)

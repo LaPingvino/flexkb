@@ -1,0 +1,15 @@
+file: pk
+variants:
+  - name: basic
+    description: Urdu (Arabic-101 base + Urdu extras)
+    physical: iso
+    transformation: arabic-101
+    additions: [urdu-extras]
+    default: true
+
+  - name: phonetic
+    description: Urdu (phonetic, QWERTY base + Urdu extras)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-arabic-phonetic]
+    additions: [urdu-extras]

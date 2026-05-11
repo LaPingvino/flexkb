@@ -1,0 +1,58 @@
+name: Latin → Tifinagh (phonetic / Berber)
+description: |
+  Phonetic Tifinagh substitution for typing Berber/Tamazight. Tifinagh
+  (U2D30-U2D7F) is the indigenous Berber script, used in Morocco and
+  Algeria. Maps Latin letters to their Tifinagh consonant cognates.
+map:
+  a: U2D30   # ⴰ
+  A: U2D30
+  b: U2D31   # ⴱ
+  B: U2D31
+  c: U2D33   # ⴳ (g sound)
+  C: U2D33
+  d: U2D37   # ⴷ
+  D: U2D38   # ⴸ
+  e: U2D3B   # ⴻ
+  E: U2D3B
+  f: U2D3C   # ⴼ
+  F: U2D3C
+  g: U2D33   # ⴳ
+  G: U2D33
+  h: U2D49   # ⵉ (vowel i, used as h sometimes)
+  H: U2D49
+  i: U2D49   # ⵉ
+  I: U2D49
+  j: U2D4A   # ⵊ
+  J: U2D4A
+  k: U2D3D   # ⴽ
+  K: U2D3D
+  l: U2D4D   # ⵍ
+  L: U2D4D
+  m: U2D4E   # ⵎ
+  M: U2D4E
+  n: U2D4F   # ⵏ
+  N: U2D4F
+  o: U2D53   # ⵓ
+  O: U2D53
+  p: U2D31
+  P: U2D31
+  q: U2D51   # ⵑ
+  Q: U2D51
+  r: U2D54   # ⵔ
+  R: U2D55   # ⵕ
+  s: U2D59   # ⵙ
+  S: U2D5A   # ⵚ
+  t: U2D5C   # ⵜ
+  T: U2D5D   # ⵝ
+  u: U2D53   # ⵓ
+  U: U2D53
+  v: U2D31
+  V: U2D31
+  w: U2D61   # ⵡ
+  W: U2D61
+  x: U2D45   # ⵅ
+  X: U2D45
+  y: U2D62   # ⵢ
+  Y: U2D62
+  z: U2D63   # ⵣ
+  Z: U2D63

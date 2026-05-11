@@ -23,3 +23,15 @@ variants:
     physical: iso
     transformation: colemak
     substitutions: [latin-arabic-phonetic]
+
+  - name: tifinagh-phonetic
+    description: Tamazight/Berber (Tifinagh phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-tifinagh-phonetic]
+
+  - name: tifinagh-phonetic-dvorak
+    description: Tamazight/Berber (Tifinagh phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-tifinagh-phonetic]
