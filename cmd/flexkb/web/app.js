@@ -202,6 +202,7 @@ bEditBtn.addEventListener("click", async () => {
   composeSubs = (v.substitutions || []).slice();
   cDefault.checked = !!v.default;
   cPassthrough.checked = !!v.passthrough;
+  cAutofill.checked = !!(v.autofill && v.autofill.length);
   renderChips(cAddChips, composeAdditions, modules.additions, composeAdditions);
   renderChips(cSubChips, composeSubs, modules.substitutions, composeSubs);
   // Switch to Compose tab.
@@ -410,6 +411,7 @@ const cDeleteBtn = document.getElementById("cDelete");
 const cStatus = document.getElementById("cStatus");
 const cDefault = document.getElementById("cDefault");
 const cPassthrough = document.getElementById("cPassthrough");
+const cAutofill = document.getElementById("cAutofill");
 const cMeta = document.getElementById("cMeta");
 const cKb = document.getElementById("cKeyboard");
 const cWarn = document.getElementById("cWarnings");
@@ -596,6 +598,9 @@ cPhysical.addEventListener("change", composeLivePreview);
 cTransformation.addEventListener("change", composeLivePreview);
 cName.addEventListener("input", composeLivePreview);
 cDesc.addEventListener("input", composeLivePreview);
+cAutofill.addEventListener("change", composeLivePreview);
+cDefault.addEventListener("change", composeLivePreview);
+cPassthrough.addEventListener("change", composeLivePreview);
 cPreviewBtn.addEventListener("click", composeLivePreview);
 
 cSaveBtn.addEventListener("click", () => doSave(false));
@@ -710,6 +715,7 @@ function composeSpec() {
     substitutions: composeSubs.slice(),
     default: cDefault.checked,
     passthrough: cPassthrough.checked,
+    autofill: cAutofill.checked ? ["*"] : [],
   };
 }
 

@@ -59,6 +59,11 @@ type Result struct {
 
 // Compose resolves a LayoutSpec against the data root. It loads the named
 // physical, transformation, additions and substitutions, then merges them.
+//
+// If spec.Autofill is set, the data root is also consulted for the
+// pool of filler additions matching the requested categories. Fillers
+// apply with empty-only merge semantics — they never override an
+// existing value, only fill levels still empty after the main stages.
 func Compose(root model.DataRoot, spec model.LayoutSpec) (Result, error) {
 	phys, err := root.Physical(spec.Physical)
 	if err != nil {
@@ -84,24 +89,82 @@ func Compose(root model.DataRoot, spec model.LayoutSpec) (Result, error) {
 		}
 		subs = append(subs, s)
 	}
-	return ComposeFromPartsWithSubs(spec, phys, trans, adds, subs), nil
+	var fillers []model.Addition
+	if len(spec.Autofill) > 0 {
+		all, err := root.ListFillers()
+		if err != nil {
+			return Result{}, fmt.Errorf("variant %q: autofill lookup: %w", spec.Name, err)
+		}
+		fillers = pickFillers(all, spec.Autofill)
+	}
+	return ComposeFromPartsFull(spec, phys, trans, adds, subs, fillers), nil
+}
+
+// pickFillers selects fillers whose Categories overlap with the
+// requested set. A literal "*" in requested means "every filler".
+// Result preserves the requested category order, so a user-controlled
+// "typography first, math second" intent is honoured.
+func pickFillers(all []model.Addition, requested []string) []model.Addition {
+	wantAll := false
+	want := map[string]bool{}
+	for _, c := range requested {
+		if c == "*" {
+			wantAll = true
+		}
+		want[c] = true
+	}
+	if wantAll {
+		return all
+	}
+	// Order fillers by requested-category order so "typography first"
+	// applies before "math" — affects which filler wins when two
+	// fillers both target the same empty level.
+	seen := map[string]bool{}
+	var out []model.Addition
+	for _, c := range requested {
+		for _, a := range all {
+			if seen[a.Slug] {
+				continue
+			}
+			for _, ac := range a.Categories {
+				if ac == c {
+					out = append(out, a)
+					seen[a.Slug] = true
+					break
+				}
+			}
+		}
+	}
+	return out
 }
 
 // ComposeFromParts is the no-substitutions form, kept for the
 // pre-substitution callers and tests. New callers should prefer
-// ComposeFromPartsWithSubs.
+// ComposeFromPartsFull.
 func ComposeFromParts(spec model.LayoutSpec, phys model.Physical, trans model.Transformation, adds []model.Addition) Result {
-	return ComposeFromPartsWithSubs(spec, phys, trans, adds, nil)
+	return ComposeFromPartsFull(spec, phys, trans, adds, nil, nil)
 }
 
-// ComposeFromPartsWithSubs does the actual merge once parts have been
+// ComposeFromPartsWithSubs is the pre-autofill API, kept so existing
+// in-memory callers don't break. New callers should prefer
+// ComposeFromPartsFull which also handles the autofill pool.
+func ComposeFromPartsWithSubs(spec model.LayoutSpec, phys model.Physical, trans model.Transformation, adds []model.Addition, subs []model.Substitution) Result {
+	return ComposeFromPartsFull(spec, phys, trans, adds, subs, nil)
+}
+
+// ComposeFromPartsFull does the actual merge once parts have been
 // resolved. Split out so tests can drive composition with in-memory data.
 //
 // Tracks per-level provenance into r.Sources alongside the composed
 // symbols: every time a stage writes a non-empty value into a level,
 // we record (stage, module) for that (key, level). Empty values
 // pass through unchanged and so does their source record.
-func ComposeFromPartsWithSubs(spec model.LayoutSpec, phys model.Physical, trans model.Transformation, adds []model.Addition, subs []model.Substitution) Result {
+//
+// Stages: transformation seed → positional addition overlays →
+// letter overlays → substitutions → (optionally) autofill from the
+// filler pool. Autofill uses empty-only-merge so it never overrides
+// content from earlier stages.
+func ComposeFromPartsFull(spec model.LayoutSpec, phys model.Physical, trans model.Transformation, adds []model.Addition, subs []model.Substitution, fillers []model.Addition) Result {
 	r := Result{Sources: map[string][]LevelSource{}}
 	out := model.ComposedLayout{
 		Name:        spec.Name,
@@ -260,6 +323,83 @@ func ComposeFromPartsWithSubs(spec model.LayoutSpec, phys model.Physical, trans 
 			}
 			out.Symbols[k] = model.KeySymbols{Levels: newLevels}
 			r.Sources[k] = src
+		}
+	}
+
+	// Stage 4 (optional): autofill from filler pool. Empty-only merge —
+	// never override a level that any earlier stage already populated.
+	if len(fillers) > 0 {
+		// Build the byLetter index again — letter overlays may have
+		// changed level-1 values during stage 2b.
+		byLetter := map[string][]string{}
+		for _, k := range out.Keys {
+			sym, ok := out.Symbols[k]
+			if !ok || len(sym.Levels) == 0 {
+				continue
+			}
+			byLetter[strings.ToLower(sym.Levels[0])] = append(byLetter[strings.ToLower(sym.Levels[0])], k)
+		}
+		applyFillerOverlay := func(k string, overlay []string, fillerSlug string) {
+			cur := out.Symbols[k].Levels
+			n := len(cur)
+			if len(overlay) > n {
+				n = len(overlay)
+			}
+			next := make([]string, n)
+			copy(next, cur)
+			curSrc := r.Sources[k]
+			nextSrc := make([]LevelSource, n)
+			copy(nextSrc, curSrc)
+			for i := 0; i < n; i++ {
+				var ov string
+				if i < len(overlay) {
+					ov = overlay[i]
+				}
+				var existing string
+				if i < len(next) {
+					existing = next[i]
+				}
+				if ov != "" && existing == "" {
+					next[i] = ov
+					nextSrc[i] = LevelSource{Stage: "autofill", Module: fillerSlug}
+				}
+			}
+			// Trim trailing empties for symmetry with mergeLevels.
+			for len(next) > 0 && next[len(next)-1] == "" {
+				next = next[:len(next)-1]
+				if len(nextSrc) > len(next) {
+					nextSrc = nextSrc[:len(next)]
+				}
+			}
+			out.Symbols[k] = model.KeySymbols{Levels: next}
+			r.Sources[k] = nextSrc
+		}
+		for _, f := range fillers {
+			fs := f.Slug
+			if fs == "" {
+				fs = f.Name
+			}
+			for k, ov := range f.Overlays {
+				if !keyAllowed[k] {
+					continue
+				}
+				applyFillerOverlay(k, ov.Levels, fs)
+			}
+			for letter, ov := range f.LetterOverlays {
+				keys := byLetter[strings.ToLower(letter)]
+				if len(keys) == 0 {
+					for _, fb := range ov.Fallback {
+						keys = byLetter[strings.ToLower(fb)]
+						if len(keys) > 0 {
+							break
+						}
+					}
+				}
+				for _, k := range keys {
+					applyFillerOverlay(k, ov.Levels, fs)
+				}
+			}
+			out.Includes = append(out.Includes, f.Includes...)
 		}
 	}
 

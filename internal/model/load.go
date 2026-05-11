@@ -131,6 +131,29 @@ func (r DataRoot) Find(subdir, name string) (string, error) {
 	return "", fmt.Errorf("%s/%s.yaml not found in any data path", subdir, name)
 }
 
+// ListFillers walks every addition across the data paths and returns
+// those tagged Filler: true. Used by compose to pick autofill content
+// without forcing callers to also list every filler. Slug is populated
+// on each result.
+func (r DataRoot) ListFillers() ([]Addition, error) {
+	names, err := r.ListNames("additions")
+	if err != nil {
+		return nil, err
+	}
+	out := make([]Addition, 0, len(names))
+	for n := range names {
+		a, err := r.Addition(n)
+		if err != nil {
+			continue
+		}
+		if !a.Filler {
+			continue
+		}
+		out = append(out, a)
+	}
+	return out, nil
+}
+
 // ListNames enumerates every YAML basename across all data paths in
 // the given subdir. The returned map is basename -> highest-priority
 // source path, matching the layered-lookup behaviour. Used by the GUI

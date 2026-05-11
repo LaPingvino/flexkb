@@ -1,0 +1,34 @@
+name: Typography filler
+description: |
+  Common typographic glyphs (em-dash, en-dash, ellipsis, smart quotes,
+  non-breaking space, ×, ÷, ©, ®, ™, °) slotted into empty AltGr levels
+  on the punctuation keys. Universal — works on any Latin-script base
+  because it only attaches to keys whose level-1 already holds the
+  matching ASCII anchor (.,?;:'"`-=/+ etc.).
+
+  Applied via `autofill: [typography]` on a LayoutSpec. As a filler,
+  it never overrides existing content — if the base already puts e.g.
+  EuroSign at AltGr+5, this filler skips that level.
+filler: true
+categories: [typography]
+scripts: [latin, any]
+letter_overlays:
+  # Smart quotes anchored on the ASCII quote key. (The same key carries
+  # both ' and ", at levels 1 and 2 respectively — letter-overlay
+  # matches level-1 only, so we put both pairs on the apostrophe anchor.)
+  apostrophe: { levels: ["", "", U2018, U2019] }   # ‘ ’ on AltGr / AltGr+Shift
+  # Dashes / ellipsis on the minus / period keys.
+  minus:      { levels: ["", "", U2013, U2014] }   # – —
+  period:     { levels: ["", "", U2026, ""] }       # …
+  comma:      { levels: ["", "", U2039, U203A] }   # ‹ ›
+  # Math operators on x / slash.
+  x:          { levels: ["", "", U00D7, ""] }       # ×
+  slash:      { levels: ["", "", U00F7, ""] }       # ÷
+  # Symbols on letter anchors that commonly survive intl/national additions.
+  c:          { levels: ["", "", U00A9, ""] }       # ©
+  r:          { levels: ["", "", U00AE, ""] }       # ®
+  t:          { levels: ["", "", U2122, ""] }       # ™
+  # Degree sign anchored on the digit "0" (level-1 token "0").
+  "0":        { levels: ["", "", U00B0, ""] }       # ° on AltGr+0
+  # NBSP on Shift+space — anchored on the space key whose level-1 is "space".
+  space:      { levels: ["", U00A0, "", ""] }       # NBSP on Shift+space

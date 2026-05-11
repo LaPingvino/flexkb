@@ -60,6 +60,7 @@
         <span class="src-position">positional overlay</span>
         <span class="src-letter">letter overlay</span>
         <span class="src-substitution">substitution</span>
+        <span class="src-autofill">autofill</span>
       </div>
       <div class="keyboard" id="keyboard"></div>
       <pre class="xkb-output hidden" id="bXkb"></pre>
@@ -99,6 +100,10 @@
             <input type="checkbox" id="cPassthrough">
             <span>passthrough</span>
           </label>
+          <label class="inline-check" title="After composition, fill any still-empty levels from the pool of filler additions (categories like typography, math, cultural-extras). Empty-only: never overrides existing content.">
+            <input type="checkbox" id="cAutofill">
+            <span>autofill empty positions</span>
+          </label>
         </div>
         <div class="row">
           <label class="full">
@@ -137,6 +142,7 @@
         <span class="src-position">positional overlay</span>
         <span class="src-letter">letter overlay</span>
         <span class="src-substitution">substitution</span>
+        <span class="src-autofill">autofill</span>
       </div>
       <div class="keyboard" id="cKeyboard"></div>
       <pre class="xkb-output hidden" id="cXkb"></pre>

@@ -189,6 +189,21 @@ type Addition struct {
 	// Includes are raw xkb `include "..."` lines appended to the symbols
 	// block — e.g. `level3(ralt_switch)` to enable AltGr.
 	Includes []string `yaml:"includes,omitempty"`
+	// Categories are free-form tags used by the autofill mechanism to
+	// match an addition against a layout's `autofill:` request. Common
+	// values: "typography", "math", "arabic-cultural", "latin-supp",
+	// "currency". Empty means the addition is opaque to autofill
+	// matching — only an explicit name match in spec.Additions pulls
+	// it in.
+	Categories []string `yaml:"categories,omitempty,flow"`
+	// Filler marks this addition as autofill-only: when applied via
+	// autofill it skips levels that already have a non-empty value,
+	// rather than overriding them. This lets fillers slot into gaps
+	// without clobbering the user's main layout. A Filler addition
+	// can still be picked explicitly via spec.Additions — in that
+	// case it behaves like a regular addition (the Filler flag only
+	// changes autofill-pass behaviour).
+	Filler bool `yaml:"filler,omitempty"`
 	// Slug is the file basename (e.g. "intl"). Set at load time; see
 	// Physical.Slug.
 	Slug string `yaml:"-"`
@@ -213,6 +228,13 @@ type LayoutSpec struct {
 	// listed order, so you can stack e.g. [latin-cyrillic-phonetic,
 	// some-cyrillic-respelling].
 	Substitutions []string `yaml:"substitutions,omitempty"`
+	// Autofill enables the "fill empty levels from a pool of filler
+	// additions" pass that runs after all other stages. Values are
+	// category tags ("typography", "math", "arabic-cultural", ...) —
+	// every Addition tagged Filler with one of these categories is
+	// applied with empty-only-merge semantics, in tag order. A literal
+	// "*" enables all categories. Empty list disables autofill.
+	Autofill []string `yaml:"autofill,omitempty,flow"`
 	// Passthrough marks this variant as "preserve upstream verbatim" —
 	// at build time the flexkb build step reads the corresponding
 	// xkb_symbols block from the source xkb tree and embeds its raw text
