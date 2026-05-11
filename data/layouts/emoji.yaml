@@ -1,0 +1,57 @@
+file: emoji
+variants:
+  # Faces / smileys — full-keyboard transformation. Switch to this
+  # layer (compositor group switch / xkbcomp / setxkbmap) to type
+  # emoji, switch back to your normal layout for regular text.
+  - name: faces
+    description: Emoji (Smileys & emotion) — 4 emoji per key
+    physical: iso
+    transformation: emoji-faces
+    default: true
+
+  - name: symbols
+    description: Emoji (Hearts, stars, weather, music, zodiac)
+    physical: iso
+    transformation: emoji-symbols
+
+  - name: nature
+    description: Emoji (Animals, plants, weather, landscapes)
+    physical: iso
+    transformation: emoji-nature
+
+  # Flags — stacked on a normal Latin layout, since regional-indicator
+  # mnemonics depend on letter position. Pick your base transformation
+  # via the variants below — qwerty / dvorak / colemak.
+  - name: flags-qwerty
+    description: Country flags (QWERTY base — type two letters for a flag)
+    physical: iso
+    transformation: qwerty
+    additions: [emoji-flags]
+
+  - name: flags-dvorak
+    description: Country flags (Dvorak base)
+    physical: iso
+    transformation: dvorak
+    additions: [emoji-flags]
+
+  - name: flags-colemak
+    description: Country flags (Colemak base)
+    physical: iso
+    transformation: colemak
+    additions: [emoji-flags]
+
+  # ANSI variants for users on a 104-key shell.
+  - name: faces-ansi
+    description: Emoji (Faces, ANSI shell)
+    physical: ansi
+    transformation: emoji-faces
+
+  - name: symbols-ansi
+    description: Emoji (Symbols, ANSI shell)
+    physical: ansi
+    transformation: emoji-symbols
+
+  - name: nature-ansi
+    description: Emoji (Nature, ANSI shell)
+    physical: ansi
+    transformation: emoji-nature

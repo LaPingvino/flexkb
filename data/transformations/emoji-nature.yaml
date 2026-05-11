@@ -1,0 +1,65 @@
+name: Emoji (Nature)
+description: |
+  Animals, plants, weather, landscapes. 4 levels per key — roughly
+  organised by taxonomy: top row = mammals + pets, middle = birds /
+  reptiles / sea life, bottom = plants + weather + landscape.
+
+  Same switch-to-emoji-mode UX as the other emoji variants.
+script: emoji
+keys:
+  # Pets and small mammals.
+  AE01: { levels: [U1F436, U1F415, U1F429, U1F43A] }   # 🐶 🐕 🐩 🐺
+  AE02: { levels: [U1F431, U1F408, U1F981, U1F42F] }   # 🐱 🐈 🦁 🐯
+  AE03: { levels: [U1F42D, U1F401, U1F400, U1F439] }   # 🐭 🐁 🐀 🐹
+  AE04: { levels: [U1F430, U1F407, U1F98A, U1F99D] }   # 🐰 🐇 🦊 🦝
+  AE05: { levels: [U1F43B, U1F43C, U1F428, U1F9A5] }   # 🐻 🐼 🐨 🦥
+  AE06: { levels: [U1F42E, U1F404, U1F403, U1F402] }   # 🐮 🐄 🐃 🐂
+  AE07: { levels: [U1F437, U1F416, U1F417, U1F43D] }   # 🐷 🐖 🐗 🐽
+  AE08: { levels: [U1F411, U1F40F, U1F40E, U1F993] }   # 🐑 🐏 🐎 🦓
+  AE09: { levels: [U1F410, U1F98C, U1F999, U1F992] }   # 🐐 🦌 🦙 🦒
+  AE10: { levels: [U1F418, U1F98F, U1F99B, U1F405] }   # 🐘 🦏 🦛 🐅
+  AE11: { levels: [U1F412, U1F435, U1F98D, U1F9A7] }   # 🐒 🐵 🦍 🦧
+  AE12: { levels: [U1F415, U1F42A, U1F42B, U1F999] }   # 🐕 🐪 🐫 🦙
+
+  # Birds.
+  AD01: { levels: [U1F414, U1F413, U1F423, U1F424] }   # 🐔 🐓 🐣 🐤
+  AD02: { levels: [U1F425, U1F426, U1F427, U1F985] }   # 🐥 🐦 🐧 🦅
+  AD03: { levels: [U1F986, U1F989, U1F9A2, U1F99A] }   # 🦆 🦉 🦢 🦚
+  AD04: { levels: [U1F99C, U1F9A4, U1F54A, U1F411] }   # 🦜 🦤 🕊 🐑
+  # Reptiles / amphibians.
+  AD05: { levels: [U1F438, U1F40A, U1F422, U1F98E] }   # 🐸 🐊 🐢 🦎
+  AD06: { levels: [U1F40D, U1F432, U1F409, U1F995] }   # 🐍 🐲 🐉 🦕
+  AD07: { levels: [U1F996, U1F99F, U1F577, U1F578] }   # 🦖 🦟 🕷 🕸
+  # Sea life.
+  AD08: { levels: [U1F420, U1F421, U1F988, U1F40B] }   # 🐠 🐡 🦈 🐋
+  AD09: { levels: [U1F42C, U1F419, U1F41A, U1F41F] }   # 🐬 🐙 🐚 🐟
+  AD10: { levels: [U1F990, U1F99E, U1F40C, U1F40D] }   # 🦐 🦞 🐌 🐍
+  # Insects.
+  AD11: { levels: [U1F41D, U1F41E, U1F41B, U1F41C] }   # 🐝 🐞 🐛 🐜
+  AD12: { levels: [U1F98B, U1F997, U1F99F, U1F578] }   # 🦋 🦗 🦟 🕸
+
+  # Plants.
+  AC01: { levels: [U1F490, U1F337, U1F339, U1F33A] }   # 💐 🌷 🌹 🌺
+  AC02: { levels: [U1F33B, U1F33C, U1F344, U1F33E] }   # 🌻 🌼 🍄 🌾
+  AC03: { levels: [U1F331, U1F33F, U2618, U1F340] }    # 🌱 🌿 ☘ 🍀
+  AC04: { levels: [U1F341, U1F342, U1F343, U1F33C] }   # 🍁 🍂 🍃 🌼
+  AC05: { levels: [U1F384, U1F332, U1F333, U1F334] }   # 🎄 🌲 🌳 🌴
+  AC06: { levels: [U1F335, U1F33A, U1F338, U1F300] }   # 🌵 🌺 🌸 🌀
+  # Fruits.
+  AC07: { levels: [U1F347, U1F348, U1F349, U1F34A] }   # 🍇 🍈 🍉 🍊
+  AC08: { levels: [U1F34B, U1F34C, U1F34D, U1F34E] }   # 🍋 🍌 🍍 🍎
+  AC09: { levels: [U1F34F, U1F350, U1F351, U1F352] }   # 🍏 🍐 🍑 🍒
+  AC10: { levels: [U1F353, U1F95D, U1F345, U1F965] }   # 🍓 🥝 🍅 🥥
+  AC11: { levels: [U1F951, U1F346, U1F955, U1F966] }   # 🥑 🍆 🥕 🥦
+
+  # Weather + landscapes.
+  AB01: { levels: [U2600, U1F31E, U1F31D, U1F31C] }    # ☀ 🌞 🌝 🌜
+  AB02: { levels: [U2601, U26C5, U26C8, U26A1] }       # ☁ ⛅ ⛈ ⚡
+  AB03: { levels: [U1F327, U1F328, U1F329, U1F32A] }   # 🌧 🌨 🌩 🌪
+  AB04: { levels: [U2603, U26C4, U2744, U1F32C] }      # ☃ ⛄ ❄ 🌬
+  AB05: { levels: [U1F308, U1F302, U2614, U1F30B] }    # 🌈 🌂 ☔ 🌋
+  AB06: { levels: [U1F30D, U1F30E, U1F30F, U1F310] }   # 🌍 🌎 🌏 🌐
+  AB07: { levels: [U1F3D6, U1F3DD, U1F3DC, U1F3D5] }   # 🏖 🏝 🏜 🏕
+  AB08: { levels: [U1F3D4, U26F0, U1F30B, U1F3DE] }    # 🏔 ⛰ 🌋 🏞
+  AB09: { levels: [U1F3DF, U1F3DB, U1F3DA, U1F306] }   # 🏟 🏛 🏚 🌆
+  AB10: { levels: [U1F305, U1F307, U1F303, U1F304] }   # 🌅 🌇 🌃 🌄

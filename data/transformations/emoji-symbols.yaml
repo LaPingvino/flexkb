@@ -1,0 +1,66 @@
+name: Emoji (Symbols)
+description: |
+  Symbols, hearts, sparkles, marks, signs, religious symbols, currency
+  symbols (the picture ones), and miscellaneous useful pictographs.
+  4 levels per key.
+
+  Same "switch-to-emoji-mode" UX as emoji(faces). Pair with a
+  compositor group-switch hotkey for quick layer toggling.
+script: emoji
+keys:
+  # Top row — hearts spectrum.
+  AE01: { levels: [U2764, U1F49E, U1F495, U1F493] }   # ❤ 💞 💕 💓
+  AE02: { levels: [U1F497, U1F496, U1F498, U1F49D] }   # 💗 💖 💘 💝
+  AE03: { levels: [U1F9E1, U1F49B, U1F49A, U1F499] }   # 🧡 💛 💚 💙
+  AE04: { levels: [U1F49C, U1F5A4, U1F90D, U1F90E] }   # 💜 🖤 🤍 🤎
+  AE05: { levels: [U1F494, U2763, U2665, U1F48B] }    # 💔 ❣ ♥ 💋
+  # Stars / sparkles.
+  AE06: { levels: [U2B50, U1F31F, U2728, U1F4AB] }    # ⭐ 🌟 ✨ 💫
+  AE07: { levels: [U2734, U2735, U1F38C, U1F38A] }    # ✴ ✵ 🎌 🎊
+  AE08: { levels: [U1F389, U1F386, U1F387, U1F38E] }   # 🎉 🎆 🎇 🎎
+  AE09: { levels: [U1F381, U1F388, U1F380, U1F384] }   # 🎁 🎈 🎀 🎄
+  AE10: { levels: [U2705, U274C, U2754, U2753] }      # ✅ ❌ ❔ ❓
+  AE11: { levels: [U2757, U2755, U2622, U2623] }      # ❗ ❕ ☢ ☣
+  AE12: { levels: [U1F4AF, U1F195, U1F198, U1F197] }   # 💯 🆕 🆘 🆗
+
+  # Astronomy / weather signs.
+  AD01: { levels: [U2600, U1F31E, U2601, U26C5] }     # ☀ 🌞 ☁ ⛅
+  AD02: { levels: [U2602, U2603, U26C4, U2744] }      # ☂ ☃ ⛄ ❄
+  AD03: { levels: [U26C8, U26A1, U1F329, U1F32A] }    # ⛈ ⚡ 🌩 🌪
+  AD04: { levels: [U1F32B, U1F32C, U1F324, U1F325] }   # 🌫 🌬 🌤 🌥
+  AD05: { levels: [U1F326, U1F327, U1F328, U1F309] }   # 🌦 🌧 🌨 🌉
+  AD06: { levels: [U1F308, U1F302, U2614, U1F319] }    # 🌈 🌂 ☔ 🌙
+  AD07: { levels: [U1F315, U1F311, U1F312, U1F313] }   # 🌕 🌑 🌒 🌓
+  AD08: { levels: [U1F314, U1F316, U1F317, U1F318] }   # 🌔 🌖 🌗 🌘
+  # Religious / philosophical.
+  AD09: { levels: [U271D, U262A, U262F, U2638] }      # ✝ ☪ ☯ ☸
+  AD10: { levels: [U2721, U271E, U2626, U262E] }      # ✡ ✞ ☦ ☮
+  AD11: { levels: [U262B, U2627, U2628, U26E9] }      # ☫ ☧ ☨ ⛩
+  AD12: { levels: [U1F549, U1F54B, U1F54C, U1F54D] }   # 🕉 🕋 🕌 🕍
+
+  # Zodiac signs (12 of them).
+  AC01: { levels: [U2648, U2649, U264A, U264B] }      # ♈ ♉ ♊ ♋
+  AC02: { levels: [U264C, U264D, U264E, U264F] }      # ♌ ♍ ♎ ♏
+  AC03: { levels: [U2650, U2651, U2652, U2653] }      # ♐ ♑ ♒ ♓
+  # Game / play.
+  AC04: { levels: [U2660, U2663, U2665, U2666] }      # ♠ ♣ ♥ ♦
+  AC05: { levels: [U2669, U266A, U266B, U266C] }      # ♩ ♪ ♫ ♬
+  AC06: { levels: [U1F3B5, U1F3B6, U1F3B7, U1F3BA] }   # 🎵 🎶 🎷 🎺
+  AC07: { levels: [U1F3B8, U1F3B9, U1F941, U1F3BC] }   # 🎸 🎹 🥁 🎼
+  # Tech / arrows.
+  AC08: { levels: [U2190, U2192, U2191, U2193] }      # ← → ↑ ↓
+  AC09: { levels: [U21A9, U21AA, U2B05, U27A1] }      # ↩ ↪ ⬅ ➡
+  AC10: { levels: [U2934, U2935, U21D1, U21D3] }      # ⤴ ⤵ ⇑ ⇓
+  AC11: { levels: [U23ED, U23EE, U23EF, U23F8] }      # ⏭ ⏮ ⏯ ⏸
+
+  # Currency / commerce / objects.
+  AB01: { levels: [U1F4B0, U1F4B5, U1F4B6, U1F4B7] }   # 💰 💵 💶 💷
+  AB02: { levels: [U1F4B8, U1F4B3, U1F4B4, U1F4B9] }   # 💸 💳 💴 💹
+  AB03: { levels: [U1F4CA, U1F4C8, U1F4C9, U1F4CB] }   # 📊 📈 📉 📋
+  AB04: { levels: [U1F511, U1F512, U1F513, U1F510] }   # 🔑 🔒 🔓 🔐
+  AB05: { levels: [U1F4A1, U1F526, U1F56F, U1F4A3] }   # 💡 🔦 🕯 💣
+  AB06: { levels: [U1F4A5, U1F525, U1F4A8, U1F4A6] }   # 💥 🔥 💨 💦
+  AB07: { levels: [U1F302, U1F576, U1F455, U1F45F] }   # 🌂 🕶 👕 👟
+  AB08: { levels: [U2615, U1F375, U1F37A, U1F377] }    # ☕ 🍵 🍺 🍷
+  AB09: { levels: [U1F344, U1F347, U1F352, U1F353] }   # 🍄 🍇 🍒 🍓
+  AB10: { levels: [U1F495, U1F496, U1F497, U1F49E] }   # 💕 💖 💗 💞

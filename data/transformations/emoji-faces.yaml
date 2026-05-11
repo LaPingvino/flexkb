@@ -1,0 +1,65 @@
+name: Emoji (Faces)
+description: |
+  Each key carries 4 smileys/emotion emoji across all levels — base,
+  Shift, AltGr, AltGr+Shift — since emoji have no case distinction.
+  ~190 emoji on a single layout. Curated for emotion progression:
+  top row digits = happy spectrum, alphabet rows = neutral / playful /
+  sad / surprised, bottom row = irritated / mischievous / monsters.
+
+  Intended use: switch to this as a temporary input layer via a
+  compositor group-switch hotkey, type the emoji, switch back. Or set
+  permanently and use AltGr / Shift modifiers to navigate the grid.
+script: emoji
+keys:
+  # Top row — happy progression.
+  AE01: { levels: [U1F600, U1F606, U1F923, U1F602] }   # 😀 😆 🤣 😂
+  AE02: { levels: [U1F603, U1F604, U1F605, U1F642] }   # 😃 😄 😅 🙂
+  AE03: { levels: [U1F601, U1F60A, U1F643, U1F60C] }   # 😁 😊 🙃 😌
+  AE04: { levels: [U1F60D, U1F970, U1F618, U1F60E] }   # 😍 🥰 😘 😎
+  AE05: { levels: [U1F929, U1F973, U1F60F, U1F920] }   # 🤩 🥳 😏 🤠
+  AE06: { levels: [U1F609, U1F61C, U1F61B, U1F61D] }   # 😉 😜 😛 😝
+  AE07: { levels: [U1F92A, U1F913, U1F9D0, U1F914] }   # 🤪 🤓 🧐 🤔
+  AE08: { levels: [U1F910, U1F92B, U1F92D, U1F907] }   # 🤐 🤫 🤭 🤇
+  AE09: { levels: [U1F928, U1F644, U1F612, U1F614] }   # 🤨 🙄 😒 😔
+  AE10: { levels: [U1F61E, U1F61F, U1F622, U1F625] }   # 😞 😟 😢 😥
+  AE11: { levels: [U1F62D, U1F624, U1F620, U1F621] }   # 😭 😤 😠 😡
+  AE12: { levels: [U1F92C, U1F608, U1F47F, U1F480] }   # 🤬 😈 👿 💀
+
+  # Top alpha row — neutral / contemplative / sleepy.
+  AD01: { levels: [U1F610, U1F611, U1F636, U1F60B] }   # 😐 😑 😶 😋
+  AD02: { levels: [U1F62E, U1F62F, U1F632, U1F633] }   # 😮 😯 😲 😳
+  AD03: { levels: [U1F628, U1F630, U1F631, U1F635] }   # 😨 😰 😱 😵
+  AD04: { levels: [U1F924, U1F62A, U1F634, U1F971] }   # 🤤 😪 😴 🥱
+  AD05: { levels: [U1F60C, U1F912, U1F915, U1F922] }   # 😌 🤒 🤕 🤢
+  AD06: { levels: [U1F92E, U1F975, U1F976, U1F927] }   # 🤮 🥵 🥶 🤧
+  AD07: { levels: [U1F923, U1F606, U1F602, U1F605] }   # 🤣 😆 😂 😅
+  AD08: { levels: [U1F44A, U1F44D, U1F44E, U1F44C] }   # 👊 👍 👎 👌
+  AD09: { levels: [U1F44F, U270B, U1F91D, U1F91F] }    # 👏 ✋ 🤝 🤟
+  AD10: { levels: [U1F590, U1F44B, U270C, U1F91E] }    # 🖐 👋 ✌ 🤞
+  AD11: { levels: [U1F4AA, U1F64C, U1F64F, U1F932] }   # 💪 🙌 🙏 🤲
+  AD12: { levels: [U1F926, U1F937, U1F64B, U1F481] }   # 🤦 🤷 🙋 💁
+
+  # Home row — characters / animals as transition.
+  AC01: { levels: [U1F476, U1F9D2, U1F466, U1F467] }   # 👶 🧒 👦 👧
+  AC02: { levels: [U1F468, U1F469, U1F9D1, U1F474] }   # 👨 👩 🧑 👴
+  AC03: { levels: [U1F475, U1F46E, U1F477, U1F482] }   # 👵 👮 👷 💂
+  AC04: { levels: [U1F478, U1F934, U1F470, U1F935] }   # 👸 🤴 👰 🤵
+  AC05: { levels: [U1F47C, U1F385, U1F936, U1F9DA] }   # 👼 🎅 🤶 🧚
+  AC06: { levels: [U1F9DC, U1F9DD, U1F9DE, U1F9DF] }   # 🧜 🧝 🧞 🧟
+  AC07: { levels: [U1F436, U1F431, U1F42D, U1F439] }   # 🐶 🐱 🐭 🐹
+  AC08: { levels: [U1F430, U1F98A, U1F43B, U1F43C] }   # 🐰 🦊 🐻 🐼
+  AC09: { levels: [U1F428, U1F42F, U1F981, U1F42E] }   # 🐨 🐯 🦁 🐮
+  AC10: { levels: [U1F437, U1F438, U1F435, U1F648] }   # 🐷 🐸 🐵 🙈
+  AC11: { levels: [U1F649, U1F64A, U1F412, U1F981] }   # 🙉 🙊 🐒 🦁
+
+  # Bottom row — hearts and symbols.
+  AB01: { levels: [U2764, U1F9E1, U1F49B, U1F49A] }    # ❤ 🧡 💛 💚
+  AB02: { levels: [U1F499, U1F49C, U1F5A4, U1F90D] }   # 💙 💜 🖤 🤍
+  AB03: { levels: [U1F90E, U1F495, U1F49E, U1F493] }   # 🤎 💕 💞 💓
+  AB04: { levels: [U1F497, U1F496, U1F498, U1F49D] }   # 💗 💖 💘 💝
+  AB05: { levels: [U1F494, U2763, U1F48B, U1F48F] }    # 💔 ❣ 💋 💏
+  AB06: { levels: [U2728, U1F31F, U2B50, U1F4AB] }     # ✨ 🌟 ⭐ 💫
+  AB07: { levels: [U1F389, U1F38A, U1F386, U1F387] }   # 🎉 🎊 🎆 🎇
+  AB08: { levels: [U1F525, U1F4A5, U1F4A6, U1F4A7] }   # 🔥 💥 💦 💧
+  AB09: { levels: [U1F44C, U1F44D, U1F44E, U1F44F] }   # 👌 👍 👎 👏
+  AB10: { levels: [U1F4AC, U1F4AD, U1F441, U1F5E8] }   # 💬 💭 👁 🗨

@@ -1,0 +1,78 @@
+name: Emoji Flags
+description: |
+  Country flags via regional-indicator letter pairs anchored on their
+  matching Latin letters — works on top of any base transformation
+  (qwerty, dvorak, colemak, workman, …) because the overlays follow
+  the letter, not the key position.
+
+  Per-letter levels:
+    L1 = regional indicator (🇦 .. 🇿) — primary use
+    L2 = the underlying ASCII letter — Shift falls back to typing
+    L3 = regional indicator again — AltGr also works for users who
+         have AltGr-as-primary input habits
+    L4 = ASCII letter again
+
+  Type two letters in sequence to form a flag — U+S → 🇺🇸, J+P →
+  🇯🇵, G+B → 🇬🇧. Fonts that don't support flag sequences show the
+  pair of regional indicators side-by-side, still meaningful.
+
+  Positional overlays on the digit row carry single-codepoint flag
+  pictographs that don't have a letter mnemonic — checkered, white,
+  black, triangular, crossed, golf — plus the component glyphs used
+  to build multi-codepoint flag sequences (🏳 for the base, 🌈 for
+  rainbow flag, ⚧ for trans flag, ☠ for pirate flag, 🇪+🇺 for EU,
+  …). Compose them via the user's input method by typing the
+  components in sequence; xkb keysyms are single-codepoint, so flexkb
+  can't ship the ZWJ sequences as one keypress.
+
+  Stacking: `transformation: dvorak, additions: [emoji-flags]` gives
+  Dvorak-position regional indicators (so 🇦 lives at Dvorak's A key,
+  not Dvorak's "row C key 1" which is where QWERTY-A would be).
+scripts: [any]
+
+# Digit row + adjacent — single-codepoint flag pictographs and ZWJ
+# components. Positional, identical regardless of base.
+overlays:
+  AE01: { levels: [U1F3C1, U1F3C1, U1F3C1, U1F3C1] }   # 🏁 checkered
+  AE02: { levels: [U1F38C, U1F38C, U1F38C, U1F38C] }   # 🎌 crossed flags
+  AE03: { levels: [U1F3F3, U1F3F4, U1F3F3, U1F3F4] }   # 🏳 white / 🏴 black
+  AE04: { levels: [U1F6A9, U1F6A9, U1F6A9, U1F6A9] }   # 🚩 triangular
+  AE05: { levels: [U26F3, U26F3, U26F3, U26F3] }       # ⛳ golf flag
+  AE06: { levels: [U1F308, U1F308, U1F308, U1F308] }   # 🌈 rainbow — combine with 🏳 + VS16 + ZWJ for 🏳️‍🌈
+  AE07: { levels: [U26A7, U26A7, U26A7, U26A7] }       # ⚧ transgender — combine with 🏳 + VS16 + ZWJ for 🏳️‍⚧️
+  AE08: { levels: [U2620, U2620, U2620, U2620] }       # ☠ skull & crossbones — combine with 🏴 + VS16 + ZWJ for 🏴‍☠️
+  AE09: { levels: [U2693, U2693, U2693, U2693] }       # ⚓
+  AE10: { levels: [U2694, U2694, U2694, U2694] }       # ⚔
+  AE11: { levels: [U2696, U2696, U2696, U2696] }       # ⚖
+  AE12: { levels: [U1F451, U1F451, U1F451, U1F451] }   # 👑
+
+# Letter rows — A..Z → regional indicators wherever each letter
+# lives. Lowercase keys match level-1 of the transformation; the
+# overlay sets all 4 levels (L1/L3 = flag, L2/L4 = the ASCII letter).
+letter_overlays:
+  a: { levels: [U1F1E6, A, U1F1E6, A] }
+  b: { levels: [U1F1E7, B, U1F1E7, B] }
+  c: { levels: [U1F1E8, C, U1F1E8, C] }
+  d: { levels: [U1F1E9, D, U1F1E9, D] }
+  e: { levels: [U1F1EA, E, U1F1EA, E] }
+  f: { levels: [U1F1EB, F, U1F1EB, F] }
+  g: { levels: [U1F1EC, G, U1F1EC, G] }
+  h: { levels: [U1F1ED, H, U1F1ED, H] }
+  i: { levels: [U1F1EE, I, U1F1EE, I] }
+  j: { levels: [U1F1EF, J, U1F1EF, J] }
+  k: { levels: [U1F1F0, K, U1F1F0, K] }
+  l: { levels: [U1F1F1, L, U1F1F1, L] }
+  m: { levels: [U1F1F2, M, U1F1F2, M] }
+  n: { levels: [U1F1F3, N, U1F1F3, N] }
+  o: { levels: [U1F1F4, O, U1F1F4, O] }
+  p: { levels: [U1F1F5, P, U1F1F5, P] }
+  q: { levels: [U1F1F6, Q, U1F1F6, Q] }
+  r: { levels: [U1F1F7, R, U1F1F7, R] }
+  s: { levels: [U1F1F8, S, U1F1F8, S] }
+  t: { levels: [U1F1F9, T, U1F1F9, T] }
+  u: { levels: [U1F1FA, U, U1F1FA, U] }
+  v: { levels: [U1F1FB, V, U1F1FB, V] }
+  w: { levels: [U1F1FC, W, U1F1FC, W] }
+  x: { levels: [U1F1FD, X, U1F1FD, X] }
+  y: { levels: [U1F1FE, Y, U1F1FE, Y] }
+  z: { levels: [U1F1FF, Z, U1F1FF, Z] }
