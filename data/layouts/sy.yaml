@@ -1,0 +1,20 @@
+file: sy
+variants:
+  - name: phonetic
+    description: Syriac / Aramaic (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-syriac-phonetic]
+    default: true
+
+  - name: phonetic-dvorak
+    description: Syriac (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-syriac-phonetic]
+
+  - name: phonetic-colemak
+    description: Syriac (phonetic, Colemak base)
+    physical: iso
+    transformation: colemak
+    substitutions: [latin-syriac-phonetic]

@@ -22,3 +22,13 @@ variants:
     transformation: colemak
     substitutions: [latin-greek-phonetic]
     additions: [greek-phonetic-extras]
+
+  # Coptic via chained substitution: latin → greek → coptic. Demonstrates
+  # the substitution-chain mechanism for cross-script pivots. The 6
+  # Demotic-derived Coptic letters (ϣ ϥ ϧ ϩ ϫ ϭ ϯ) aren't included —
+  # they'd need an additional substitution.
+  - name: coptic
+    description: Coptic (chained — Latin phonetic → Greek → Coptic)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-greek-phonetic, greek-to-coptic]

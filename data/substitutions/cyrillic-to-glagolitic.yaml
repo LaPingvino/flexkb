@@ -1,0 +1,70 @@
+name: Cyrillic → Glagolitic (chained for Old Slavic)
+description: |
+  Glagolitic is the older Slavic alphabet (devised by Cyril ~860 CE),
+  later displaced by Cyrillic. Same phonemes, different glyphs.
+  Chain AFTER latin-cyrillic-phonetic to type Glagolitic via Latin
+  phonetic input:
+    substitutions: [latin-cyrillic-phonetic, cyrillic-to-glagolitic]
+
+  Glagolitic block: U2C00-U2C5F.
+map:
+  Cyrillic_a:       U2C00   # Ⰰ az
+  Cyrillic_A:       U2C00
+  Cyrillic_be:      U2C01   # Ⰱ buky
+  Cyrillic_BE:      U2C01
+  Cyrillic_ve:      U2C02   # Ⰲ vede
+  Cyrillic_VE:      U2C02
+  Cyrillic_ghe:     U2C03   # Ⰳ glagoli
+  Cyrillic_GHE:     U2C03
+  Cyrillic_de:      U2C04   # Ⰴ dobro
+  Cyrillic_DE:      U2C04
+  Cyrillic_ie:      U2C05   # Ⰵ jest
+  Cyrillic_IE:      U2C05
+  Cyrillic_zhe:     U2C06   # Ⰶ
+  Cyrillic_ZHE:     U2C06
+  Cyrillic_ze:      U2C08   # Ⰸ
+  Cyrillic_ZE:      U2C08
+  Cyrillic_i:       U2C0A   # Ⰺ
+  Cyrillic_I:       U2C0A
+  Cyrillic_shorti:  U2C09   # Ⰹ
+  Cyrillic_SHORTI:  U2C09
+  Cyrillic_ka:      U2C0C   # Ⰼ
+  Cyrillic_KA:      U2C0C
+  Cyrillic_el:      U2C0D   # Ⰽ
+  Cyrillic_EL:      U2C0D
+  Cyrillic_em:      U2C0E   # Ⰾ
+  Cyrillic_EM:      U2C0E
+  Cyrillic_en:      U2C0F   # Ⰿ
+  Cyrillic_EN:      U2C0F
+  Cyrillic_o:       U2C10   # Ⱀ
+  Cyrillic_O:       U2C10
+  Cyrillic_pe:      U2C11   # Ⱁ
+  Cyrillic_PE:      U2C11
+  Cyrillic_er:      U2C12   # Ⱂ
+  Cyrillic_ER:      U2C12
+  Cyrillic_es:      U2C13   # Ⱃ
+  Cyrillic_ES:      U2C13
+  Cyrillic_te:      U2C14   # Ⱄ
+  Cyrillic_TE:      U2C14
+  Cyrillic_u:       U2C15   # Ⱅ
+  Cyrillic_U:       U2C15
+  Cyrillic_ef:      U2C16   # Ⱆ
+  Cyrillic_EF:      U2C16
+  Cyrillic_ha:      U2C17   # Ⱇ
+  Cyrillic_HA:      U2C17
+  Cyrillic_tse:     U2C19   # Ⱉ
+  Cyrillic_TSE:     U2C19
+  Cyrillic_che:     U2C1A   # Ⱊ
+  Cyrillic_CHE:     U2C1A
+  Cyrillic_sha:     U2C1B   # Ⱋ
+  Cyrillic_SHA:     U2C1B
+  Cyrillic_shcha:   U2C1C   # Ⱌ
+  Cyrillic_SHCHA:   U2C1C
+  Cyrillic_yeru:    U2C1D
+  Cyrillic_YERU:    U2C1D
+  Cyrillic_softsign: U2C1F
+  Cyrillic_SOFTSIGN: U2C1F
+  Cyrillic_yu:      U2C24
+  Cyrillic_YU:      U2C24
+  Cyrillic_ya:      U2C26
+  Cyrillic_YA:      U2C26

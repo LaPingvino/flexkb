@@ -1,0 +1,61 @@
+name: Latin → Syriac (phonetic)
+description: |
+  Phonetic Syriac substitution. Syriac (Aramaic script, U0700-U074F) is
+  the third major Semitic abjad alongside Arabic and Hebrew, used for
+  Classical Syriac liturgy and modern Neo-Aramaic dialects.
+
+  22 root Proto-Semitic consonants — same set as Hebrew. Maps follow
+  the Hebrew phonetic conventions where they overlap.
+map:
+  a: U0710   # ܐ alaph
+  A: U0710
+  b: U0712   # ܒ beth
+  B: U0712
+  c: U0728   # ܨ sadhe
+  C: U0728
+  d: U0715   # ܕ dalath
+  D: U0715
+  e: U0717   # ܗ he
+  E: U0717
+  f: U0726   # ܦ pe
+  F: U0726
+  g: U0713   # ܓ gamal
+  G: U0713
+  h: U071D   # ܝ chet — use Heth (ܚ U071A)
+  H: U071A
+  i: U071D   # ܝ yodh
+  I: U071D
+  j: U071D
+  J: U071D
+  k: U071F   # ܟ kaph
+  K: U071F
+  l: U0720   # ܠ lamadh
+  L: U0720
+  m: U0721   # ܡ mim
+  M: U0721
+  n: U0722   # ܢ nun
+  N: U0722
+  o: U0725   # ܥ ʿe
+  O: U0725
+  p: U0726
+  P: U0726
+  q: U0729   # ܩ qoph
+  Q: U0729
+  r: U072A   # ܪ resh
+  R: U072A
+  s: U0723   # ܣ semkath
+  S: U0723
+  t: U072C   # ܬ taw
+  T: U072C
+  u: U0718   # ܘ waw
+  U: U0718
+  v: U0718
+  V: U0718
+  w: U0718
+  W: U0718
+  x: U071A   # ܚ heth
+  X: U071A
+  y: U071D
+  Y: U071D
+  z: U0719   # ܙ zain
+  Z: U0719

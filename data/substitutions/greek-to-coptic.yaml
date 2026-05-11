@@ -1,0 +1,62 @@
+name: Greek → Coptic (chained on top of Greek phonetic)
+description: |
+  Coptic descended from Greek and shares most letter shapes. This
+  substitution maps Greek letters to their Coptic cognates (U2C80-U2CFF
+  Coptic block, or U03E2-U03EF for the few Coptic-specific letters in
+  the Greek block).
+
+  Chain AFTER latin-greek-phonetic to get Coptic via Latin input:
+    substitutions: [latin-greek-phonetic, greek-to-coptic]
+
+  Coptic also has 6 letters borrowed from Demotic (ϣ Shei, ϥ Fei,
+  ϧ Khei, ϩ Hori, ϫ Janja, ϭ Cima, ϯ Ti) which Greek doesn't have —
+  those would need additional substitutions/additions.
+map:
+  Greek_alpha:     U2C81   # ⲁ
+  Greek_ALPHA:     U2C80   # Ⲁ
+  Greek_beta:      U2C83
+  Greek_BETA:      U2C82
+  Greek_gamma:     U2C85
+  Greek_GAMMA:     U2C84
+  Greek_delta:     U2C87
+  Greek_DELTA:     U2C86
+  Greek_epsilon:   U2C89
+  Greek_EPSILON:   U2C88
+  Greek_zeta:      U2C8B
+  Greek_ZETA:      U2C8A
+  Greek_eta:       U2C8D
+  Greek_ETA:       U2C8C
+  Greek_theta:     U2C8F
+  Greek_THETA:     U2C8E
+  Greek_iota:      U2C91
+  Greek_IOTA:      U2C90
+  Greek_kappa:     U2C93
+  Greek_KAPPA:     U2C92
+  Greek_lamda:     U2C95
+  Greek_LAMDA:     U2C94
+  Greek_mu:        U2C97
+  Greek_MU:        U2C96
+  Greek_nu:        U2C99
+  Greek_NU:        U2C98
+  Greek_xi:        U2C9B
+  Greek_XI:        U2C9A
+  Greek_omicron:   U2C9D
+  Greek_OMICRON:   U2C9C
+  Greek_pi:        U2C9F
+  Greek_PI:        U2C9E
+  Greek_rho:       U2CA1
+  Greek_RHO:       U2CA0
+  Greek_sigma:     U2CA3
+  Greek_SIGMA:     U2CA2
+  Greek_tau:       U2CA5
+  Greek_TAU:       U2CA4
+  Greek_upsilon:   U2CA7
+  Greek_UPSILON:   U2CA6
+  Greek_phi:       U2CA9
+  Greek_PHI:       U2CA8
+  Greek_chi:       U2CAB
+  Greek_CHI:       U2CAA
+  Greek_psi:       U2CAD
+  Greek_PSI:       U2CAC
+  Greek_omega:     U2CAF
+  Greek_OMEGA:     U2CAE
