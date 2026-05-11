@@ -189,6 +189,36 @@ type Addition struct {
 	// Includes are raw xkb `include "..."` lines appended to the symbols
 	// block — e.g. `level3(ralt_switch)` to enable AltGr.
 	Includes []string `yaml:"includes,omitempty"`
+	// Mode controls how positional overlays merge against the existing
+	// (transformation + earlier additions) content when there's a
+	// non-empty / non-empty collision at the requested level. Three
+	// modes:
+	//
+	//   "" or "force"  Addition wins, overlay value lands at the
+	//                  requested level overwriting what was there.
+	//                  Default — preserves backward compat with
+	//                  earlier additions whose whole point was to
+	//                  clobber (german-umlauts putting ä on the +
+	//                  key, emoji-flags replacing letters with
+	//                  regional indicators, …).
+	//
+	//   "nudge"        Addition yields. Overlay value slides up to
+	//                  the first empty level instead of clobbering;
+	//                  if every level on this key is full, the value
+	//                  is dropped (with a warning). Use for additions
+	//                  like intl whose positional dead keys assume a
+	//                  QWERTY-shaped base — on AZERTY/QWERTZ the
+	//                  digit/punctuation at L1/L2 survives, dead
+	//                  keys arrive at AltGr instead.
+	//
+	//   "claim"        Addition wins AND existing content yields —
+	//                  the prior occupant of the requested level
+	//                  slides up to the first empty level, then the
+	//                  overlay value lands. Use for "high-priority"
+	//                  additions whose intent is to claim L1/L2 but
+	//                  preserve whatever was there at an AltGr slot
+	//                  rather than destroying it.
+	Mode string `yaml:"mode,omitempty"`
 	// Categories are free-form tags used by the autofill mechanism to
 	// match an addition against a layout's `autofill:` request. Common
 	// values: "typography", "math", "arabic-cultural", "latin-supp",

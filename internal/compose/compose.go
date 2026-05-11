@@ -243,26 +243,60 @@ func ComposeFromPartsFull(spec model.LayoutSpec, phys model.Physical, trans mode
 
 	// writeLevels merges overlay levels into key k's current levels and
 	// records (stage, module) for every level the overlay actually set.
-	// Out-parameter style on r.Sources keeps the existing stages tidy.
-	writeLevels := func(k string, overlayLevels []string, stage, module string) {
+	// `mode` selects the merge strategy: "" / "force" overwrites
+	// (default), "nudge" slides overlay values to free slots, "claim"
+	// slides existing values out to free slots so overlay can take L1/L2.
+	writeLevels := func(k string, overlayLevels []string, stage, module, mode string) {
 		cur := out.Symbols[k].Levels
-		merged := mergeLevels(cur, overlayLevels)
-		out.Symbols[k] = model.KeySymbols{Levels: merged}
-		// Sources: extend to merged length, copy existing, mark levels
-		// the overlay populated.
 		curSrc := r.Sources[k]
-		newSrc := make([]LevelSource, len(merged))
-		copy(newSrc, curSrc) // existing sources preserved where overlay didn't write
-		for i := 0; i < len(merged); i++ {
-			ov := ""
-			if i < len(overlayLevels) {
-				ov = overlayLevels[i]
+		switch strings.ToLower(mode) {
+		case "nudge":
+			merged, landed := mergeLevelsNudge(cur, overlayLevels)
+			out.Symbols[k] = model.KeySymbols{Levels: merged}
+			newSrc := make([]LevelSource, len(merged))
+			copy(newSrc, curSrc)
+			for _, target := range landed {
+				if target >= 0 && target < len(newSrc) {
+					newSrc[target] = LevelSource{Stage: stage, Module: module}
+				}
 			}
-			if ov != "" {
-				newSrc[i] = LevelSource{Stage: stage, Module: module}
+			r.Sources[k] = newSrc
+		case "claim":
+			merged, landed, displaced := mergeLevelsClaim(cur, overlayLevels)
+			out.Symbols[k] = model.KeySymbols{Levels: merged}
+			newSrc := make([]LevelSource, len(merged))
+			copy(newSrc, curSrc)
+			// First the displacements — existing source moves with its
+			// value. We do this before landings so a landed value can
+			// then overwrite the source at its slot.
+			for from, to := range displaced {
+				if to < 0 || to >= len(newSrc) || from >= len(curSrc) {
+					continue
+				}
+				newSrc[to] = curSrc[from]
 			}
+			for _, target := range landed {
+				if target >= 0 && target < len(newSrc) {
+					newSrc[target] = LevelSource{Stage: stage, Module: module}
+				}
+			}
+			r.Sources[k] = newSrc
+		default:
+			merged := mergeLevels(cur, overlayLevels)
+			out.Symbols[k] = model.KeySymbols{Levels: merged}
+			newSrc := make([]LevelSource, len(merged))
+			copy(newSrc, curSrc)
+			for i := 0; i < len(merged); i++ {
+				ov := ""
+				if i < len(overlayLevels) {
+					ov = overlayLevels[i]
+				}
+				if ov != "" {
+					newSrc[i] = LevelSource{Stage: stage, Module: module}
+				}
+			}
+			r.Sources[k] = newSrc
 		}
-		r.Sources[k] = newSrc
 	}
 
 	// Stage 1: seed from transformation. We tag provenance with the
@@ -306,7 +340,7 @@ func ComposeFromPartsFull(spec model.LayoutSpec, phys model.Physical, trans mode
 				}
 				continue
 			}
-			writeLevels(k, overlay.Levels, "position", addSlug(a))
+			writeLevels(k, overlay.Levels, "position", addSlug(a), a.Mode)
 		}
 		out.Includes = append(out.Includes, a.Includes...)
 	}
@@ -355,7 +389,12 @@ func ComposeFromPartsFull(spec model.LayoutSpec, phys model.Physical, trans mode
 				if prev, ok := claimedRank[k]; ok && rank < prev {
 					continue
 				}
-				writeLevels(k, e.overlay.Levels, "letter", e.addName)
+				// Letter overlays stay in force mode — their whole
+				// purpose is to override level-1 with the letter-
+				// following replacement (regional indicators replacing
+				// letters, accent forms etc.). Mode is a positional-
+				// overlay concept.
+				writeLevels(k, e.overlay.Levels, "letter", e.addName, "")
 				if rank > claimedRank[k] {
 					claimedRank[k] = rank
 				}
@@ -507,8 +546,9 @@ func applySubsTraced(sym string, subs []model.Substitution) (string, string) {
 	return out, by
 }
 
-// mergeLevels overlays b on top of a. Result length is max(len(a), len(b)).
-// At index i: empty b[i] (or missing) -> a[i]; non-empty b[i] -> b[i].
+// mergeLevels overlays b on top of a in force mode: non-empty b[i]
+// overwrites a[i], empty b[i] passes through. Result length is
+// max(len(a), len(b)), trailing empties trimmed.
 func mergeLevels(a, b []string) []string {
 	n := max(len(a), len(b))
 	out := make([]string, n)
@@ -526,9 +566,119 @@ func mergeLevels(a, b []string) []string {
 			out[i] = av
 		}
 	}
-	// Trim trailing empties — no point emitting bare commas in xkb output.
 	for len(out) > 0 && out[len(out)-1] == "" {
 		out = out[:len(out)-1]
 	}
 	return out
+}
+
+// maxOverlayLevels caps how far merge functions will extend a level
+// list when nudging values into free slots. xkb practically uses L1
+// (base), L2 (Shift), L3 (AltGr), L4 (AltGr+Shift). Anything past 4
+// requires a custom xkb_types definition the user is unlikely to
+// have, so nudge values that would land at L5+ are dropped on the
+// floor (the alternative is silent unreachable spillover).
+const maxOverlayLevels = 4
+
+// mergeLevelsNudge merges b onto a politely: when both a[i] and b[i]
+// are non-empty, b's value slides up to the first empty slot above i
+// instead of clobbering. Empty b[i] passes through a[i] as in
+// mergeLevels. Returns the merged levels plus a per-overlay-index
+// `landed` slice giving the final position of each b[i] (-1 if the
+// value was dropped because no empty slot existed within maxOverlayLevels).
+func mergeLevelsNudge(a, b []string) ([]string, []int) {
+	out := make([]string, 0, maxOverlayLevels)
+	for _, v := range a {
+		if len(out) >= maxOverlayLevels {
+			break
+		}
+		out = append(out, v)
+	}
+	landed := make([]int, len(b))
+	for i := range landed {
+		landed[i] = -1
+	}
+	for i, ov := range b {
+		if ov == "" || i >= maxOverlayLevels {
+			continue
+		}
+		// Ensure preferred index exists.
+		for len(out) <= i {
+			out = append(out, "")
+		}
+		if out[i] == "" {
+			out[i] = ov
+			landed[i] = i
+			continue
+		}
+		// Conflict — slide up until we find an empty slot.
+		for j := i + 1; j < maxOverlayLevels; j++ {
+			for len(out) <= j {
+				out = append(out, "")
+			}
+			if out[j] == "" {
+				out[j] = ov
+				landed[i] = j
+				break
+			}
+		}
+	}
+	for len(out) > 0 && out[len(out)-1] == "" {
+		out = out[:len(out)-1]
+	}
+	return out, landed
+}
+
+// mergeLevelsClaim is the symmetric polite-write: the overlay always
+// gets its requested slot, but if that slot held existing non-empty
+// content, the existing value slides up to the first empty slot
+// instead of being destroyed. Returns merged levels, a parallel
+// `displaced` slice describing where each previously-occupying value
+// ended up (only meaningful at indices that the overlay actually
+// touched; -1 for non-displacements), and a `landed` slice giving the
+// overlay's landing position per index (always == i for claim mode,
+// included for parity with mergeLevelsNudge).
+func mergeLevelsClaim(a, b []string) ([]string, []int, []int) {
+	out := make([]string, 0, maxOverlayLevels)
+	for _, v := range a {
+		if len(out) >= maxOverlayLevels {
+			break
+		}
+		out = append(out, v)
+	}
+	landed := make([]int, len(b))
+	displaced := make([]int, len(b))
+	for i := range landed {
+		landed[i] = -1
+		displaced[i] = -1
+	}
+	for i, ov := range b {
+		if ov == "" || i >= maxOverlayLevels {
+			continue
+		}
+		for len(out) <= i {
+			out = append(out, "")
+		}
+		if out[i] != "" {
+			// Move the existing value to the first empty slot above i.
+			old := out[i]
+			out[i] = ""
+			for j := i + 1; j < maxOverlayLevels; j++ {
+				for len(out) <= j {
+					out = append(out, "")
+				}
+				if out[j] == "" {
+					out[j] = old
+					displaced[i] = j
+					break
+				}
+			}
+		}
+		out[i] = ov
+		landed[i] = i
+	}
+	for len(out) > 0 && out[len(out)-1] == "" {
+		out = out[:len(out)-1]
+	}
+	return out, landed, displaced
 }
