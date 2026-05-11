@@ -1,0 +1,59 @@
+name: Latin → Khmer (phonetic)
+description: |
+  Phonetic Khmer substitution. Khmer (U1780-U17FF) has a rich consonant
+  inventory with two series ("light" / "heavy" vowels). This mapping
+  picks the most common cognate per letter; full Khmer typing needs an
+  IME for the subscript-consonant clusters.
+map:
+  a: U17A2   # ឣ
+  A: U17A2
+  b: U1794   # ប
+  B: U1795   # ផ
+  c: U1785   # ច
+  C: U1786   # ឆ
+  d: U178A   # ដ
+  D: U178B   # ឋ
+  e: U17A2   # ឣ as 'a' approximation
+  E: U17A2
+  f: U1795
+  F: U1795
+  g: U1782   # គ
+  G: U1783   # ឃ
+  h: U17A0   # ហ
+  H: U17A0
+  i: U17A2
+  I: U17A2
+  j: U1788   # ឈ
+  J: U1788
+  k: U1780   # ក
+  K: U1781   # ខ
+  l: U179B   # ល
+  L: U179B
+  m: U1798   # ម
+  M: U1798
+  n: U1793   # ន
+  N: U178E   # ណ
+  o: U17A2
+  O: U17A2
+  p: U1794   # ប
+  P: U1795
+  q: U1780
+  Q: U1780
+  r: U179A   # រ
+  R: U179A
+  s: U179F   # ស
+  S: U179F
+  t: U178F   # ត
+  T: U1790   # ថ
+  u: U17A2
+  U: U17A2
+  v: U179C   # វ
+  V: U179C
+  w: U179C
+  W: U179C
+  x: U1780
+  X: U1780
+  y: U1799   # យ
+  Y: U1799
+  z: U1781
+  Z: U1781

@@ -1,0 +1,14 @@
+file: la
+variants:
+  - name: phonetic
+    description: Lao (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-lao-phonetic]
+    default: true
+
+  - name: phonetic-dvorak
+    description: Lao (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-lao-phonetic]

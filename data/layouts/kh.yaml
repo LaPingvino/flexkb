@@ -1,0 +1,14 @@
+file: kh
+variants:
+  - name: phonetic
+    description: Khmer (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-khmer-phonetic]
+    default: true
+
+  - name: phonetic-dvorak
+    description: Khmer (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-khmer-phonetic]

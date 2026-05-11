@@ -1,0 +1,59 @@
+name: Latin → Tamil (phonetic)
+description: |
+  Phonetic Tamil substitution. Tamil has fewer consonants than Devanagari
+  (no voicing distinctions; ka/ga/kha/gha all map to க). Vowels are
+  distinct. Apply on any Latin transformation for phonetic Tamil typing;
+  real syllabic input needs an IME.
+map:
+  a: U0B85   # அ
+  A: U0B86   # ஆ
+  b: U0BAA   # ப (no separate b; Tamil's p covers both)
+  B: U0BAA
+  c: U0B9A   # ச
+  C: U0B9A
+  d: U0BA4   # த
+  D: U0BA4
+  e: U0B8E   # எ
+  E: U0B8F   # ஏ
+  f: U0BAA
+  F: U0BAA
+  g: U0B95   # க
+  G: U0B95
+  h: U0BB9   # ஹ
+  H: U0BB9
+  i: U0B87   # இ
+  I: U0B88   # ஈ
+  j: U0B9C   # ஜ
+  J: U0B9C
+  k: U0B95   # க
+  K: U0B95
+  l: U0BB2   # ல
+  L: U0BB3   # ள
+  m: U0BAE   # ம
+  M: U0BAE
+  n: U0BA8   # ந
+  N: U0BA3   # ண
+  o: U0B92   # ஒ
+  O: U0B93   # ஓ
+  p: U0BAA   # ப
+  P: U0BAA
+  q: U0B95
+  Q: U0B95
+  r: U0BB0   # ர
+  R: U0BB1   # ற
+  s: U0BB8   # ஸ
+  S: U0BB6   # ஶ
+  t: U0BA4   # த
+  T: U0BA4
+  u: U0B89   # உ
+  U: U0B8A   # ஊ
+  v: U0BB5   # வ
+  V: U0BB5
+  w: U0BB5
+  W: U0BB5
+  x: U0B95
+  X: U0B95
+  y: U0BAF   # ய
+  Y: U0BAF
+  z: U0B9C
+  Z: U0B9C

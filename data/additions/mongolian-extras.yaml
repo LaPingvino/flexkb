@@ -1,0 +1,14 @@
+name: Mongolian Cyrillic extras (ө, ү)
+description: |
+  Mongolian Cyrillic adds two letters not in standard Russian Cyrillic:
+  ө (Cyrillic_O_bar / Mongolian_oe) and ү (Cyrillic_U_straight). Placed
+  at AltGr-level on the standard Cyrillic_o / Cyrillic_u keys. Compose
+  on top of the ЙЦУКЕН transformation for typing Mongolian.
+scripts: [cyrillic]
+letter_overlays:
+  Cyrillic_o: { levels: ["", "", U04E9, U04E8] }
+  Cyrillic_O: { levels: ["", "", U04E9, U04E8] }
+  Cyrillic_u: { levels: ["", "", U04AF, U04AE] }
+  Cyrillic_U: { levels: ["", "", U04AF, U04AE] }
+includes:
+  - level3(ralt_switch)

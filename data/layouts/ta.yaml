@@ -1,0 +1,20 @@
+file: ta
+variants:
+  - name: phonetic
+    description: Tamil (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-tamil-phonetic]
+    default: true
+
+  - name: phonetic-dvorak
+    description: Tamil (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-tamil-phonetic]
+
+  - name: phonetic-colemak
+    description: Tamil (phonetic, Colemak base)
+    physical: iso
+    transformation: colemak
+    substitutions: [latin-tamil-phonetic]

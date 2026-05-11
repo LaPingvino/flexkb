@@ -1,0 +1,20 @@
+file: lk
+variants:
+  - name: phonetic
+    description: Sinhala (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-sinhala-phonetic]
+    default: true
+
+  - name: phonetic-dvorak
+    description: Sinhala (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-sinhala-phonetic]
+
+  - name: tamil-phonetic
+    description: Tamil (phonetic, QWERTY base — Sri Lankan Tamil)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-tamil-phonetic]

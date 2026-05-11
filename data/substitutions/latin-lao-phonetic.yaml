@@ -1,0 +1,57 @@
+name: Latin → Lao (phonetic)
+description: |
+  Phonetic Lao substitution. Lao (U0E80-U0EFF) is closely related to Thai
+  with similar phonological patterns but a simplified consonant set.
+map:
+  a: U0EAD   # ອ (alef-like carrier)
+  A: U0EAD
+  b: U0E9A   # ບ
+  B: U0E9A
+  c: U0E88   # ຈ
+  C: U0E88
+  d: U0E94   # ດ
+  D: U0E94
+  e: U0EC0   # ເ (sara e)
+  E: U0EC0
+  f: U0E9F   # ຟ
+  F: U0E9F
+  g: U0E81   # ກ
+  G: U0E82   # ຂ
+  h: U0EAB   # ຫ
+  H: U0EAB
+  i: U0EB4   # ິ (vowel sign)
+  I: U0EB5   # ີ
+  j: U0E88
+  J: U0E88
+  k: U0E81   # ກ
+  K: U0E82
+  l: U0EA5   # ລ
+  L: U0EA5
+  m: U0EA1   # ມ
+  M: U0EA1
+  n: U0E99   # ນ
+  N: U0E99
+  o: U0EC2   # ໂ (sara o)
+  O: U0EC2
+  p: U0E9C   # ປ → ຜ pho
+  P: U0E9C
+  q: U0E81
+  Q: U0E81
+  r: U0EA3   # ຣ
+  R: U0EA3
+  s: U0EAA   # ສ
+  S: U0EAA
+  t: U0E95   # ຕ
+  T: U0E96   # ຖ
+  u: U0EB8   # ຸ
+  U: U0EB9   # ູ
+  v: U0EA7   # ວ
+  V: U0EA7
+  w: U0EA7
+  W: U0EA7
+  x: U0E81
+  X: U0E81
+  y: U0EA2   # ຢ
+  Y: U0EA2
+  z: U0EAA
+  Z: U0EAA

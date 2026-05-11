@@ -1,0 +1,22 @@
+file: mn
+variants:
+  - name: basic
+    description: Mongolian (Cyrillic, ЙЦУКЕН base + Mongolian extras)
+    physical: iso
+    transformation: ycuken
+    additions: [mongolian-extras]
+    default: true
+
+  - name: phonetic
+    description: Mongolian (phonetic Cyrillic, QWERTY base + Mongolian extras)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras, mongolian-extras]
+
+  - name: phonetic-dvorak
+    description: Mongolian (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras, mongolian-extras]

@@ -1,0 +1,19 @@
+name: Sami letters (á, č, đ, ŋ, š, ŧ, ž)
+description: |
+  Northern Sami (and other Sami languages) use Latin script with a number
+  of distinctive letters: á, č, đ, ŋ, š, ŧ, ž. Letter-following addition,
+  composes on any Latin base.
+
+  ŋ (eng) doesn't have a single-letter cognate; placed on AltGr+n
+  alongside the regular intl ntilde — high priority is recommended if
+  combined with intl.
+letter_overlays:
+  a: { levels: ["", "", aacute, Aacute] }
+  c: { levels: ["", "", ccaron, Ccaron] }
+  d: { levels: ["", "", dstroke, Dstroke] }
+  n: { levels: ["", "", eng, ENG] }
+  s: { levels: ["", "", scaron, Scaron] }
+  t: { levels: ["", "", tslash, Tslash] }
+  z: { levels: ["", "", zcaron, Zcaron] }
+includes:
+  - level3(ralt_switch)

@@ -1,0 +1,59 @@
+name: Latin → Sinhala (phonetic)
+description: |
+  Phonetic Sinhala substitution for Sri Lankan typing. Sinhala uses the
+  Indic Brahmic family with its own codepoints (U0D80-U0DFF). Maps the
+  closest consonant/vowel cognate per letter; real syllabic input needs
+  an IME.
+map:
+  a: U0D85   # අ
+  A: U0D86   # ආ
+  b: U0DB6   # බ
+  B: U0DB7   # භ
+  c: U0DA0   # ච
+  C: U0DA1   # ඡ
+  d: U0DAF   # ද
+  D: U0DB0   # ධ
+  e: U0D91   # එ
+  E: U0D92   # ඒ
+  f: U0DB5   # ඵ
+  F: U0DB5
+  g: U0D9C   # ග
+  G: U0D9D   # ඝ
+  h: U0DC4   # හ
+  H: U0DC4
+  i: U0D89   # ඉ
+  I: U0D8A   # ඊ
+  j: U0DA2   # ජ
+  J: U0DA3   # ඣ
+  k: U0D9A   # ක
+  K: U0D9B   # ඛ
+  l: U0DBD   # ල
+  L: U0DC5   # ළ
+  m: U0DB8   # ම
+  M: U0DB8
+  n: U0DB1   # න
+  N: U0DAB   # ණ
+  o: U0D94   # ඔ
+  O: U0D95   # ඕ
+  p: U0DB4   # ප
+  P: U0DB5   # ඵ
+  q: U0D9A
+  Q: U0D9A
+  r: U0DBB   # ර
+  R: U0DBB
+  s: U0DC3   # ස
+  S: U0DC1   # ශ
+  t: U0DAD   # ත
+  T: U0DAE   # ථ
+  u: U0D8B   # උ
+  U: U0D8C   # ඌ
+  v: U0DC0   # ව
+  V: U0DC0
+  w: U0DC0
+  W: U0DC0
+  x: U0D9A
+  X: U0D9A
+  y: U0DBA   # ය
+  Y: U0DBA
+  z: U0DA2
+  Z: U0DA2
