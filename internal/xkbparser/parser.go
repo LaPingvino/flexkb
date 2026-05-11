@@ -25,6 +25,11 @@ type Variant struct {
 	Keys     []string
 	Symbols  map[string]model.KeySymbols
 	Includes []string
+	// RawSource is the original source text of this variant block (the
+	// full `default partial ... xkb_symbols "name" { … };` declaration as
+	// it appeared in the input). Useful when you want to passthrough an
+	// upstream variant verbatim alongside flexkb-generated ones.
+	RawSource string
 }
 
 // File is a parsed xkb symbols file.
@@ -50,10 +55,14 @@ var (
 
 // Parse parses the contents of an xkb symbols file.
 func Parse(src string) (*File, error) {
-	clean := reBlockComment.ReplaceAllString(src, "")
-	clean = reLineComment.ReplaceAllString(clean, "")
+	// We strip comments only for the *symbol-extraction* pass; raw source
+	// is taken from the original input so passthrough preserves the
+	// upstream file's commentary.
+	clean := reBlockComment.ReplaceAllString(src, " ")
+	clean = reLineComment.ReplaceAllString(clean, " ")
 
 	f := &File{}
+	rawOffset := 0
 	for {
 		head := reVariantHead.FindStringIndex(clean)
 		if head == nil {
@@ -69,10 +78,21 @@ func Parse(src string) (*File, error) {
 		}
 		body := clean[bodyStart : bodyEnd-1]
 
+		// rawSource extraction: find the same xkb_symbols block in the
+		// original (uncommented-out) input. Look for the modifier keywords
+		// + xkb_symbols "<name>" pattern starting from rawOffset; capture
+		// the full statement up to (and including) the matching closing
+		// brace + semicolon.
+		rawSource := extractRaw(src, rawOffset, name)
+		if rawSource != "" {
+			rawOffset = strings.Index(src[rawOffset:], rawSource) + rawOffset + len(rawSource)
+		}
+
 		v := Variant{
-			Name:    name,
-			Default: strings.Contains(mods, "default"),
-			Symbols: map[string]model.KeySymbols{},
+			Name:      name,
+			Default:   strings.Contains(mods, "default"),
+			Symbols:   map[string]model.KeySymbols{},
+			RawSource: rawSource,
 		}
 		if m := reNameGroup.FindStringSubmatch(body); m != nil {
 			v.Description = m[1]
@@ -97,6 +117,64 @@ func Parse(src string) (*File, error) {
 		clean = clean[bodyEnd:]
 	}
 	return f, nil
+}
+
+// extractRaw locates an xkb_symbols block by name in the original source
+// (with comments intact) and returns the full source range covering its
+// declaration. Search starts at offset to avoid re-matching earlier blocks.
+func extractRaw(src string, offset int, name string) string {
+	tail := src[offset:]
+	// Find the xkb_symbols "<name>" needle.
+	needle := `xkb_symbols "` + name + `"`
+	rel := strings.Index(tail, needle)
+	if rel == -1 {
+		return ""
+	}
+	// Walk backwards to include any leading modifier keywords (default,
+	// partial, alphanumeric_keys, etc.) — stop at preceding `;` or `}`
+	// (the end of a previous statement).
+	start := rel
+	for start > 0 {
+		c := tail[start-1]
+		if c == '\n' || c == '\t' || c == ' ' {
+			start--
+			continue
+		}
+		// Letters / underscores are modifier keywords; consume them.
+		if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' {
+			start--
+			continue
+		}
+		break
+	}
+	// Now scan forward from the needle to find the opening { then walk
+	// braces.
+	open := strings.IndexByte(tail[rel:], '{')
+	if open == -1 {
+		return ""
+	}
+	open += rel
+	depth := 0
+	for i := open; i < len(tail); i++ {
+		switch tail[i] {
+		case '{':
+			depth++
+		case '}':
+			depth--
+			if depth == 0 {
+				// Include trailing whitespace + the closing semicolon.
+				end := i + 1
+				for end < len(tail) && (tail[end] == ' ' || tail[end] == '\t') {
+					end++
+				}
+				if end < len(tail) && tail[end] == ';' {
+					end++
+				}
+				return tail[start:end]
+			}
+		}
+	}
+	return ""
 }
 
 // matchBraces takes the index of an opening `{` and returns the index just

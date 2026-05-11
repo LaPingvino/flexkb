@@ -114,14 +114,22 @@ type LayoutSpec struct {
 	Description string `yaml:"description"`
 	// Physical, Transformation, Additions reference data files by their
 	// base name (e.g. "ansi", "dvorak", "intl").
-	Physical       string   `yaml:"physical"`
-	Transformation string   `yaml:"transformation"`
+	Physical       string   `yaml:"physical,omitempty"`
+	Transformation string   `yaml:"transformation,omitempty"`
 	Additions      []string `yaml:"additions,omitempty"`
 	// Substitutions are applied AFTER additions. Prefix a name with "~" to
 	// apply the inverse direction (target→source). Substitutions chain in
 	// listed order, so you can stack e.g. [latin-cyrillic-phonetic,
 	// some-cyrillic-respelling].
 	Substitutions []string `yaml:"substitutions,omitempty"`
+	// Passthrough marks this variant as "preserve upstream verbatim" —
+	// at build time the flexkb build step reads the corresponding
+	// xkb_symbols block from the source xkb tree and embeds its raw text
+	// instead of composing from modular pieces. This is the map slot for
+	// "we know this variant exists, we just haven't decomposed it yet."
+	// A variant cannot be both Passthrough and have a composition; the
+	// builder picks Passthrough first.
+	Passthrough bool `yaml:"passthrough,omitempty"`
 	// Default marks this variant as the file-level default (xkb syntax:
 	// `default partial alphanumeric_keys`).
 	Default bool `yaml:"default,omitempty"`

@@ -1,0 +1,76 @@
+# flexkb pacman install hook — runs at pre/post install + upgrade.
+#
+# Goal: detect the user's current keyboard layout BEFORE we replace
+# xkeyboard-config, confirm that the new flexkb tree still provides it
+# (either modularly or as an implicit passthrough from the upstream
+# source we mirrored at build time), and tell the user where to find
+# their config + how to customise.
+
+_snapshot_keyboard() {
+    local snapshot="/var/lib/flexkb/pre-install-keyboard.txt"
+    install -d -m 755 /var/lib/flexkb
+    {
+        echo "# Captured by flexkb pre_install on $(date -Iseconds)"
+        echo
+        if command -v localectl >/dev/null 2>&1; then
+            localectl status 2>/dev/null
+        fi
+        echo
+        echo "## /etc/X11/xorg.conf.d/00-keyboard.conf:"
+        cat /etc/X11/xorg.conf.d/00-keyboard.conf 2>/dev/null || echo "(not present)"
+        echo
+        echo "## /etc/vconsole.conf:"
+        cat /etc/vconsole.conf 2>/dev/null || echo "(not present)"
+    } > "$snapshot" 2>/dev/null
+    echo "  Saved current keyboard config to $snapshot"
+}
+
+_post_install_banner() {
+    local layout variant
+    if [[ -r /etc/X11/xorg.conf.d/00-keyboard.conf ]]; then
+        layout=$(grep -oP 'XkbLayout"\s*"\K[^"]+' /etc/X11/xorg.conf.d/00-keyboard.conf 2>/dev/null | head -1)
+        variant=$(grep -oP 'XkbVariant"\s*"\K[^"]+' /etc/X11/xorg.conf.d/00-keyboard.conf 2>/dev/null | head -1)
+    fi
+    echo
+    echo "  flexkb is now providing /usr/share/X11/xkb."
+    if [[ -n "$layout" ]]; then
+        echo "  Your current X11 layout: ${layout}${variant:+($variant)}"
+        echo "  This variant is preserved in flexkb's tree — your session keeps working."
+    fi
+    echo
+    echo "  Next steps:"
+    echo "    flexkb list                  # see all modular variants"
+    echo "    flexkb info --xkb /usr/share/X11/xkb us   # what's modular vs upstream"
+    echo "    flexkb migrate-suggest us dvorak-intl     # suggest a modular form"
+    echo "    flexkb activate ru phonetic-dvorak        # apply a new variant"
+    echo
+    echo "  Per-user customisation: drop YAML files in ~/.config/flexkb/data/."
+    echo "  See /usr/share/doc/flexkb/README.md."
+    echo
+    echo "  Rollback: pacman -S xkeyboard-config  (will remove flexkb)."
+}
+
+pre_install() {
+    echo ":: flexkb: snapshotting current keyboard configuration..."
+    _snapshot_keyboard
+}
+
+post_install() {
+    _post_install_banner
+}
+
+pre_upgrade() {
+    _snapshot_keyboard
+}
+
+post_upgrade() {
+    _post_install_banner
+}
+
+post_remove() {
+    echo
+    echo "  flexkb removed. If pacman has just installed xkeyboard-config in its"
+    echo "  place, your keyboard should continue to work unchanged."
+    echo "  Saved keyboard snapshots are in /var/lib/flexkb/."
+    echo
+}

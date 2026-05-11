@@ -27,6 +27,7 @@ makedepends=('go' 'xkeyboard-config')
 # place; when releasing, point source at a git tag tarball.
 source=()
 sha256sums=()
+install=flexkb.install
 
 build() {
     cd "$startdir"
@@ -71,3 +72,5 @@ package() {
     install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
     install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
 }
+
+# vim:set ts=4 sw=4 et:
