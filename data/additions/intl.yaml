@@ -7,24 +7,26 @@ description: |
   the correct intl variant on QWERTY (us-intl), Dvorak (us-dvorak-intl),
   Colemak, Workman, Norman — one addition, every base.
 
-# Position-based dead keys on punctuation slots. These belong on specific
-# physical keys regardless of which Latin letter happens to be at that
-# position, so we use position overlays.
+# Position-based level 3/4 decorations. Levels 1 and 2 are left empty
+# (pass-through) so the underlying transformation's keys aren't clobbered
+# — that's how intl can compose cleanly on Dvorak, which puts brackets on
+# AE11/AE12 where QWERTY has minus/equal. TLDE keeps a position-based
+# dead_grave on level 1 because every Latin transformation has grave/
+# asciitilde there; AE06 keeps dead_circumflex on level 2 because every
+# Latin transformation has asciicircum at level 2 of AE06.
 overlays:
   TLDE: { levels: [dead_grave, dead_tilde, grave, asciitilde] }
-  AE01: { levels: ["1", exclam, exclamdown, onesuperior] }
-  AE02: { levels: ["2", at, twosuperior, dead_doubleacute] }
-  AE03: { levels: ["3", numbersign, threesuperior, dead_macron] }
-  AE04: { levels: ["4", dollar, currency, sterling] }
-  AE05: { levels: ["5", percent, EuroSign, dead_cedilla] }
-  AE06: { levels: ["6", dead_circumflex, onequarter, asciicircum] }
-  AE07: { levels: ["7", ampersand, onehalf, dead_horn] }
-  AE08: { levels: ["8", asterisk, threequarters, dead_ogonek] }
-  AE09: { levels: ["9", parenleft, leftsinglequotemark, dead_breve] }
-  AE10: { levels: ["0", parenright, rightsinglequotemark, dead_abovering] }
-  AE11: { levels: [minus, underscore, yen, dead_belowdot] }
-  AE12: { levels: [equal, plus, multiply, division] }
-  BKSL: { levels: [backslash, bar, notsign, brokenbar] }
+  AE01: { levels: ["", "", exclamdown, onesuperior] }
+  AE02: { levels: ["", "", twosuperior, dead_doubleacute] }
+  AE03: { levels: ["", "", threesuperior, dead_macron] }
+  AE04: { levels: ["", "", currency, sterling] }
+  AE05: { levels: ["", "", EuroSign, dead_cedilla] }
+  AE06: { levels: ["", dead_circumflex, onequarter, asciicircum] }
+  AE07: { levels: ["", "", onehalf, dead_horn] }
+  AE08: { levels: ["", "", threequarters, dead_ogonek] }
+  AE09: { levels: ["", "", leftsinglequotemark, dead_breve] }
+  AE10: { levels: ["", "", rightsinglequotemark, dead_abovering] }
+  BKSL: { levels: ["", "", notsign, brokenbar] }
 
 # Letter-following accent overlays. The level-1 letter is the lookup key;
 # levels 3 and 4 (AltGr and AltGr+Shift) get the accented forms. Applied

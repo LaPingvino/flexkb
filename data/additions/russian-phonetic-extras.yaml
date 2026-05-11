@@ -1,4 +1,5 @@
 name: Russian phonetic extras
+scripts: [cyrillic]
 description: |
   The non-Latin-cognate Cyrillic letters that need a home: ё, ъ, ч, ш, щ,
   ж, ю, э. These fall on punctuation / number-row slots in the standard

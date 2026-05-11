@@ -24,3 +24,19 @@ variants:
     physical: iso
     transformation: workman
     additions: [polish]
+
+  # Polish-language priority on top of intl. The intl addition gives
+  # access to most European accented forms; polish-on-intl uses high
+  # priority to claim the keys Polish needs (l → ł, z → ż etc.) over
+  # intl's normal-priority versions (l → oslash etc.).
+  - name: intl
+    description: Polish (intl base + Polish priority)
+    physical: iso
+    transformation: qwerty
+    additions: [intl, polish-on-intl]
+
+  - name: dvorak-intl
+    description: Polish (Dvorak + intl + Polish priority)
+    physical: iso
+    transformation: dvorak
+    additions: [intl, polish-on-intl]

@@ -1,4 +1,5 @@
 name: Greek phonetic extras
+scripts: [greek]
 description: |
   Greek-specific positions: dead_acute (tonos) on AC11 (semicolon slot),
   final-sigma (ς) on a punctuation key, etc.

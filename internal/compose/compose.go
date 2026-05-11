@@ -15,6 +15,7 @@ package compose
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/lapingvino/flexkb/internal/model"
@@ -123,15 +124,30 @@ func ComposeFromPartsWithSubs(spec model.LayoutSpec, phys model.Physical, trans 
 		out.Includes = append(out.Includes, a.Includes...)
 	}
 
-	// Stage 2b: apply letter-following overlays. For each (letter -> overlay)
-	// in each addition, find every key whose post-transformation level 1
-	// matches the letter (case-insensitive) and merge the overlay there.
-	// Pre-build a level-1 → keys index so this is O(keys + overlays) per
-	// addition instead of O(keys * overlays).
+	// Stage 2b: apply letter-following overlays.
+	//
+	// Priority spans every addition's overlays globally — so a user can
+	// stack additions and have a high-priority overlay in one win against
+	// a normal-priority overlay in another. Example: a "polish-intl"
+	// addition with high-priority `l -> lstroke` overrides the regular
+	// intl's normal-priority `l -> oslash` because high-prio applies
+	// first and claims the L key before low-prio runs.
+	//
+	// Primary letter lookup; if the primary isn't at level 1 of any key,
+	// walk the overlay's Fallback list in order. First match wins. Gives
+	// "rough fit" coverage on uncommon bases.
+	type entry struct {
+		addName string
+		letter  string
+		overlay model.LetterOverlay
+	}
+	var allEntries []entry
 	for _, a := range adds {
-		if len(a.LetterOverlays) == 0 {
-			continue
+		for letter, ov := range a.LetterOverlays {
+			allEntries = append(allEntries, entry{a.Name, letter, ov})
 		}
+	}
+	if len(allEntries) > 0 {
 		byLetter := map[string][]string{}
 		for _, k := range out.Keys {
 			sym, ok := out.Symbols[k]
@@ -140,15 +156,38 @@ func ComposeFromPartsWithSubs(spec model.LayoutSpec, phys model.Physical, trans 
 			}
 			byLetter[strings.ToLower(sym.Levels[0])] = append(byLetter[strings.ToLower(sym.Levels[0])], k)
 		}
-		for letter, overlay := range a.LetterOverlays {
-			keys := byLetter[strings.ToLower(letter)]
+		sort.SliceStable(allEntries, func(i, j int) bool {
+			return allEntries[i].overlay.PriorityRank() > allEntries[j].overlay.PriorityRank()
+		})
+		// claimedRank[k] = rank of the overlay that last applied to key k.
+		// Subsequent overlays with strictly LOWER rank yield. Equal-rank
+		// overlays apply in addition-order (later wins) so you can still
+		// layer narrow patches at the same priority.
+		claimedRank := map[string]int{}
+		for _, e := range allEntries {
+			keys := byLetter[strings.ToLower(e.letter)]
+			if len(keys) == 0 {
+				for _, fb := range e.overlay.Fallback {
+					keys = byLetter[strings.ToLower(fb)]
+					if len(keys) > 0 {
+						break
+					}
+				}
+			}
 			if len(keys) == 0 {
 				continue
 			}
+			rank := e.overlay.PriorityRank()
 			for _, k := range keys {
+				if prev, ok := claimedRank[k]; ok && rank < prev {
+					continue
+				}
 				cur := out.Symbols[k]
-				merged := mergeLevels(cur.Levels, overlay.Levels)
+				merged := mergeLevels(cur.Levels, e.overlay.Levels)
 				out.Symbols[k] = model.KeySymbols{Levels: merged}
+				if rank > claimedRank[k] {
+					claimedRank[k] = rank
+				}
 			}
 		}
 	}

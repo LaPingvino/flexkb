@@ -1,4 +1,5 @@
 name: Dubeolsik (Korean)
+script: korean
 description: |
   Korean two-set keyboard layout (두벌식). Consonants on the left half
   of the keyboard, vowels on the right. This is the de-facto Korean

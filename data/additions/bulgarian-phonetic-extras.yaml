@@ -1,4 +1,5 @@
 name: Bulgarian phonetic extras
+scripts: [cyrillic]
 description: |
   Bulgarian-specific positions: ш (sha), щ (shcha), ч (che) on punctuation
   slots that don't have a Latin cognate.

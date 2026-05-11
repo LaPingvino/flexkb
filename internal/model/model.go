@@ -10,6 +10,43 @@
 // files.
 package model
 
+import "strings"
+
+// LetterOverlay is the value type for Addition.LetterOverlays. It pairs a
+// per-level overlay with an optional ordered list of fallback level-1
+// tokens to try if the primary letter isn't present in the base. This
+// lets an addition specify "rough fit" behaviour on uncommon bases —
+// e.g., Portuguese ç wants to land on 'c', but if a base has no 'c' at
+// level 1, it can fall back to "comma" (visual cognate — ç ≈ c + cedilla,
+// and comma's hook resembles cedilla). First match wins.
+type LetterOverlay struct {
+	Levels   []string `yaml:"levels,flow"`
+	Fallback []string `yaml:"fallback,omitempty,flow"`
+	// Priority is "high", "" (normal/default), or "low". Within an
+	// addition, high-priority overlays apply first so they get first dibs
+	// on the keys they target. Low-priority overlays apply last; if their
+	// match key has already been claimed by a higher-priority overlay
+	// from the same addition, they silently yield (no warning, layout
+	// stays small and predictable). "Drop on poor fit" is implicit:
+	// low-priority overlays with no primary or fallback match just don't
+	// land anywhere.
+	Priority string `yaml:"priority,omitempty"`
+}
+
+// PriorityRank maps the Priority string to a sortable int: high → 2,
+// default ("") → 1, low → 0. Used by compose to order overlay
+// application across all additions in a layout spec.
+func (lo LetterOverlay) PriorityRank() int {
+	switch strings.ToLower(lo.Priority) {
+	case "high":
+		return 2
+	case "low":
+		return 0
+	default:
+		return 1
+	}
+}
+
 // KeySymbols holds the per-level symbol assignments for a single physical key.
 // Index 0 is the base (unmodified), 1 is shifted, 2 is level3 (typically
 // AltGr), 3 is level3+shift. An empty string at a level means "leave whatever
@@ -42,6 +79,11 @@ type Physical struct {
 type Transformation struct {
 	Name        string                `yaml:"name"`
 	Description string                `yaml:"description,omitempty"`
+	// Script tags the writing system at level 1 — "latin", "cyrillic",
+	// "greek", "arabic", "hebrew", "korean", "thai", etc. Empty defaults
+	// to "latin". The matrix sanity test uses this to skip
+	// transformation × addition pairs whose scripts don't match.
+	Script string `yaml:"script,omitempty"`
 	// Keys maps an XKB key code to the (typically 2-level) base symbol list.
 	Keys map[string]KeySymbols `yaml:"keys"`
 }
@@ -106,6 +148,12 @@ func (s Substitution) Inverse() Substitution {
 type Addition struct {
 	Name        string                `yaml:"name"`
 	Description string                `yaml:"description,omitempty"`
+	// Scripts lists the writing systems this addition is meaningful on
+	// (typically just one — "latin" for intl, "cyrillic" for
+	// russian-phonetic-extras). Empty = "latin". The matrix sanity test
+	// uses this to skip combinations like vietnamese-tone × ycuken that
+	// would just produce no-op warnings. Use ["any"] to opt out.
+	Scripts []string `yaml:"scripts,omitempty"`
 	// Overlays maps an XKB key code to the per-level override list.
 	Overlays map[string]KeySymbols `yaml:"overlays,omitempty"`
 	// LetterOverlays maps a level-1 symbol token (e.g. "a", "q") to per-
@@ -124,7 +172,7 @@ type Addition struct {
 	// Turkish transformation, ship a small addition that sets level 2
 	// of the 'i' overlay to Iabovedot — see data/additions/turkish-i-pair
 	// for a worked example.
-	LetterOverlays map[string]KeySymbols `yaml:"letter_overlays,omitempty"`
+	LetterOverlays map[string]LetterOverlay `yaml:"letter_overlays,omitempty"`
 	// Includes are raw xkb `include "..."` lines appended to the symbols
 	// block — e.g. `level3(ralt_switch)` to enable AltGr.
 	Includes []string `yaml:"includes,omitempty"`

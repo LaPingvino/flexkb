@@ -88,6 +88,35 @@ func TestAdditionTrimsTrailingEmpties(t *testing.T) {
 	}
 }
 
+// TestLetterOverlayFallback: if the primary letter isn't at level 1 of any
+// key, the compose engine should try Fallback tokens in order. Lets an
+// addition author specify "rough fit" — Portuguese ç on 'c', but fall
+// back to comma if no 'c' exists at level 1.
+func TestLetterOverlayFallback(t *testing.T) {
+	phys := model.Physical{Name: "p", Keys: []string{"AC01", "AB08"}}
+	// Hypothetical base with no 'c' at level 1, but has comma.
+	odd := model.Transformation{Name: "odd", Keys: map[string]model.KeySymbols{
+		"AC01": {Levels: []string{"x", "X"}},
+		"AB08": {Levels: []string{"comma", "less"}},
+	}}
+	portuguese := model.Addition{Name: "pt", LetterOverlays: map[string]model.LetterOverlay{
+		"c": {
+			Levels:   []string{"", "", "ccedilla", "Ccedilla"},
+			Fallback: []string{"comma"},
+		},
+	}}
+	r := ComposeFromParts(model.LayoutSpec{Name: "t"}, phys, odd, []model.Addition{portuguese})
+	// Primary 'c' missing → fallback to 'comma' (AB08).
+	got := r.Layout.Symbols["AB08"].Levels
+	if len(got) < 3 || got[2] != "ccedilla" {
+		t.Errorf("fallback should land ccedilla on AB08 (comma), got %v", got)
+	}
+	// AC01 (the 'x' key) untouched.
+	if r.Layout.Symbols["AC01"].Levels[0] != "x" {
+		t.Errorf("AC01 should still be 'x', got %v", r.Layout.Symbols["AC01"].Levels)
+	}
+}
+
 // TestLetterOverlayFollowsLetterAcrossTransformations: a letter overlay
 // defined for 'q' should land at whichever physical key 'q' occupies under
 // the active transformation. This is the property that makes one `intl`
@@ -104,7 +133,7 @@ func TestLetterOverlayFollowsLetterAcrossTransformations(t *testing.T) {
 		"AD01": {Levels: []string{"apostrophe", "quotedbl"}},
 		"AB02": {Levels: []string{"q", "Q"}},
 	}}
-	intl := model.Addition{Name: "intl", LetterOverlays: map[string]model.KeySymbols{
+	intl := model.Addition{Name: "intl", LetterOverlays: map[string]model.LetterOverlay{
 		"q": {Levels: []string{"", "", "adiaeresis", "Adiaeresis"}},
 	}}
 

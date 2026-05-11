@@ -1,4 +1,5 @@
 name: Hebrew (standard)
+script: hebrew
 description: |
   Native Hebrew keyboard layout. Hebrew letters at level 1; level 2 mirrors
   level 1 since Hebrew has no case distinction (xkb adds Latin capitals at

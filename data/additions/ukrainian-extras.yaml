@@ -1,4 +1,5 @@
 name: Ukrainian extras (on Russian Cyrillic base)
+scripts: [cyrillic]
 description: |
   Ukrainian-specific Cyrillic letters added on top of a Russian ЙЦУКЕН
   keyboard: і (Ukrainian_i), ї (Ukrainian_yi), є (Ukrainian_ie), ґ

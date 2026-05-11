@@ -1,0 +1,29 @@
+name: Polish-language priority over intl
+description: |
+  Solves the "you can type most languages with intl, but Polish is half-
+  broken" problem. The regular `intl` addition uses normal priority
+  letter_overlays — it puts oslash on AltGr+l, ae on AltGr+z, etc. Apply
+  this addition AFTER intl in a layout spec, and its high-priority
+  overlays preempt intl on the keys Polish cares about: ł on l, ż on z,
+  etc. intl still owns every other letter (eacute, aring, ntilde, …) so
+  the user still has access to most-language intl typing.
+
+  Usage:
+    additions: [intl, polish-on-intl]
+
+  Composer applies all letter_overlays sorted by priority globally —
+  high-priority overlays from this addition claim the L key first; intl's
+  low-priority(implicit-default) oslash lands nowhere, freeing AltGr+l
+  for ł.
+letter_overlays:
+  a: { levels: ["", "", aogonek, Aogonek], priority: high }
+  c: { levels: ["", "", cacute, Cacute], priority: high }
+  e: { levels: ["", "", eogonek, Eogonek], priority: high }
+  l: { levels: ["", "", lstroke, Lstroke], priority: high }
+  n: { levels: ["", "", nacute, Nacute], priority: high }
+  o: { levels: ["", "", oacute, Oacute], priority: high }
+  s: { levels: ["", "", sacute, Sacute], priority: high }
+  z: { levels: ["", "", zabovedot, Zabovedot], priority: high }
+  x: { levels: ["", "", zacute, Zacute], priority: high }
+includes:
+  - level3(ralt_switch)

@@ -1,4 +1,5 @@
 name: Arabic (101 layout)
+script: arabic
 description: |
   Standard Arabic 101 keyboard arrangement. Level 1 = Arabic letter,
   level 2 = Arabic diacritic / punctuation. This is the de-facto Arabic
