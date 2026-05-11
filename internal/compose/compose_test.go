@@ -35,6 +35,25 @@ func TestComposeAppliesTransformationThenAdditions(t *testing.T) {
 }
 
 func TestComposeDropsKeysNotOnPhysical(t *testing.T) {
+	phys := model.Physical{Name: "tiny", Keys: []string{"AC01"}}
+	trans := model.Transformation{Name: "qw", Keys: map[string]model.KeySymbols{
+		"AC01": {Levels: []string{"a", "A"}},
+		// XYZ1 is a fictional key — not in extensionKeys — so the composer
+		// should drop it AND warn (likely a data typo).
+		"XYZ1": {Levels: []string{"backslash", "bar"}},
+	}}
+	r := ComposeFromParts(model.LayoutSpec{Name: "t"}, phys, trans, nil)
+	if _, ok := r.Layout.Symbols["XYZ1"]; ok {
+		t.Errorf("XYZ1 should be dropped on tiny physical")
+	}
+	if len(r.Warnings) == 0 {
+		t.Errorf("expected a warning for dropped unknown key")
+	}
+}
+
+// LSGT is in extensionKeys: cross-physical transformations that define it
+// should compose onto ANSI silently — that's the design, not a typo.
+func TestComposeSilentForExtensionKeys(t *testing.T) {
 	phys := model.Physical{Name: "ansi-tiny", Keys: []string{"AC01"}}
 	trans := model.Transformation{Name: "qw", Keys: map[string]model.KeySymbols{
 		"AC01": {Levels: []string{"a", "A"}},
@@ -44,8 +63,8 @@ func TestComposeDropsKeysNotOnPhysical(t *testing.T) {
 	if _, ok := r.Layout.Symbols["LSGT"]; ok {
 		t.Errorf("LSGT should be dropped on ANSI physical")
 	}
-	if len(r.Warnings) == 0 {
-		t.Errorf("expected a warning for dropped LSGT")
+	if len(r.Warnings) != 0 {
+		t.Errorf("LSGT on ANSI should compose silently, got warnings: %v", r.Warnings)
 	}
 }
 

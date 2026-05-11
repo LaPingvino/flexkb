@@ -19,6 +19,17 @@ import (
 	"github.com/lapingvino/flexkb/internal/model"
 )
 
+// extensionKeys is the set of XKB keycodes that are present on some physical
+// shells but legitimately absent on others. A transformation or addition that
+// defines these doesn't need to warn when composed onto a physical that
+// doesn't have them — that's by design (e.g. an ISO transformation composed
+// onto an ANSI shell drops LSGT).
+var extensionKeys = map[string]bool{
+	"LSGT": true, // ISO 105: extra key between Left Shift and Z
+	"AB11": true, // JIS 109: ¥ / underscore key
+	"AE13": true, // JIS 109: extra top-row key
+}
+
 // Result carries the composed layout plus any non-fatal warnings raised
 // during composition (e.g. transformation referencing a key the physical
 // doesn't have).
@@ -66,10 +77,15 @@ func ComposeFromParts(spec model.LayoutSpec, phys model.Physical, trans model.Tr
 		keyAllowed[k] = true
 	}
 
-	// Stage 1: seed from transformation.
+	// Stage 1: seed from transformation. Keys not on the physical are
+	// silently dropped if they're known cross-physical "extension" keys
+	// (LSGT on ISO, AB11/AE13 on JIS). Warn for the rest — that's the case
+	// that catches typos like ADO1 (zero vs O).
 	for k, sym := range trans.Keys {
 		if !keyAllowed[k] {
-			r.Warnings = append(r.Warnings, fmt.Sprintf("transformation %q assigns key %s not on physical %s — dropped", trans.Name, k, phys.Name))
+			if !extensionKeys[k] {
+				r.Warnings = append(r.Warnings, fmt.Sprintf("transformation %q assigns key %s not on physical %s — dropped", trans.Name, k, phys.Name))
+			}
 			continue
 		}
 		out.Symbols[k] = model.KeySymbols{Levels: append([]string(nil), sym.Levels...)}
@@ -79,7 +95,9 @@ func ComposeFromParts(spec model.LayoutSpec, phys model.Physical, trans model.Tr
 	for _, a := range adds {
 		for k, overlay := range a.Overlays {
 			if !keyAllowed[k] {
-				r.Warnings = append(r.Warnings, fmt.Sprintf("addition %q overlays key %s not on physical %s — dropped", a.Name, k, phys.Name))
+				if !extensionKeys[k] {
+					r.Warnings = append(r.Warnings, fmt.Sprintf("addition %q overlays key %s not on physical %s — dropped", a.Name, k, phys.Name))
+				}
 				continue
 			}
 			cur := out.Symbols[k]
