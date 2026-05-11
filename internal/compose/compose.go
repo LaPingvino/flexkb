@@ -95,33 +95,56 @@ func Compose(root model.DataRoot, spec model.LayoutSpec) (Result, error) {
 		if err != nil {
 			return Result{}, fmt.Errorf("variant %q: autofill lookup: %w", spec.Name, err)
 		}
-		fillers = pickFillers(all, spec.Autofill)
+		addSlugs := make([]string, 0, len(adds))
+		for _, a := range adds {
+			if a.Slug != "" {
+				addSlugs = append(addSlugs, a.Slug)
+			} else {
+				addSlugs = append(addSlugs, a.Name)
+			}
+		}
+		ctx := smartContext{Script: trans.Script, AdditionSlugs: addSlugs}
+		fillers = pickFillers(all, spec.Autofill, ctx)
 	}
 	return ComposeFromPartsFull(spec, phys, trans, adds, subs, fillers), nil
 }
 
 // pickFillers selects fillers whose Categories overlap with the
-// requested set. A literal "*" in requested means "every filler".
-// Result preserves the requested category order, so a user-controlled
-// "typography first, math second" intent is honoured.
-func pickFillers(all []model.Addition, requested []string) []model.Addition {
+// requested set. Two special category tokens:
+//   - "*"     → every filler
+//   - "smart" → flexkb decides based on the recipe (see smartCategories)
+//
+// Otherwise the result preserves the requested category order, so a
+// user-controlled "typography first, math second" intent is honoured.
+func pickFillers(all []model.Addition, requested []string, ctx smartContext) []model.Addition {
 	wantAll := false
 	want := map[string]bool{}
+	expanded := []string{}
 	for _, c := range requested {
-		if c == "*" {
+		switch c {
+		case "*":
 			wantAll = true
+		case "smart":
+			for _, sc := range smartCategories(ctx) {
+				if !want[sc] {
+					expanded = append(expanded, sc)
+					want[sc] = true
+				}
+			}
+		default:
+			if !want[c] {
+				expanded = append(expanded, c)
+				want[c] = true
+			}
 		}
-		want[c] = true
 	}
 	if wantAll {
 		return all
 	}
-	// Order fillers by requested-category order so "typography first"
-	// applies before "math" — affects which filler wins when two
-	// fillers both target the same empty level.
+	// Order fillers by expanded-category order.
 	seen := map[string]bool{}
 	var out []model.Addition
-	for _, c := range requested {
+	for _, c := range expanded {
 		for _, a := range all {
 			if seen[a.Slug] {
 				continue
@@ -135,6 +158,45 @@ func pickFillers(all []model.Addition, requested []string) []model.Addition {
 			}
 		}
 	}
+	return out
+}
+
+// smartContext carries the recipe info smartCategories looks at to
+// pick categories — kept narrow so the heuristic stays a pure function.
+type smartContext struct {
+	Script        string   // transformation.Script ("latin" / "cyrillic" / ...)
+	AdditionSlugs []string // recipe addition slugs (for "already covered" checks)
+}
+
+// smartCategories applies the recommendation heuristic. v1 is
+// deliberately simple: universal typography always; latin-script
+// recipes also get math + currency + latin-extras (the last only if
+// no international-style addition is already covering AltGr).
+// Future: confusables-based / per-locale frequency scoring per the
+// vector-proximity plan in memory.
+func smartCategories(ctx smartContext) []string {
+	script := strings.ToLower(ctx.Script)
+	if script == "" {
+		script = "latin"
+	}
+	hasIntlLike := false
+	for _, s := range ctx.AdditionSlugs {
+		ls := strings.ToLower(s)
+		if strings.Contains(ls, "intl") || strings.Contains(ls, "extras") ||
+			strings.Contains(ls, "deadkeys") || strings.Contains(ls, "national") {
+			hasIntlLike = true
+			break
+		}
+	}
+	out := []string{"typography"} // universal
+	if script == "latin" {
+		out = append(out, "currency", "math")
+		if !hasIntlLike {
+			out = append(out, "latin-extras")
+		}
+	}
+	// Other scripts get just typography until we ship script-specific
+	// fillers — Greek / Cyrillic / Arabic / Hebrew etc.
 	return out
 }
 

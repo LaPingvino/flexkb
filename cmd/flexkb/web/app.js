@@ -41,6 +41,7 @@ document.querySelectorAll("nav.tabs button").forEach(btn => {
 
 // === Browse tab ===
 const fileSelect = document.getElementById("file");
+const fileFilter = document.getElementById("fileFilter");
 const variantSelect = document.getElementById("variant");
 const metaEl = document.getElementById("meta");
 const kbEl = document.getElementById("keyboard");
@@ -60,7 +61,6 @@ const bXkb = document.getElementById("bXkb");
 async function loadLayouts() {
   const res = await fetch("/api/layouts");
   layouts = await res.json();
-  fileSelect.innerHTML = "";
   cmpFile.innerHTML = '<option value="">— none —</option>';
   for (const lf of layouts) {
     const opt = document.createElement("option");
@@ -68,13 +68,59 @@ async function loadLayouts() {
     const defVar = lf.variants.find(v => v.default) || lf.variants[0];
     const tag = lf.sourceKind ? ` [${lf.sourceKind}]` : "";
     opt.textContent = `${lf.file}${tag}${defVar ? " — " + defVar.description : ""}`;
-    fileSelect.appendChild(opt);
-    cmpFile.appendChild(opt.cloneNode(true));
+    cmpFile.appendChild(opt);
   }
-  fileSelect.value = layouts[0]?.file || "";
+  renderFilePicker();
   populateVariants();
   populateCmpVariants();
 }
+
+// renderFilePicker rebuilds the Browse-tab layout-file picker honouring
+// the live fileFilter query (matches against file name, variant names,
+// and variant descriptions so "dvorak" finds us/de/etc., "polish"
+// finds layouts mentioning Polish, and so on).
+function renderFilePicker() {
+  const q = (fileFilter.value || "").toLowerCase().trim();
+  const prev = fileSelect.value;
+  fileSelect.innerHTML = "";
+  for (const lf of layouts) {
+    if (q && !matchesQuery(lf, q)) continue;
+    const opt = document.createElement("option");
+    opt.value = lf.file;
+    const defVar = lf.variants.find(v => v.default) || lf.variants[0];
+    const tag = lf.sourceKind ? ` [${lf.sourceKind}]` : "";
+    opt.textContent = `${lf.file}${tag}${defVar ? " — " + defVar.description : ""}`;
+    fileSelect.appendChild(opt);
+  }
+  if (fileSelect.options.length === 0) {
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.disabled = true;
+    opt.textContent = "(no layouts match)";
+    fileSelect.appendChild(opt);
+    return;
+  }
+  // Restore previous selection if still visible, else pick first.
+  if ([...fileSelect.options].some(o => o.value === prev)) {
+    fileSelect.value = prev;
+  } else {
+    fileSelect.value = fileSelect.options[0].value;
+  }
+}
+
+function matchesQuery(lf, q) {
+  if (lf.file.toLowerCase().includes(q)) return true;
+  for (const v of lf.variants) {
+    if (v.name.toLowerCase().includes(q)) return true;
+    if ((v.description || "").toLowerCase().includes(q)) return true;
+  }
+  return false;
+}
+
+fileFilter.addEventListener("input", () => {
+  renderFilePicker();
+  populateVariants();
+});
 
 function populateVariants() {
   const lf = layouts.find(l => l.file === fileSelect.value);
@@ -204,8 +250,10 @@ bEditBtn.addEventListener("click", async () => {
   cPassthrough.checked = !!v.passthrough;
   selectedAutofillCats = new Set();
   cAutofillAll.checked = false;
+  cAutofillSmart.checked = false;
   if (v.autofill && v.autofill.length) {
-    if (v.autofill.includes("*")) cAutofillAll.checked = true;
+    if (v.autofill.includes("smart")) cAutofillSmart.checked = true;
+    else if (v.autofill.includes("*")) cAutofillAll.checked = true;
     else for (const c of v.autofill) selectedAutofillCats.add(c);
   }
   renderAutofillCats();
@@ -417,6 +465,7 @@ const cDeleteBtn = document.getElementById("cDelete");
 const cStatus = document.getElementById("cStatus");
 const cDefault = document.getElementById("cDefault");
 const cPassthrough = document.getElementById("cPassthrough");
+const cAutofillSmart = document.getElementById("cAutofillSmart");
 const cAutofillAll = document.getElementById("cAutofillAll");
 const cAutofillCatList = document.getElementById("cAutofillCatList");
 const cFillStats = document.getElementById("cFillStats");
@@ -473,6 +522,16 @@ function renderAutofillCats() {
 
 cAutofillAll.addEventListener("change", () => {
   if (cAutofillAll.checked) {
+    cAutofillSmart.checked = false;
+    selectedAutofillCats.clear();
+    for (const cb of cAutofillCatList.querySelectorAll("input")) cb.checked = false;
+  }
+  composeLivePreview();
+});
+
+cAutofillSmart.addEventListener("change", () => {
+  if (cAutofillSmart.checked) {
+    cAutofillAll.checked = false;
     selectedAutofillCats.clear();
     for (const cb of cAutofillCatList.querySelectorAll("input")) cb.checked = false;
   }
@@ -751,7 +810,8 @@ cShowXKBBtn.addEventListener("click", async () => {
 
 function composeSpec() {
   let autofill = [];
-  if (cAutofillAll.checked) autofill = ["*"];
+  if (cAutofillSmart.checked) autofill = ["smart"];
+  else if (cAutofillAll.checked) autofill = ["*"];
   else if (selectedAutofillCats.size > 0) autofill = Array.from(selectedAutofillCats);
   return {
     name: cName.value.trim() || "basic",

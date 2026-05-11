@@ -114,7 +114,8 @@ section.tab.hidden { display: none; }
   font-size: 0.85rem;
   color: #768390;
 }
-.picker select, .compose-form select, .compose-form input[type=text] {
+.picker select, .compose-form select, .compose-form input[type=text],
+.picker input[type=search] {
   margin-top: 0.2rem;
   padding: 0.4rem 0.6rem;
   background: #161b22;
@@ -124,6 +125,10 @@ section.tab.hidden { display: none; }
   font-size: 1rem;
   min-width: 240px;
   font-family: inherit;
+}
+.picker input[type=search] { margin-bottom: 0.2rem; }
+body.theme-light .picker input[type=search] {
+  background: var(--bg-input); color: var(--fg); border-color: var(--border-strong);
 }
 
 .layer-tag {

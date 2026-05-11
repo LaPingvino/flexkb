@@ -25,8 +25,9 @@
     <section class="tab" data-tab="browse">
       <div class="picker">
         <label>
-          <span>Layout file</span>
-          <select id="file"></select>
+          <span>Layout file <em>(type to filter)</em></span>
+          <input id="fileFilter" type="search" placeholder="e.g. us, dvorak, polish…" autocomplete="off">
+          <select id="file" size="1"></select>
         </label>
         <label>
           <span>Variant</span>
@@ -105,7 +106,10 @@
           <label class="full">
             <span>Autofill empty positions <em>(fillers run after composition, empty-only — never overrides)</em></span>
             <div class="autofill-cats" id="cAutofillCats">
-              <label class="inline-check"><input type="checkbox" id="cAutofillAll"><span>all</span></label>
+              <label class="inline-check" title="Let flexkb pick the most-useful categories based on the recipe (transformation script + additions). Currently: universal typography, plus math/currency/latin-extras on Latin scripts without an existing intl-style addition.">
+                <input type="checkbox" id="cAutofillSmart"><span>smart</span>
+              </label>
+              <label class="inline-check" title="Apply every filler in the data tree, regardless of fit."><input type="checkbox" id="cAutofillAll"><span>all</span></label>
               <span class="autofill-cat-list" id="cAutofillCatList"></span>
               <span class="fill-stats" id="cFillStats"></span>
             </div>
