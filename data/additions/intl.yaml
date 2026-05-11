@@ -7,21 +7,24 @@ description: |
   the correct intl variant on QWERTY (us-intl), Dvorak (us-dvorak-intl),
   Colemak, Workman, Norman — one addition, every base.
 
-# Position-based level 3/4 decorations. Levels 1 and 2 are left empty
-# (pass-through) so the underlying transformation's keys aren't clobbered
-# — that's how intl can compose cleanly on Dvorak, which puts brackets on
-# AE11/AE12 where QWERTY has minus/equal. TLDE keeps a position-based
-# dead_grave on level 1 because every Latin transformation has grave/
-# asciitilde there; AE06 keeps dead_circumflex on level 2 because every
-# Latin transformation has asciicircum at level 2 of AE06.
+# Position-based level 3/4 decorations. Levels 1 and 2 are pass-through
+# (empty strings) so the underlying transformation's keys aren't
+# clobbered — important on bases like AZERTY that put digits on L2,
+# Dvorak that puts brackets on AE11/AE12, etc.
+#
+# Dead-key keysyms (dead_grave/dead_tilde/dead_circumflex) used to live
+# on TLDE L1/L2 and AE06 L2 — which assumed a QWERTY base with grave/
+# tilde at TLDE and caret at AE06 L2. On AZERTY that overwrote the
+# real content (TLDE = ²/~, AE06 L2 = "6"). They're now on L3/L4 so
+# dead keys remain accessible via AltGr, regardless of base.
 overlays:
-  TLDE: { levels: [dead_grave, dead_tilde, grave, asciitilde] }
+  TLDE: { levels: ["", "", dead_grave, dead_tilde] }
   AE01: { levels: ["", "", exclamdown, onesuperior] }
   AE02: { levels: ["", "", twosuperior, dead_doubleacute] }
   AE03: { levels: ["", "", threesuperior, dead_macron] }
   AE04: { levels: ["", "", currency, sterling] }
   AE05: { levels: ["", "", EuroSign, dead_cedilla] }
-  AE06: { levels: ["", dead_circumflex, onequarter, asciicircum] }
+  AE06: { levels: ["", "", dead_circumflex, asciicircum] }
   AE07: { levels: ["", "", onehalf, dead_horn] }
   AE08: { levels: ["", "", threequarters, dead_ogonek] }
   AE09: { levels: ["", "", leftsinglequotemark, dead_breve] }
