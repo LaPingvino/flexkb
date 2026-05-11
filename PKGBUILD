@@ -2,15 +2,23 @@
 #
 # flexkb — modular XKB layout generator. Replaces xkeyboard-config by
 # generating an XKB tree composed of modular Physical × Transformation ×
-# Additions sources, falling back to verbatim-copied xkeyboard-config files
-# for anything not yet modularised. The PKGBUILD therefore needs
-# xkeyboard-config available at build time (as the fallback source) but
-# replaces it at install time so userspace ends up with one canonical
-# /usr/share/X11/xkb tree.
+# Additions sources, falling back to verbatim-copied xkeyboard-config
+# files for anything not yet modularised.
+#
+# Build reads the verbatim-fallback content from a *pinned upstream
+# xkeyboard-config tarball* fetched at build time — never from the
+# live system. This avoids the self-amputating circular dependency
+# we had when reading /usr/share/xkeyboard-config-2 directly: once
+# flexkb is installed, that path resolves to flexkb's own tree, so
+# any subsequent rebuild copied the previously-stripped flexkb tree
+# instead of the real upstream, dropping rules/compat/keycodes/types
+# files. Pinning to an x.org tarball makes the build reproducible
+# regardless of the host system's xkb state.
 
 pkgname=flexkb
 pkgver=0.1.0
-pkgrel=1
+pkgrel=2
+_xkbcver=2.47
 pkgdesc="Modular XKB layout generator and drop-in xkeyboard-config replacement"
 # CGO is enabled to link the webview engine, so the package is no
 # longer arch-independent.
@@ -28,16 +36,19 @@ optdepends=('chromium: enables `flexkb gui --engine=lorca` (chromeless app windo
             'microsoft-edge-stable-bin: enables `flexkb gui --engine=lorca`')
 # We provide xkeyboard-config so any package depending on it stays satisfied
 # (libxkbcommon, xorg-server, gnome-control-center, etc.).
-provides=("xkeyboard-config=${pkgver}.upstream-2.47")
+provides=("xkeyboard-config=${_xkbcver}")
 conflicts=('xkeyboard-config')
-# Build deps: go for the binary, gcc/pkgconf for CGO+webkit headers,
-# xkeyboard-config for the fallback xkb tree we mirror anything-not-
-# yet-modularised from.
-makedepends=('go' 'gcc' 'pkgconf' 'xkeyboard-config')
-# When packaging from a checkout, set source to () and just run makepkg in
-# place; when releasing, point source at a git tag tarball.
-source=()
-sha256sums=()
+# Build deps: go for the binary, gcc/pkgconf for CGO+webkit headers.
+# Crucially NOT xkeyboard-config — we fetch a pinned tarball below
+# instead of reading the live system.
+makedepends=('go' 'gcc' 'pkgconf')
+# Pin the upstream xkeyboard-config we mirror anything-not-yet-
+# modularised from. Tarball lives in $srcdir/xkeyboard-config-X.Y/
+# after extraction.
+source=("https://www.x.org/archive/individual/data/xkeyboard-config/xkeyboard-config-${_xkbcver}.tar.xz")
+# Skipping the hash trusts x.org over HTTPS — pin a real hash here
+# if you want byte-exact reproducibility / supply-chain verification.
+sha256sums=('SKIP')
 install=flexkb.install
 
 build() {
@@ -52,9 +63,12 @@ build() {
         -ldflags "-s -w -X main.version=$pkgver" -o flexkb ./cmd/flexkb
 
     # Run our build pipeline: generate modular xkb files into pkg-staging/,
-    # then copy everything else verbatim from the installed xkeyboard-config.
+    # then copy everything else verbatim from the *pinned* upstream
+    # xkeyboard-config tarball. Reading from $srcdir/xkeyboard-config-X.Y
+    # rather than the live system avoids the self-amputation loop
+    # described at the top of this file.
     rm -rf "$srcdir/staging"
-    ./flexkb build --xkb /usr/share/xkeyboard-config-2 "$srcdir/staging"
+    ./flexkb build --xkb "$srcdir/xkeyboard-config-${_xkbcver}" "$srcdir/staging"
 }
 
 check() {
@@ -66,7 +80,8 @@ check() {
     # The drop-in promise: the built tree must be a strict superset of the
     # upstream xkeyboard-config tree we replace. Anything missing fails the
     # package build, so a regression in the generator can't silently ship.
-    ./flexkb dropin-check "$srcdir/staging" /usr/share/xkeyboard-config-2
+    # Reference is the pinned tarball, not the live system.
+    ./flexkb dropin-check "$srcdir/staging" "$srcdir/xkeyboard-config-${_xkbcver}"
 }
 
 package() {
