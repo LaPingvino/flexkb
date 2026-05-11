@@ -1,0 +1,31 @@
+name: African Latin extras (ɛ ɔ ŋ ɲ ɓ ɗ ǝ ɣ ƴ)
+description: |
+  Shared addition for the African Latin alphabets used by Mande languages
+  (Bambara, Maninka, Soninke), Cameroonian languages (Fulfulde, Ewondo,
+  Duala, Beti), and others. Letter-following on AltGr.
+
+  Phonetic conventions:
+    AltGr+e → ɛ (open e, U025B)
+    AltGr+o → ɔ (open o, U0254)
+    AltGr+n → ŋ (eng, U014B) — same as wolof
+    AltGr+m → ɲ (n with curl, U0272)
+    AltGr+b → ɓ (implosive b, U0253)
+    AltGr+d → ɗ (implosive d, U0257)
+    AltGr+a → ǝ (schwa, U01DD)
+    AltGr+g → ɣ (gamma / voiced velar fric., U0263)
+    AltGr+y → ƴ (y-hook, U01B4)
+
+  Stack as additions: [african-latin-extras] on top of any Latin
+  transformation (qwerty / azerty / dvorak / colemak).
+letter_overlays:
+  e: { levels: ["", "", U025B, U0190] }
+  o: { levels: ["", "", U0254, U0186] }
+  n: { levels: ["", "", U014B, U014A] }
+  m: { levels: ["", "", U0272, U019D] }
+  b: { levels: ["", "", U0253, U0181] }
+  d: { levels: ["", "", U0257, U018A] }
+  a: { levels: ["", "", U01DD, U018E] }
+  g: { levels: ["", "", U0263, U0194] }
+  y: { levels: ["", "", U01B4, U01B3] }
+includes:
+  - level3(ralt_switch)

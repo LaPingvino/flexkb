@@ -1,0 +1,31 @@
+file: dz
+variants:
+  - name: basic
+    description: Algerian Arabic (Arabic-101 base)
+    physical: iso
+    transformation: arabic-101
+    default: true
+
+  - name: berber-tifinagh
+    description: Berber (Tamazight Tifinagh phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-tifinagh-phonetic]
+
+  - name: berber-tifinagh-dvorak
+    description: Berber (Tifinagh phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-tifinagh-phonetic]
+
+  - name: berber-latin
+    description: Berber (Kabyle Latin, AZERTY base + African extras)
+    physical: iso
+    transformation: azerty
+    additions: [french-accents, african-latin-extras]
+
+  - name: french-azerty
+    description: Algerian French (AZERTY)
+    physical: iso
+    transformation: azerty
+    additions: [french-accents]

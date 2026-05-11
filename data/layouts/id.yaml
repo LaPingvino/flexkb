@@ -1,0 +1,21 @@
+file: id
+variants:
+  # Indonesian and Malay use standard Latin without diacritics. The base
+  # layout is just plain QWERTY. Native Javanese/Sundanese/Pegon scripts
+  # would need dedicated transformations (deferred).
+  - name: basic
+    description: Indonesian (plain QWERTY)
+    physical: iso
+    transformation: qwerty
+    default: true
+
+  - name: intl
+    description: Indonesian with intl dead keys (for foreign-word entry)
+    physical: iso
+    transformation: qwerty
+    additions: [intl]
+
+  - name: dvorak
+    description: Indonesian (Dvorak base)
+    physical: iso
+    transformation: dvorak

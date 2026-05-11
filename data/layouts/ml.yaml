@@ -1,0 +1,20 @@
+file: ml
+variants:
+  - name: basic
+    description: Mali (Bambara, AZERTY-French base + African Latin extras)
+    physical: iso
+    transformation: azerty
+    additions: [french-accents, african-latin-extras]
+    default: true
+
+  - name: qwerty
+    description: Mali (Bambara, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    additions: [intl, african-latin-extras]
+
+  - name: dvorak
+    description: Mali (Bambara, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    additions: [african-latin-extras]
