@@ -7,11 +7,14 @@
 //	build <out-dir> [--xkb=/path]        generate modular + fallback-copy rest
 //	verify <layout-file> <variant>       compose then compare against system xkb
 //	list                                 list known modular layouts
+//	paths                                show which data directories are active
+//	activate <file> <variant>            generate into ~/.xkb and setxkbmap to it
 package main
 
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -44,6 +47,10 @@ func main() {
 		runVerify(args)
 	case "list":
 		runList(args)
+	case "paths":
+		runPaths(args)
+	case "activate":
+		runActivate(args)
 	case "-h", "--help", "help":
 		usage()
 	default:
@@ -62,6 +69,8 @@ Usage:
   flexkb build [--data DIR] [--xkb /usr/share/X11/xkb] <output-dir>
   flexkb verify [--data DIR] [--xkb /usr/share/X11/xkb] <layout-file> <variant>
   flexkb list [--data DIR]
+  flexkb paths
+  flexkb activate <layout-file> <variant>
 
 Commands:
   compose   Emit one variant to stdout (debug / preview).
@@ -69,52 +78,50 @@ Commands:
   build     generate, then copy any remaining xkb tree from --xkb verbatim,
             so output is a complete drop-in /usr/share/X11/xkb replacement.
   verify    Compose a variant and compare key-by-key against the same-named
-            variant in <xkb>/symbols/<layout-file>. Useful for round-trip
-            testing the modular decomposition.
-  list      Print the layout-file / variant matrix flexkb knows about.`)
+            variant in <xkb>/symbols/<layout-file>.
+  list      Print the layout-file / variant matrix flexkb knows about.
+  paths     Show the data directories being consulted, in priority order.
+            Per-user overrides go in $XDG_CONFIG_HOME/flexkb/data (default
+            ~/.config/flexkb/data) and shadow same-named system files.
+  activate  Generate the modular tree to ~/.xkb and invoke setxkbmap to
+            apply <layout-file>/<variant> in the current X session.
+
+--data DIR overrides discovery and uses only DIR. Without it, flexkb walks
+the user/system/dev paths in order — see "flexkb paths" for the resolved
+list. New YAML files in a user directory just appear in "flexkb list";
+same-named files in higher-priority directories shadow lower ones.`)
 }
 
-// dataDir pulls --data / --data=… out of args (leaving everything else,
-// including --xkb, untouched for the subcommand-specific parser to handle).
-func dataDir(args []string) (string, []string) {
-	out := findDefaultDataDir()
+// dataPaths pulls --data / --data=… out of args. If supplied (possibly
+// multiple times) the explicit list wins. Otherwise we use the XDG-aware
+// discovery order so user overrides under ~/.config/flexkb/data are
+// picked up automatically.
+func dataPaths(args []string) ([]string, []string) {
+	var override []string
 	rest := make([]string, 0, len(args))
 	for i := 0; i < len(args); i++ {
 		a := args[i]
 		switch {
 		case a == "--data" && i+1 < len(args):
-			out = args[i+1]
+			override = append(override, args[i+1])
 			i++
 		case strings.HasPrefix(a, "--data="):
-			out = strings.TrimPrefix(a, "--data=")
+			override = append(override, strings.TrimPrefix(a, "--data="))
 		default:
 			rest = append(rest, a)
 		}
 	}
-	return out, rest
+	if len(override) > 0 {
+		return override, rest
+	}
+	return model.DiscoverPaths(), rest
 }
 
-// findDefaultDataDir walks upward from the binary location and the cwd
-// looking for a `data/physical` directory — so `flexkb` works both from
-// the repo root during development and from /usr/share/flexkb after install.
-func findDefaultDataDir() string {
-	candidates := []string{
-		"data",
-		"/usr/share/flexkb/data",
+func makeRoot(paths []string) model.DataRoot {
+	if len(paths) == 1 {
+		return model.DataRoot{Path: paths[0]}
 	}
-	if exe, err := os.Executable(); err == nil {
-		candidates = append(candidates,
-			filepath.Join(filepath.Dir(exe), "data"),
-			filepath.Join(filepath.Dir(exe), "..", "share", "flexkb", "data"),
-		)
-	}
-	for _, c := range candidates {
-		if _, err := os.Stat(filepath.Join(c, "physical")); err == nil {
-			abs, _ := filepath.Abs(c)
-			return abs
-		}
-	}
-	return "data"
+	return model.DataRoot{Paths: paths}
 }
 
 // xkbDir extracts --xkb from args; used by build/verify which both need it.
@@ -137,12 +144,12 @@ func xkbDir(args []string) (string, []string) {
 }
 
 func runCompose(args []string) {
-	data, rest := dataDir(args)
+	paths, rest := dataPaths(args)
 	if len(rest) != 2 {
 		fmt.Fprintln(os.Stderr, "usage: flexkb compose <layout-file> <variant>")
 		os.Exit(2)
 	}
-	root := model.DataRoot{Path: data}
+	root := makeRoot(paths)
 	lf, err := root.LayoutFile(rest[0])
 	check(err)
 	for _, v := range lf.Variants {
@@ -162,13 +169,13 @@ func runCompose(args []string) {
 }
 
 func runGenerate(args []string) {
-	data, rest := dataDir(args)
+	paths, rest := dataPaths(args)
 	if len(rest) != 1 {
 		fmt.Fprintln(os.Stderr, "usage: flexkb generate <output-dir>")
 		os.Exit(2)
 	}
 	out := rest[0]
-	root := model.DataRoot{Path: data}
+	root := makeRoot(paths)
 	names, err := root.ListLayoutFiles()
 	check(err)
 	symbolsDir := filepath.Join(out, "symbols")
@@ -208,14 +215,14 @@ func generateOne(root model.DataRoot, name, symbolsDir string) error {
 }
 
 func runBuild(args []string) {
-	data, rest := dataDir(args)
+	paths, rest := dataPaths(args)
 	xkb, rest := xkbDir(rest)
 	if len(rest) != 1 {
 		fmt.Fprintln(os.Stderr, "usage: flexkb build [--xkb /path] <output-dir>")
 		os.Exit(2)
 	}
 	out := rest[0]
-	root := model.DataRoot{Path: data}
+	root := makeRoot(paths)
 
 	// Step 1: list which symbols files we own modularly — they'll be skipped
 	// by the fallback copy in step 3.
@@ -241,13 +248,13 @@ func runBuild(args []string) {
 }
 
 func runVerify(args []string) {
-	data, rest := dataDir(args)
+	paths, rest := dataPaths(args)
 	xkb, rest := xkbDir(rest)
 	if len(rest) != 2 {
 		fmt.Fprintln(os.Stderr, "usage: flexkb verify [--xkb /path] <layout-file> <variant>")
 		os.Exit(2)
 	}
-	root := model.DataRoot{Path: data}
+	root := makeRoot(paths)
 	lf, err := root.LayoutFile(rest[0])
 	check(err)
 
@@ -355,8 +362,8 @@ func trimNoise(a []string) []string {
 }
 
 func runList(args []string) {
-	data, _ := dataDir(args)
-	root := model.DataRoot{Path: data}
+	paths, _ := dataPaths(args)
+	root := makeRoot(paths)
 	names, err := root.ListLayoutFiles()
 	check(err)
 	for _, n := range names {
@@ -377,6 +384,99 @@ func runList(args []string) {
 			fmt.Printf("%s\t%s\t%s + %s + add:%s + sub:%s\n", lf.File, v.Name, v.Physical, v.Transformation, adds, subs)
 		}
 	}
+}
+
+func runPaths(args []string) {
+	paths, rest := dataPaths(args)
+	if len(rest) != 0 {
+		fmt.Fprintln(os.Stderr, "usage: flexkb paths")
+		os.Exit(2)
+	}
+	fmt.Println("flexkb data search path (highest priority first):")
+	if len(paths) == 0 {
+		fmt.Println("  (none — set $XDG_CONFIG_HOME/flexkb/data or install the package)")
+		return
+	}
+	for i, p := range paths {
+		marker := "system"
+		if home, _ := os.UserHomeDir(); home != "" && strings.HasPrefix(p, home) {
+			marker = "user"
+		} else if strings.Contains(p, "/usr/") {
+			marker = "system"
+		} else {
+			marker = "dev/local"
+		}
+		fmt.Printf("  %d. %s  [%s]\n", i+1, p, marker)
+	}
+	fmt.Println("\nFiles in higher-priority directories shadow same-named files lower\ndown. New files just add to the available set; see `flexkb list`.")
+}
+
+// runActivate generates the modular xkb tree into ~/.xkb and invokes
+// setxkbmap with -I$HOME/.xkb so the new variant is picked up by the
+// running X session. The user-level overrides are honoured because
+// `flexkb generate` already walks the layered data root.
+func runActivate(args []string) {
+	paths, rest := dataPaths(args)
+	if len(rest) != 2 {
+		fmt.Fprintln(os.Stderr, "usage: flexkb activate <layout-file> <variant>")
+		os.Exit(2)
+	}
+	root := makeRoot(paths)
+	layoutName, variantName := rest[0], rest[1]
+
+	// Sanity-check the variant exists before clobbering ~/.xkb.
+	lf, err := root.LayoutFile(layoutName)
+	check(err)
+	found := false
+	for _, v := range lf.Variants {
+		if v.Name == variantName {
+			found = true
+			break
+		}
+	}
+	if !found {
+		fmt.Fprintf(os.Stderr, "variant %q not found in layout %q\n", variantName, layoutName)
+		os.Exit(1)
+	}
+
+	home, err := os.UserHomeDir()
+	check(err)
+	xkbDir := filepath.Join(home, ".xkb")
+	symbolsDir := filepath.Join(xkbDir, "symbols")
+	check(os.MkdirAll(symbolsDir, 0o755))
+
+	// Regenerate everything so the user-dir tree reflects current sources.
+	names, err := root.ListLayoutFiles()
+	check(err)
+	for _, n := range names {
+		check(generateOne(root, n, symbolsDir))
+	}
+	fmt.Printf("wrote %d layout file(s) to %s\n", len(names), symbolsDir)
+
+	// Apply via setxkbmap. -I prepends the include path so xkbcomp finds
+	// our symbols/<file> before the system one.
+	cmd := exec.Command("setxkbmap",
+		"-I"+xkbDir,
+		"-layout", layoutName,
+		"-variant", variantName,
+		"-print",
+	)
+	out, err := cmd.Output()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "setxkbmap -print failed: %v\n  (is X running? for Wayland, use xkbcli or your compositor's input config)\n", err)
+		os.Exit(1)
+	}
+
+	// Pipe the keymap through xkbcomp to actually load it.
+	xkbcomp := exec.Command("xkbcomp", "-I"+xkbDir, "-", os.Getenv("DISPLAY"))
+	xkbcomp.Stdin = strings.NewReader(string(out))
+	xkbcomp.Stderr = os.Stderr
+	if err := xkbcomp.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "xkbcomp failed: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("activated %s(%s) for display %s\n", layoutName, variantName, os.Getenv("DISPLAY"))
+	fmt.Println("\nThis applies to the running X session only. Add this command to\nyour login script (e.g. ~/.xsessionrc) to persist across logins.")
 }
 
 func check(err error) {

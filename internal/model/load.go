@@ -9,23 +9,59 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// DataRoot is a directory containing physical/, transformations/, and
-// additions/ subdirectories of YAML files, plus a layouts/ directory for
-// LayoutFile recipes.
+// DataRoot is one or more directories, each containing physical/,
+// transformations/, additions/, substitutions/ and layouts/ subdirectories
+// of YAML files. When multiple paths are configured (typical: user override
+// + system install), lookups walk the Paths in order and the first match
+// wins. This means a user file at $XDG_CONFIG_HOME/flexkb/data shadows the
+// same-named system file, while new files in the user directory simply
+// extend the available set.
+//
+// The single-path field Path is retained for backward compatibility with
+// tests and callers that don't need layering; it's preferred when Paths is
+// empty.
 type DataRoot struct {
-	Path string
+	Path  string
+	Paths []string
 }
 
+// resolved returns Paths if non-empty, otherwise a single-element slice
+// containing Path. Empty entries are filtered out.
+func (r DataRoot) resolved() []string {
+	in := r.Paths
+	if len(in) == 0 {
+		in = []string{r.Path}
+	}
+	out := make([]string, 0, len(in))
+	for _, p := range in {
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+// loadOne tries each path in order; first existing file wins. If no path
+// has the requested file, returns the error from the last attempt so the
+// message names the highest-priority location.
 func (r DataRoot) loadOne(subdir, name string, out any) error {
-	path := filepath.Join(r.Path, subdir, name+".yaml")
-	b, err := os.ReadFile(path)
-	if err != nil {
-		return fmt.Errorf("loading %s/%s: %w", subdir, name, err)
+	var lastErr error
+	for _, p := range r.resolved() {
+		path := filepath.Join(p, subdir, name+".yaml")
+		b, err := os.ReadFile(path)
+		if err != nil {
+			lastErr = fmt.Errorf("loading %s/%s: %w", subdir, name, err)
+			continue
+		}
+		if err := yaml.Unmarshal(b, out); err != nil {
+			return fmt.Errorf("parsing %s: %w", path, err)
+		}
+		return nil
 	}
-	if err := yaml.Unmarshal(b, out); err != nil {
-		return fmt.Errorf("parsing %s: %w", path, err)
+	if lastErr == nil {
+		return fmt.Errorf("no data paths configured")
 	}
-	return nil
+	return lastErr
 }
 
 func (r DataRoot) Physical(name string) (Physical, error) {
@@ -73,19 +109,35 @@ func (r DataRoot) LayoutFile(name string) (LayoutFile, error) {
 	return l, err
 }
 
-// ListLayoutFiles returns the basenames of all YAML files in layouts/.
+// ListLayoutFiles returns the basenames of all YAML files in any of the
+// configured Paths' layouts/ directories. Duplicates are deduplicated;
+// the union is what the user can actually compose, since lookups will
+// later find the highest-priority copy.
 func (r DataRoot) ListLayoutFiles() ([]string, error) {
-	dir := filepath.Join(r.Path, "layouts")
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return nil, err
-	}
+	seen := map[string]bool{}
 	var names []string
-	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ".yaml") {
+	var lastErr error
+	for _, p := range r.resolved() {
+		dir := filepath.Join(p, "layouts")
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			lastErr = err
 			continue
 		}
-		names = append(names, strings.TrimSuffix(e.Name(), ".yaml"))
+		for _, e := range entries {
+			if e.IsDir() || !strings.HasSuffix(e.Name(), ".yaml") {
+				continue
+			}
+			n := strings.TrimSuffix(e.Name(), ".yaml")
+			if seen[n] {
+				continue
+			}
+			seen[n] = true
+			names = append(names, n)
+		}
+	}
+	if len(names) == 0 && lastErr != nil {
+		return nil, lastErr
 	}
 	return names, nil
 }

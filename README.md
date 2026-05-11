@@ -65,7 +65,31 @@ flexkb compose us basic                    # print one variant to stdout
 flexkb generate ./out                      # write all modular layouts to ./out/symbols/
 flexkb build ./out --xkb /usr/share/X11/xkb  # generate + fallback-copy rest
 flexkb verify us basic                     # diff composed vs system xkb file
+flexkb paths                               # show which data dirs are active
+flexkb activate ru phonetic-dvorak         # generate to ~/.xkb and setxkbmap to it
 ```
+
+## Per-user customisation
+
+flexkb walks a layered data search path. Highest priority first:
+
+1. `$XDG_CONFIG_HOME/flexkb/data` (default `~/.config/flexkb/data`)
+2. `$XDG_DATA_HOME/flexkb/data` (default `~/.local/share/flexkb/data`)
+3. `./data` (when invoked from a repo checkout — dev workflow)
+4. `/usr/share/flexkb/data` (system install)
+
+Files in a higher-priority directory **shadow** same-named files lower
+down; new files just **add** to the available set. So you can:
+
+- Override `data/transformations/dvorak.yaml` to tweak the layout to your
+  taste — the system file is untouched and pacman won't ever clobber yours.
+- Drop a brand-new `data/layouts/my-mix.yaml` to declare any combination of
+  the existing physical / transformation / additions / substitutions —
+  it appears in `flexkb list` and composes immediately.
+- Activate any variant (yours or shipped) for the current X session:
+  `flexkb activate my-mix mine` writes to `~/.xkb/` and runs xkbcomp.
+
+Run `flexkb paths` to see what's currently resolved.
 
 ## Designing a new layout
 
