@@ -113,6 +113,17 @@ type Addition struct {
 	// at level 1 after the transformation. Lookup is case-insensitive at
 	// the key but case-sensitive in the values, so you can express
 	// distinct shifted forms.
+	//
+	// Edge case — Turkish dotted i vs. dotless ı:
+	// xkb has separate keysyms for the dotted and dotless forms ("i" /
+	// "I" / "Iabovedot" / "idotless"), so this index keys them
+	// distinctly. A `letter_overlays: { i: ... }` entry lands only on
+	// keys whose level-1 is "i" (the dotted one). Turkish-F's ı key
+	// (idotless) is untouched unless you write a separate entry for it.
+	// If you want Turkish-style case pairing (i ↔ İ) on top of a non-
+	// Turkish transformation, ship a small addition that sets level 2
+	// of the 'i' overlay to Iabovedot — see data/additions/turkish-i-pair
+	// for a worked example.
 	LetterOverlays map[string]KeySymbols `yaml:"letter_overlays,omitempty"`
 	// Includes are raw xkb `include "..."` lines appended to the symbols
 	// block — e.g. `level3(ralt_switch)` to enable AltGr.

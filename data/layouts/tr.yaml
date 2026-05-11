@@ -10,3 +10,11 @@ variants:
     description: Turkish (F)
     physical: iso
     transformation: turkish-f
+
+  # For users who prefer QWERTY base but want Turkish-style i/İ casing
+  # without the full Turkish-Q layout rearrangement.
+  - name: us-qwerty-tr-i
+    description: Turkish (QWERTY base, Turkish i↔İ pairing)
+    physical: iso
+    transformation: qwerty
+    additions: [turkish-i-pair]

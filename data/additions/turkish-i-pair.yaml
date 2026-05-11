@@ -1,0 +1,15 @@
+name: Turkish i↔İ case pair
+description: |
+  Override the i-key's level-2 to produce İ (Iabovedot) instead of plain
+  I. Turkish's lowercase 'i' uppercases to 'İ', not 'I'; the dotless ı
+  uppercases to 'I'. This addition gives you Turkish-style case pairing
+  on top of any Latin transformation that has plain `i` at level 1.
+
+  Note: doesn't touch the dotless ı, since stock Latin transformations
+  don't have idotless at level 1. Use Turkish-Q or Turkish-F as base
+  if you need both pairs.
+
+  Worked example of using letter_overlays to fix case-pair edge cases —
+  see internal/model/model.go LetterOverlays doc for the full rationale.
+letter_overlays:
+  i: { levels: ["", Iabovedot] }
