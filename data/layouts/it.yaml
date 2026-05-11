@@ -1,0 +1,26 @@
+file: it
+variants:
+  - name: basic
+    description: Italian
+    physical: iso
+    transformation: qwerty
+    additions: [italian-accents]
+    default: true
+
+  - name: dvorak
+    description: Italian (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [italian-accents]
+
+  - name: colemak
+    description: Italian (Colemak)
+    physical: iso
+    transformation: colemak
+    additions: [italian-accents]
+
+  - name: intl
+    description: Italian (with intl dead keys)
+    physical: iso
+    transformation: qwerty
+    additions: [intl, italian-accents]

@@ -1,0 +1,13 @@
+file: eg
+variants:
+  - name: basic
+    description: Egyptian Arabic
+    physical: iso
+    transformation: arabic-101
+    default: true
+
+  - name: phonetic
+    description: Egyptian Arabic (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-arabic-phonetic]

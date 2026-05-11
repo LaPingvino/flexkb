@@ -1,0 +1,14 @@
+file: ke
+variants:
+  - name: basic
+    description: Kenyan (QWERTY + intl, Swahili-friendly)
+    physical: iso
+    transformation: qwerty
+    additions: [intl]
+    default: true
+
+  - name: dvorak
+    description: Kenyan (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [intl]

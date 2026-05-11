@@ -1,0 +1,20 @@
+file: latam
+variants:
+  - name: basic
+    description: Latin American Spanish (traditional, ñ on AC10)
+    physical: iso
+    transformation: qwerty
+    additions: [spanish-traditional]
+    default: true
+
+  - name: dvorak
+    description: Latin American Spanish (Dvorak base)
+    physical: iso
+    transformation: dvorak
+    additions: [spanish]
+
+  - name: colemak
+    description: Latin American Spanish (Colemak base)
+    physical: iso
+    transformation: colemak
+    additions: [spanish]

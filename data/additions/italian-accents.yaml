@@ -1,0 +1,12 @@
+name: Italian accented vowels (à è é ì ò ù)
+description: |
+  Italian uses grave accents on most vowels (à, è, ì, ò, ù) plus
+  acute é. Letter-following AltGr — works on any Latin base.
+letter_overlays:
+  a: { levels: ["", "", agrave, Agrave] }
+  e: { levels: ["", "", egrave, Eacute] }
+  i: { levels: ["", "", igrave, Igrave] }
+  o: { levels: ["", "", ograve, Ograve] }
+  u: { levels: ["", "", ugrave, Ugrave] }
+includes:
+  - level3(ralt_switch)

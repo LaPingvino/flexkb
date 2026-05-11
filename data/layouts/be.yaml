@@ -1,0 +1,20 @@
+file: be
+variants:
+  - name: basic
+    description: Belgian (AZERTY French + intl)
+    physical: iso
+    transformation: azerty
+    additions: [french-accents, intl]
+    default: true
+
+  - name: nl-intl
+    description: Belgian Dutch (QWERTY US-intl)
+    physical: iso
+    transformation: qwerty
+    additions: [intl]
+
+  - name: dvorak
+    description: Belgian (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [french-accents]

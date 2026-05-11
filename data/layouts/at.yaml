@@ -1,0 +1,14 @@
+file: at
+variants:
+  - name: basic
+    description: Austrian (QWERTZ + German umlauts)
+    physical: iso
+    transformation: qwertz
+    additions: [german-umlauts]
+    default: true
+
+  - name: dvorak
+    description: Austrian (Dvorak + German umlauts)
+    physical: iso
+    transformation: dvorak
+    additions: [german-umlauts]

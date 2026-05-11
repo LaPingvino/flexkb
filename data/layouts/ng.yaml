@@ -1,0 +1,14 @@
+file: ng
+variants:
+  - name: basic
+    description: Nigerian (QWERTY + African Latin extras + intl)
+    physical: iso
+    transformation: qwerty
+    additions: [intl, african-latin-extras]
+    default: true
+
+  - name: dvorak
+    description: Nigerian (Dvorak + African Latin extras)
+    physical: iso
+    transformation: dvorak
+    additions: [african-latin-extras]

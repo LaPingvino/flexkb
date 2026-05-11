@@ -1,0 +1,20 @@
+file: nl
+variants:
+  - name: basic
+    description: Dutch (US-international, the de-facto Dutch keyboard)
+    physical: iso
+    transformation: qwerty
+    additions: [intl]
+    default: true
+
+  - name: dvorak
+    description: Dutch (Dvorak + intl)
+    physical: iso
+    transformation: dvorak
+    additions: [intl]
+
+  - name: colemak
+    description: Dutch (Colemak + intl)
+    physical: iso
+    transformation: colemak
+    additions: [intl]

@@ -1,0 +1,25 @@
+file: ma
+variants:
+  - name: basic
+    description: Moroccan Arabic
+    physical: iso
+    transformation: arabic-101
+    default: true
+
+  - name: tifinagh
+    description: Moroccan Berber (Tifinagh phonetic)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-tifinagh-phonetic]
+
+  - name: french
+    description: Moroccan French (AZERTY)
+    physical: iso
+    transformation: azerty
+    additions: [french-accents]
+
+  - name: phonetic
+    description: Moroccan Arabic (phonetic on QWERTY)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-arabic-phonetic]

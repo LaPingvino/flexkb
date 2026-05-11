@@ -1,0 +1,14 @@
+file: me
+variants:
+  - name: basic
+    description: Montenegrin (QWERTZ + Croatian-Latin extras)
+    physical: iso
+    transformation: qwertz
+    additions: [croatian]
+    default: true
+
+  - name: cyrillic
+    description: Montenegrin Cyrillic (ЙЦУКЕН-ish)
+    physical: iso
+    transformation: ycuken
+    additions: [russian-phonetic-extras]

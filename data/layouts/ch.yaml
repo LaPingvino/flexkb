@@ -1,0 +1,26 @@
+file: ch
+variants:
+  - name: basic
+    description: Swiss German (QWERTZ + German umlauts)
+    physical: iso
+    transformation: qwertz
+    additions: [german-umlauts]
+    default: true
+
+  - name: fr
+    description: Swiss French (QWERTZ + French accents)
+    physical: iso
+    transformation: qwertz
+    additions: [french-accents]
+
+  - name: it
+    description: Swiss Italian (QWERTZ + Italian accents)
+    physical: iso
+    transformation: qwertz
+    additions: [italian-accents]
+
+  - name: de-dvorak
+    description: Swiss German (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [german-umlauts]

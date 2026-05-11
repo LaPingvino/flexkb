@@ -1,0 +1,19 @@
+file: ph
+variants:
+  - name: basic
+    description: Philippine English (QWERTY)
+    physical: ansi
+    transformation: qwerty
+    default: true
+
+  - name: capewell-dvorak
+    description: Philippine (Dvorak + intl, for Filipino vowel marking)
+    physical: ansi
+    transformation: dvorak
+    additions: [intl]
+
+  - name: colemak
+    description: Philippine (Colemak)
+    physical: ansi
+    transformation: colemak
+    additions: [intl]
