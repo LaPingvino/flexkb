@@ -1,0 +1,10 @@
+name: Bulgarian phonetic extras
+description: |
+  Bulgarian-specific positions: ш (sha), щ (shcha), ч (che) on punctuation
+  slots that don't have a Latin cognate.
+overlays:
+  AD11: { levels: [Cyrillic_sha, Cyrillic_SHA] }
+  AD12: { levels: [Cyrillic_shcha, Cyrillic_SHCHA] }
+  AE12: { levels: [Cyrillic_che, Cyrillic_CHE] }
+includes:
+  - level3(ralt_switch)

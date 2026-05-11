@@ -1,0 +1,11 @@
+name: French dead-key accents
+description: |
+  AltGr-level dead-key accents commonly used in French text input: grave,
+  acute, circumflex, cedilla, tilde. Combine with AZERTY or BÉPO base.
+overlays:
+  AC11: { levels: ["", "", dead_grave, dead_grave] }
+  AD03: { levels: ["", "", dead_acute] }
+  AD11: { levels: ["", "", dead_diaeresis] }
+  AB04: { levels: ["", "", dead_circumflex] }
+includes:
+  - level3(ralt_switch)

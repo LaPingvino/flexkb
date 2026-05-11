@@ -1,0 +1,58 @@
+name: BÉPO
+description: |
+  BÉPO — French ergonomic alternative to AZERTY, vowels left, consonants
+  right (Dvorak-style optimisation but for French letter frequencies).
+  Designed by the bepo.fr community. This captures the level 1/2 base;
+  AltGr level 3/4 is in the `bepo-altgr` addition.
+keys:
+  TLDE: { levels: [dollar, numbersign] }
+  AE01: { levels: [quotedbl, "1"] }
+  AE02: { levels: [guillemotleft, "2"] }
+  AE03: { levels: [guillemotright, "3"] }
+  AE04: { levels: [parenleft, "4"] }
+  AE05: { levels: [parenright, "5"] }
+  AE06: { levels: [at, "6"] }
+  AE07: { levels: [plus, "7"] }
+  AE08: { levels: [minus, "8"] }
+  AE09: { levels: [slash, "9"] }
+  AE10: { levels: [asterisk, "0"] }
+  AE11: { levels: [equal, degree] }
+  AE12: { levels: [percent, grave] }
+
+  AD01: { levels: [b, B] }
+  AD02: { levels: [eacute, Eacute] }
+  AD03: { levels: [p, P] }
+  AD04: { levels: [o, O] }
+  AD05: { levels: [egrave, Egrave] }
+  AD06: { levels: [dead_circumflex, exclam] }
+  AD07: { levels: [v, V] }
+  AD08: { levels: [d, D] }
+  AD09: { levels: [l, L] }
+  AD10: { levels: [j, J] }
+  AD11: { levels: [z, Z] }
+  AD12: { levels: [w, W] }
+
+  AC01: { levels: [a, A] }
+  AC02: { levels: [u, U] }
+  AC03: { levels: [i, I] }
+  AC04: { levels: [e, E] }
+  AC05: { levels: [comma, semicolon] }
+  AC06: { levels: [c, C] }
+  AC07: { levels: [t, T] }
+  AC08: { levels: [s, S] }
+  AC09: { levels: [r, R] }
+  AC10: { levels: [n, N] }
+  AC11: { levels: [m, M] }
+  BKSL: { levels: [ccedilla, Ccedilla] }
+
+  LSGT: { levels: [ecircumflex, Ecircumflex] }
+  AB01: { levels: [agrave, Agrave] }
+  AB02: { levels: [y, Y] }
+  AB03: { levels: [x, X] }
+  AB04: { levels: [period, colon] }
+  AB05: { levels: [k, K] }
+  AB06: { levels: [apostrophe, question] }
+  AB07: { levels: [q, Q] }
+  AB08: { levels: [g, G] }
+  AB09: { levels: [h, H] }
+  AB10: { levels: [f, F] }

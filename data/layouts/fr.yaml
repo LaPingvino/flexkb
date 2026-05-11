@@ -1,0 +1,20 @@
+file: fr
+variants:
+  - name: basic
+    description: French (AZERTY)
+    physical: iso
+    transformation: azerty
+    additions: [french-accents]
+    default: true
+
+  - name: bepo
+    description: French (BÉPO)
+    physical: iso
+    transformation: bepo
+
+  # Dvorak-fr: French muscle memory keys but with Dvorak letter positions.
+  - name: dvorak
+    description: French (Dvorak, with AZERTY-style accents)
+    physical: iso
+    transformation: dvorak
+    additions: [french-accents]

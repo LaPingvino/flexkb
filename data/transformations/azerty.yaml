@@ -1,0 +1,58 @@
+name: AZERTY
+description: |
+  French AZERTY — Q/A swapped, Z/W swapped, M moved to where ; sits in
+  QWERTY, and the number row requires shift to type digits (1 = & by
+  default, shift+1 = 1). This is the level 1/2 base; accented letters
+  come via the `french-accents` addition.
+keys:
+  TLDE: { levels: [twosuperior, asciitilde] }
+  AE01: { levels: [ampersand, "1"] }
+  AE02: { levels: [eacute, "2"] }
+  AE03: { levels: [quotedbl, "3"] }
+  AE04: { levels: [apostrophe, "4"] }
+  AE05: { levels: [parenleft, "5"] }
+  AE06: { levels: [minus, "6"] }
+  AE07: { levels: [egrave, "7"] }
+  AE08: { levels: [underscore, "8"] }
+  AE09: { levels: [ccedilla, "9"] }
+  AE10: { levels: [agrave, "0"] }
+  AE11: { levels: [parenright, degree] }
+  AE12: { levels: [equal, plus] }
+
+  AD01: { levels: [a, A] }
+  AD02: { levels: [z, Z] }
+  AD03: { levels: [e, E] }
+  AD04: { levels: [r, R] }
+  AD05: { levels: [t, T] }
+  AD06: { levels: [y, Y] }
+  AD07: { levels: [u, U] }
+  AD08: { levels: [i, I] }
+  AD09: { levels: [o, O] }
+  AD10: { levels: [p, P] }
+  AD11: { levels: [dead_circumflex, dead_diaeresis] }
+  AD12: { levels: [dollar, sterling] }
+
+  AC01: { levels: [q, Q] }
+  AC02: { levels: [s, S] }
+  AC03: { levels: [d, D] }
+  AC04: { levels: [f, F] }
+  AC05: { levels: [g, G] }
+  AC06: { levels: [h, H] }
+  AC07: { levels: [j, J] }
+  AC08: { levels: [k, K] }
+  AC09: { levels: [l, L] }
+  AC10: { levels: [m, M] }
+  AC11: { levels: [ugrave, percent] }
+  BKSL: { levels: [asterisk, mu] }
+
+  LSGT: { levels: [less, greater] }
+  AB01: { levels: [w, W] }
+  AB02: { levels: [x, X] }
+  AB03: { levels: [c, C] }
+  AB04: { levels: [v, V] }
+  AB05: { levels: [b, B] }
+  AB06: { levels: [n, N] }
+  AB07: { levels: [comma, question] }
+  AB08: { levels: [semicolon, period] }
+  AB09: { levels: [colon, slash] }
+  AB10: { levels: [exclam, section] }

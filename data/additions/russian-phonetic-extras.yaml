@@ -1,0 +1,17 @@
+name: Russian phonetic extras
+description: |
+  The non-Latin-cognate Cyrillic letters that need a home: ё, ъ, ч, ш, щ,
+  ж, ю, э. These fall on punctuation / number-row slots in the standard
+  Russian phonetic layout. Combine with `latin-cyrillic-phonetic` to get
+  the complete Russian phonetic keyboard on top of any Latin transformation.
+overlays:
+  TLDE: { levels: [Cyrillic_yu, Cyrillic_YU] }
+  AE03: { levels: ["3", Cyrillic_io] }
+  AE04: { levels: ["4", Cyrillic_IO] }
+  AE05: { levels: ["5", Cyrillic_hardsign] }
+  AE06: { levels: ["6", Cyrillic_HARDSIGN] }
+  AE12: { levels: [Cyrillic_che, Cyrillic_CHE] }
+  AD11: { levels: [Cyrillic_sha, Cyrillic_SHA] }
+  AD12: { levels: [Cyrillic_shcha, Cyrillic_SHCHA] }
+  BKSL: { levels: [Cyrillic_e, Cyrillic_E] }
+  AB04: { levels: [Cyrillic_zhe, Cyrillic_ZHE] }

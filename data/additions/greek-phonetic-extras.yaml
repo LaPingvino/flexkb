@@ -1,0 +1,9 @@
+name: Greek phonetic extras
+description: |
+  Greek-specific positions: dead_acute (tonos) on AC11 (semicolon slot),
+  final-sigma (ς) on a punctuation key, etc.
+overlays:
+  AC11: { levels: [dead_acute, dead_diaeresis] }
+  AB10: { levels: [Greek_finalsmallsigma, slash] }
+includes:
+  - level3(ralt_switch)

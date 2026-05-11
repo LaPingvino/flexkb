@@ -46,6 +46,46 @@ type Transformation struct {
 	Keys map[string]KeySymbols `yaml:"keys"`
 }
 
+// Substitution is a character-level replacement table applied as a final
+// pass over the composed layout. The classic use case is "Russian phonetic":
+// take any Latin transformation (QWERTY/Dvorak/Colemak) and substitute each
+// Latin letter for its phonetic Cyrillic cognate — a→а, b→б, etc. — so
+// "Russian phonetic" works as a derivative of any base, not as a hand-coded
+// per-base file. Same trick works for Greek, Bulgarian, Hebrew phonetic
+// layouts.
+//
+// Substitutions are deliberately symbol-token-exact (not regex / substring):
+// only whole-symbol matches like "a" → "Cyrillic_a" are replaced. Multi-
+// letter names like "adiaeresis" or "Aacute" pass through unchanged so they
+// don't get mangled when stacked with an "intl" Addition.
+//
+// Use the inverse direction by prefixing the substitution name with "~" in
+// a LayoutSpec — e.g. "~latin-cyrillic-phonetic" maps Cyrillic_a → a, which
+// lets a Russian-trained user get a Latin-via-ЙЦУКЕН-positions layout.
+type Substitution struct {
+	Name        string            `yaml:"name"`
+	Description string            `yaml:"description,omitempty"`
+	// Map is source-symbol → target-symbol. Apply forward by default.
+	Map map[string]string `yaml:"map"`
+}
+
+// Inverse returns a substitution with source/target swapped. If two source
+// symbols map to the same target the result is non-deterministic; that's
+// usually OK in practice (e.g. both 'v' and 'w' map to Cyrillic_ve, but
+// inverting back lands you on one of them, which is fine for muscle-memory
+// derivative layouts).
+func (s Substitution) Inverse() Substitution {
+	inv := make(map[string]string, len(s.Map))
+	for k, v := range s.Map {
+		inv[v] = k
+	}
+	return Substitution{
+		Name:        s.Name + " (inverse)",
+		Description: "inverse of " + s.Name,
+		Map:         inv,
+	}
+}
+
 // Addition overlays extra symbol levels (AltGr characters, dead keys) on top
 // of an already-transformed layout. Examples: us-intl dead keys, Polish
 // AltGr-ą/ę/ć/etc, German umlauts on AC10/AC11/AD11.
@@ -77,6 +117,11 @@ type LayoutSpec struct {
 	Physical       string   `yaml:"physical"`
 	Transformation string   `yaml:"transformation"`
 	Additions      []string `yaml:"additions,omitempty"`
+	// Substitutions are applied AFTER additions. Prefix a name with "~" to
+	// apply the inverse direction (target→source). Substitutions chain in
+	// listed order, so you can stack e.g. [latin-cyrillic-phonetic,
+	// some-cyrillic-respelling].
+	Substitutions []string `yaml:"substitutions,omitempty"`
 	// Default marks this variant as the file-level default (xkb syntax:
 	// `default partial alphanumeric_keys`).
 	Default bool `yaml:"default,omitempty"`

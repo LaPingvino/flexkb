@@ -1,0 +1,12 @@
+file: tr
+variants:
+  - name: basic
+    description: Turkish (Q)
+    physical: iso
+    transformation: turkish-q
+    default: true
+
+  - name: f
+    description: Turkish (F)
+    physical: iso
+    transformation: turkish-f

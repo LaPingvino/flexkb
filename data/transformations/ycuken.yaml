@@ -1,0 +1,59 @@
+name: ЙЦУКЕН
+description: |
+  Native Russian keyboard arrangement — Cyrillic letters at their
+  traditional positions on a Russian typewriter / computer keyboard.
+  This is to Russian what QWERTY is to English: the de-facto standard
+  arrangement, not a phonetic mapping. Apply on top of a physical to
+  get a Russian native layout; no substitution needed.
+keys:
+  TLDE: { levels: [Cyrillic_io, Cyrillic_IO] }
+  AE01: { levels: ["1", exclam] }
+  AE02: { levels: ["2", quotedbl] }
+  AE03: { levels: ["3", numerosign] }
+  AE04: { levels: ["4", semicolon] }
+  AE05: { levels: ["5", percent] }
+  AE06: { levels: ["6", colon] }
+  AE07: { levels: ["7", question] }
+  AE08: { levels: ["8", asterisk] }
+  AE09: { levels: ["9", parenleft] }
+  AE10: { levels: ["0", parenright] }
+  AE11: { levels: [minus, underscore] }
+  AE12: { levels: [equal, plus] }
+
+  AD01: { levels: [Cyrillic_shorti, Cyrillic_SHORTI] }
+  AD02: { levels: [Cyrillic_tse, Cyrillic_TSE] }
+  AD03: { levels: [Cyrillic_u, Cyrillic_U] }
+  AD04: { levels: [Cyrillic_ka, Cyrillic_KA] }
+  AD05: { levels: [Cyrillic_ie, Cyrillic_IE] }
+  AD06: { levels: [Cyrillic_en, Cyrillic_EN] }
+  AD07: { levels: [Cyrillic_ghe, Cyrillic_GHE] }
+  AD08: { levels: [Cyrillic_sha, Cyrillic_SHA] }
+  AD09: { levels: [Cyrillic_shcha, Cyrillic_SHCHA] }
+  AD10: { levels: [Cyrillic_ze, Cyrillic_ZE] }
+  AD11: { levels: [Cyrillic_ha, Cyrillic_HA] }
+  AD12: { levels: [Cyrillic_hardsign, Cyrillic_HARDSIGN] }
+
+  AC01: { levels: [Cyrillic_ef, Cyrillic_EF] }
+  AC02: { levels: [Cyrillic_yeru, Cyrillic_YERU] }
+  AC03: { levels: [Cyrillic_ve, Cyrillic_VE] }
+  AC04: { levels: [Cyrillic_a, Cyrillic_A] }
+  AC05: { levels: [Cyrillic_pe, Cyrillic_PE] }
+  AC06: { levels: [Cyrillic_er, Cyrillic_ER] }
+  AC07: { levels: [Cyrillic_o, Cyrillic_O] }
+  AC08: { levels: [Cyrillic_el, Cyrillic_EL] }
+  AC09: { levels: [Cyrillic_de, Cyrillic_DE] }
+  AC10: { levels: [Cyrillic_zhe, Cyrillic_ZHE] }
+  AC11: { levels: [Cyrillic_e, Cyrillic_E] }
+  BKSL: { levels: [backslash, slash] }
+
+  LSGT: { levels: [slash, bar] }
+  AB01: { levels: [Cyrillic_ya, Cyrillic_YA] }
+  AB02: { levels: [Cyrillic_che, Cyrillic_CHE] }
+  AB03: { levels: [Cyrillic_es, Cyrillic_ES] }
+  AB04: { levels: [Cyrillic_em, Cyrillic_EM] }
+  AB05: { levels: [Cyrillic_i, Cyrillic_I] }
+  AB06: { levels: [Cyrillic_te, Cyrillic_TE] }
+  AB07: { levels: [Cyrillic_softsign, Cyrillic_SOFTSIGN] }
+  AB08: { levels: [Cyrillic_be, Cyrillic_BE] }
+  AB09: { levels: [Cyrillic_yu, Cyrillic_YU] }
+  AB10: { levels: [period, comma] }

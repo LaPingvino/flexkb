@@ -1,0 +1,23 @@
+file: bg
+variants:
+  - name: phonetic
+    description: Bulgarian (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-cyrillic-bg-phonetic]
+    additions: [bulgarian-phonetic-extras]
+    default: true
+
+  - name: phonetic-dvorak
+    description: Bulgarian (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-cyrillic-bg-phonetic]
+    additions: [bulgarian-phonetic-extras]
+
+  - name: phonetic-colemak
+    description: Bulgarian (phonetic, Colemak base)
+    physical: iso
+    transformation: colemak
+    substitutions: [latin-cyrillic-bg-phonetic]
+    additions: [bulgarian-phonetic-extras]

@@ -1,0 +1,46 @@
+file: ru
+variants:
+  # "winkeys" matches the xkb default variant name; flexkb's modular form
+  # is simply the ЙЦУКЕН transformation on an ISO physical.
+  - name: winkeys
+    description: Russian
+    physical: iso
+    transformation: ycuken
+    default: true
+
+  - name: phonetic
+    description: Russian (phonetic, on QWERTY base)
+    physical: ansi
+    transformation: qwerty
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras]
+
+  # The N×M×K kicks in here: Dvorak and Colemak Russian phonetic come
+  # for free from the same substitution + extras stack.
+  - name: phonetic-dvorak
+    description: Russian (phonetic, on Dvorak base)
+    physical: ansi
+    transformation: dvorak
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras]
+
+  - name: phonetic-colemak
+    description: Russian (phonetic, on Colemak base)
+    physical: ansi
+    transformation: colemak
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras]
+
+  - name: phonetic-workman
+    description: Russian (phonetic, on Workman base)
+    physical: ansi
+    transformation: workman
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras]
+
+  # Inverse: take Russian ЙЦУКЕН muscle memory and produce Latin text.
+  - name: latin-via-ycuken
+    description: Latin via ЙЦУКЕН positions (inverse phonetic)
+    physical: iso
+    transformation: ycuken
+    substitutions: [~latin-cyrillic-phonetic]

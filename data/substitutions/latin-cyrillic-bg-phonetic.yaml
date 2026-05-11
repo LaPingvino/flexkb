@@ -1,0 +1,61 @@
+name: Latin → Cyrillic (Bulgarian phonetic)
+description: |
+  Bulgarian phonetic substitution. Mostly the same Cyrillic letters as
+  Russian phonetic, except: Bulgarian doesn't use ё, ы, ъ as positionally,
+  and some shifted assignments differ. This file keeps the substitution
+  identical to Russian for shared letters and lets the Bulgarian-specific
+  addition handle the rest. Showcases how the same mechanism reuses across
+  closely related scripts — almost zero duplication.
+map:
+  a: Cyrillic_a
+  A: Cyrillic_A
+  b: Cyrillic_be
+  B: Cyrillic_BE
+  c: Cyrillic_tse
+  C: Cyrillic_TSE
+  d: Cyrillic_de
+  D: Cyrillic_DE
+  e: Cyrillic_ie
+  E: Cyrillic_IE
+  f: Cyrillic_ef
+  F: Cyrillic_EF
+  g: Cyrillic_ghe
+  G: Cyrillic_GHE
+  h: Cyrillic_ha
+  H: Cyrillic_HA
+  i: Cyrillic_i
+  I: Cyrillic_I
+  j: Cyrillic_shorti
+  J: Cyrillic_SHORTI
+  k: Cyrillic_ka
+  K: Cyrillic_KA
+  l: Cyrillic_el
+  L: Cyrillic_EL
+  m: Cyrillic_em
+  M: Cyrillic_EM
+  n: Cyrillic_en
+  N: Cyrillic_EN
+  o: Cyrillic_o
+  O: Cyrillic_O
+  p: Cyrillic_pe
+  P: Cyrillic_PE
+  q: Cyrillic_ya
+  Q: Cyrillic_YA
+  r: Cyrillic_er
+  R: Cyrillic_ER
+  s: Cyrillic_es
+  S: Cyrillic_ES
+  t: Cyrillic_te
+  T: Cyrillic_TE
+  u: Cyrillic_u
+  U: Cyrillic_U
+  v: Cyrillic_ve
+  V: Cyrillic_VE
+  w: Cyrillic_ve
+  W: Cyrillic_VE
+  x: Cyrillic_hardsign   # Bulgarian phonetic puts ъ on X
+  X: Cyrillic_HARDSIGN
+  y: Cyrillic_yu
+  Y: Cyrillic_YU
+  z: Cyrillic_ze
+  Z: Cyrillic_ZE

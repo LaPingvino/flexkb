@@ -39,7 +39,7 @@ type Result struct {
 }
 
 // Compose resolves a LayoutSpec against the data root. It loads the named
-// physical, transformation and additions, then merges them.
+// physical, transformation, additions and substitutions, then merges them.
 func Compose(root model.DataRoot, spec model.LayoutSpec) (Result, error) {
 	phys, err := root.Physical(spec.Physical)
 	if err != nil {
@@ -57,12 +57,27 @@ func Compose(root model.DataRoot, spec model.LayoutSpec) (Result, error) {
 		}
 		adds = append(adds, a)
 	}
-	return ComposeFromParts(spec, phys, trans, adds), nil
+	subs := make([]model.Substitution, 0, len(spec.Substitutions))
+	for _, n := range spec.Substitutions {
+		s, err := root.Substitution(n)
+		if err != nil {
+			return Result{}, fmt.Errorf("variant %q: %w", spec.Name, err)
+		}
+		subs = append(subs, s)
+	}
+	return ComposeFromPartsWithSubs(spec, phys, trans, adds, subs), nil
 }
 
-// ComposeFromParts does the actual merge once parts have been resolved.
-// Split out so tests can drive composition with in-memory data.
+// ComposeFromParts is the no-substitutions form, kept for the
+// pre-substitution callers and tests. New callers should prefer
+// ComposeFromPartsWithSubs.
 func ComposeFromParts(spec model.LayoutSpec, phys model.Physical, trans model.Transformation, adds []model.Addition) Result {
+	return ComposeFromPartsWithSubs(spec, phys, trans, adds, nil)
+}
+
+// ComposeFromPartsWithSubs does the actual merge once parts have been
+// resolved. Split out so tests can drive composition with in-memory data.
+func ComposeFromPartsWithSubs(spec model.LayoutSpec, phys model.Physical, trans model.Transformation, adds []model.Addition, subs []model.Substitution) Result {
 	r := Result{}
 	out := model.ComposedLayout{
 		Name:        spec.Name,
@@ -107,8 +122,35 @@ func ComposeFromParts(spec model.LayoutSpec, phys model.Physical, trans model.Tr
 		out.Includes = append(out.Includes, a.Includes...)
 	}
 
+	// Stage 3: apply substitutions as a final character-level pass. Each
+	// substitution rewrites symbols in-place; later substitutions see the
+	// already-rewritten values, allowing chains (e.g. apply Latin→Cyrillic
+	// then a Cyrillic-respelling).
+	if len(subs) > 0 {
+		for k, sym := range out.Symbols {
+			newLevels := make([]string, len(sym.Levels))
+			for i, lv := range sym.Levels {
+				newLevels[i] = applySubs(lv, subs)
+			}
+			out.Symbols[k] = model.KeySymbols{Levels: newLevels}
+		}
+	}
+
 	r.Layout = out
 	return r
+}
+
+func applySubs(sym string, subs []model.Substitution) string {
+	if sym == "" {
+		return sym
+	}
+	out := sym
+	for _, s := range subs {
+		if mapped, ok := s.Map[out]; ok {
+			out = mapped
+		}
+	}
+	return out
 }
 
 // mergeLevels overlays b on top of a. Result length is max(len(a), len(b)).

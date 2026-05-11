@@ -46,6 +46,24 @@ func (r DataRoot) Addition(name string) (Addition, error) {
 	return a, err
 }
 
+// Substitution loads a substitution from data/substitutions/<name>.yaml.
+// A "~" prefix on the requested name returns the inverse direction.
+func (r DataRoot) Substitution(name string) (Substitution, error) {
+	inverse := false
+	if strings.HasPrefix(name, "~") {
+		inverse = true
+		name = name[1:]
+	}
+	var s Substitution
+	if err := r.loadOne("substitutions", name, &s); err != nil {
+		return s, err
+	}
+	if inverse {
+		return s.Inverse(), nil
+	}
+	return s, nil
+}
+
 func (r DataRoot) LayoutFile(name string) (LayoutFile, error) {
 	var l LayoutFile
 	err := r.loadOne("layouts", name, &l)

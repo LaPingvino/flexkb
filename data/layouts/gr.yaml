@@ -1,0 +1,24 @@
+file: gr
+variants:
+  - name: basic
+    description: Greek (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-greek-phonetic]
+    additions: [greek-phonetic-extras]
+    default: true
+
+  # Free combinations:
+  - name: dvorak
+    description: Greek (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-greek-phonetic]
+    additions: [greek-phonetic-extras]
+
+  - name: colemak
+    description: Greek (phonetic, Colemak base)
+    physical: iso
+    transformation: colemak
+    substitutions: [latin-greek-phonetic]
+    additions: [greek-phonetic-extras]

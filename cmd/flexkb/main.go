@@ -370,7 +370,11 @@ func runList(args []string) {
 			if adds == "" {
 				adds = "-"
 			}
-			fmt.Printf("%s\t%s\t%s + %s + %s\n", lf.File, v.Name, v.Physical, v.Transformation, adds)
+			subs := strings.Join(v.Substitutions, "+")
+			if subs == "" {
+				subs = "-"
+			}
+			fmt.Printf("%s\t%s\t%s + %s + add:%s + sub:%s\n", lf.File, v.Name, v.Physical, v.Transformation, adds, subs)
 		}
 	}
 }

@@ -1,0 +1,58 @@
+name: Turkish F
+description: |
+  Turkish F — designed in the 1950s with Turkish letter frequency analysis;
+  vowels on right hand, frequent consonants on left. Modern Turkish
+  keyboards usually ship with the Q (QWERTY-based) layout, but F is the
+  ergonomically optimised native arrangement.
+keys:
+  TLDE: { levels: [plus, asterisk] }
+  AE01: { levels: ["1", exclam] }
+  AE02: { levels: ["2", quotedbl] }
+  AE03: { levels: ["3", asciicircum] }
+  AE04: { levels: ["4", dollar] }
+  AE05: { levels: ["5", percent] }
+  AE06: { levels: ["6", ampersand] }
+  AE07: { levels: ["7", apostrophe] }
+  AE08: { levels: ["8", parenleft] }
+  AE09: { levels: ["9", parenright] }
+  AE10: { levels: ["0", equal] }
+  AE11: { levels: [slash, question] }
+  AE12: { levels: [minus, underscore] }
+
+  AD01: { levels: [f, F] }
+  AD02: { levels: [g, G] }
+  AD03: { levels: [gbreve, Gbreve] }
+  AD04: { levels: [idotless, I] }
+  AD05: { levels: [o, O] }
+  AD06: { levels: [d, D] }
+  AD07: { levels: [r, R] }
+  AD08: { levels: [n, N] }
+  AD09: { levels: [h, H] }
+  AD10: { levels: [p, P] }
+  AD11: { levels: [q, Q] }
+  AD12: { levels: [w, W] }
+
+  AC01: { levels: [u, U] }
+  AC02: { levels: [i, Iabovedot] }
+  AC03: { levels: [e, E] }
+  AC04: { levels: [a, A] }
+  AC05: { levels: [udiaeresis, Udiaeresis] }
+  AC06: { levels: [t, T] }
+  AC07: { levels: [k, K] }
+  AC08: { levels: [m, M] }
+  AC09: { levels: [l, L] }
+  AC10: { levels: [y, Y] }
+  AC11: { levels: [scedilla, Scedilla] }
+  BKSL: { levels: [x, X] }
+
+  LSGT: { levels: [less, greater] }
+  AB01: { levels: [j, J] }
+  AB02: { levels: [odiaeresis, Odiaeresis] }
+  AB03: { levels: [v, V] }
+  AB04: { levels: [c, C] }
+  AB05: { levels: [ccedilla, Ccedilla] }
+  AB06: { levels: [z, Z] }
+  AB07: { levels: [s, S] }
+  AB08: { levels: [b, B] }
+  AB09: { levels: [period, colon] }
+  AB10: { levels: [comma, semicolon] }

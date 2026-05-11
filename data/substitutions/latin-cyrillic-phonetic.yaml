@@ -1,0 +1,64 @@
+name: Latin → Cyrillic (phonetic)
+description: |
+  Phonetic substitution: each Latin letter maps to its Cyrillic cognate.
+  Apply over any Latin transformation (QWERTY, Dvorak, Colemak, Workman…)
+  to get a Russian-phonetic layout that follows the underlying letter
+  positions. Use ~latin-cyrillic-phonetic for the inverse direction
+  (Cyrillic muscle memory typing Latin text).
+
+  Convention follows the Russian phonetic mapping used by xkb's
+  ru(phonetic): w collides onto Cyrillic_ve (same as v) and x onto
+  Cyrillic_softsign — both are non-cognate slots needing a home.
+map:
+  a: Cyrillic_a
+  A: Cyrillic_A
+  b: Cyrillic_be
+  B: Cyrillic_BE
+  c: Cyrillic_tse
+  C: Cyrillic_TSE
+  d: Cyrillic_de
+  D: Cyrillic_DE
+  e: Cyrillic_ie
+  E: Cyrillic_IE
+  f: Cyrillic_ef
+  F: Cyrillic_EF
+  g: Cyrillic_ghe
+  G: Cyrillic_GHE
+  h: Cyrillic_ha
+  H: Cyrillic_HA
+  i: Cyrillic_i
+  I: Cyrillic_I
+  j: Cyrillic_shorti
+  J: Cyrillic_SHORTI
+  k: Cyrillic_ka
+  K: Cyrillic_KA
+  l: Cyrillic_el
+  L: Cyrillic_EL
+  m: Cyrillic_em
+  M: Cyrillic_EM
+  n: Cyrillic_en
+  N: Cyrillic_EN
+  o: Cyrillic_o
+  O: Cyrillic_O
+  p: Cyrillic_pe
+  P: Cyrillic_PE
+  q: Cyrillic_ya
+  Q: Cyrillic_YA
+  r: Cyrillic_er
+  R: Cyrillic_ER
+  s: Cyrillic_es
+  S: Cyrillic_ES
+  t: Cyrillic_te
+  T: Cyrillic_TE
+  u: Cyrillic_u
+  U: Cyrillic_U
+  v: Cyrillic_ve
+  V: Cyrillic_VE
+  w: Cyrillic_ve
+  W: Cyrillic_VE
+  x: Cyrillic_softsign
+  X: Cyrillic_SOFTSIGN
+  y: Cyrillic_yeru
+  Y: Cyrillic_YERU
+  z: Cyrillic_ze
+  Z: Cyrillic_ZE

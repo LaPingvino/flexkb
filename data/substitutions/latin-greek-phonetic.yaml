@@ -1,0 +1,58 @@
+name: Latin → Greek (phonetic)
+description: |
+  Phonetic Greek substitution: each Latin letter maps to its closest Greek
+  letter by sound. Compose on top of any Latin transformation to get a
+  Greek-phonetic layout. xkb's gr(simple) variant is approximately this.
+map:
+  a: Greek_alpha
+  A: Greek_ALPHA
+  b: Greek_beta
+  B: Greek_BETA
+  c: Greek_chi      # convention: "c" goes to χ (chi) since "c" often sounded as /k/ or /ch/
+  C: Greek_CHI
+  d: Greek_delta
+  D: Greek_DELTA
+  e: Greek_epsilon
+  E: Greek_EPSILON
+  f: Greek_phi
+  F: Greek_PHI
+  g: Greek_gamma
+  G: Greek_GAMMA
+  h: Greek_eta
+  H: Greek_ETA
+  i: Greek_iota
+  I: Greek_IOTA
+  j: Greek_xi       # no perfect cognate; j → ξ by convention
+  J: Greek_XI
+  k: Greek_kappa
+  K: Greek_KAPPA
+  l: Greek_lamda
+  L: Greek_LAMDA
+  m: Greek_mu
+  M: Greek_MU
+  n: Greek_nu
+  N: Greek_NU
+  o: Greek_omicron
+  O: Greek_OMICRON
+  p: Greek_pi
+  P: Greek_PI
+  q: Greek_omega    # no Latin q in Greek; convention uses ω
+  Q: Greek_OMEGA
+  r: Greek_rho
+  R: Greek_RHO
+  s: Greek_sigma
+  S: Greek_SIGMA
+  t: Greek_tau
+  T: Greek_TAU
+  u: Greek_upsilon
+  U: Greek_UPSILON
+  v: Greek_omega
+  V: Greek_OMEGA
+  w: Greek_omega
+  W: Greek_OMEGA
+  x: Greek_xi
+  X: Greek_XI
+  y: Greek_upsilon
+  Y: Greek_UPSILON
+  z: Greek_zeta
+  Z: Greek_ZETA
