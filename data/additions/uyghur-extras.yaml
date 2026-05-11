@@ -1,0 +1,13 @@
+name: Uyghur extras on Arabic base
+description: |
+  Uyghur (used in Xinjiang) uses an Arabic-derived script with several
+  added vowels: ې (eh, U06D0), ۈ (yu, U06C8), ۆ (oe, U06C6),
+  ۋ (ve, U06CB), ڭ (ng, U06AD). Letter-following on Arabic cognates.
+scripts: [arabic]
+letter_overlays:
+  Arabic_yeh:  { levels: ["", "", U06D0, U06D0] }
+  Arabic_waw:  { levels: ["", "", U06C6, U06C8] }
+  Arabic_feh:  { levels: ["", "", U06CB, U06CB] }
+  Arabic_kaf:  { levels: ["", "", U06AD, U06AD] }
+includes:
+  - level3(ralt_switch)

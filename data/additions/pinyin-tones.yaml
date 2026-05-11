@@ -1,0 +1,15 @@
+name: Mandarin Pinyin tone marks (ā á ǎ à etc.)
+description: |
+  Mandarin Pinyin uses 4 tone marks on vowels: macron (1st tone),
+  acute (2nd), caron/hacek (3rd), grave (4th). This addition exposes
+  the precomposed tone+vowel forms on AltGr; serious Pinyin typing
+  uses an IME like ibus-pinyin that handles tones via tone-number
+  shortcuts (a1 → ā, a3 → ǎ).
+letter_overlays:
+  a: { levels: ["", "", amacron, U01CE] }   # ā ǎ
+  e: { levels: ["", "", emacron, U011B] }   # ē ě
+  i: { levels: ["", "", imacron, U01D0] }   # ī ǐ
+  o: { levels: ["", "", omacron, U01D2] }   # ō ǒ
+  u: { levels: ["", "", umacron, U01D4] }   # ū ǔ
+includes:
+  - level3(ralt_switch)

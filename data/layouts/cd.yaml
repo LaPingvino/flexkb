@@ -1,0 +1,14 @@
+file: cd
+variants:
+  - name: basic
+    description: Congolese French (AZERTY + African Latin extras)
+    physical: iso
+    transformation: azerty
+    additions: [french-accents, african-latin-extras]
+    default: true
+
+  - name: qwerty
+    description: Congolese (QWERTY + intl + African extras)
+    physical: iso
+    transformation: qwerty
+    additions: [intl, african-latin-extras]

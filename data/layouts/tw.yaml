@@ -1,0 +1,29 @@
+file: tw
+variants:
+  # Taiwanese typing uses Zhuyin (Bopomofo) or Cangjie IMEs. Bare QWERTY
+  # base for IME use.
+  - name: basic
+    description: Taiwanese (bare QWERTY for Zhuyin/Cangjie IME)
+    physical: iso
+    transformation: qwerty
+    default: true
+
+  - name: indigenous
+    description: Taiwanese indigenous languages (QWERTY + intl + Latin extras)
+    physical: iso
+    transformation: qwerty
+    additions: [intl, african-latin-extras]
+
+  - name: dvorak
+    description: Taiwanese (Dvorak base for IME)
+    physical: iso
+    transformation: dvorak
+
+  # Bopomofo glyph output: type Latin → see Bopomofo symbols. Useful for
+  # teaching/learning Zhuyin; real Mandarin typing uses ibus-chewing or
+  # similar IME on top of QWERTY.
+  - name: bopomofo
+    description: Bopomofo glyph output (Latin → Zhuyin via per-letter mapping)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-to-bopomofo]

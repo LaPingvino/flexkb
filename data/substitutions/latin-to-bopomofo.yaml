@@ -1,0 +1,66 @@
+name: Latin → Bopomofo (Mandarin phonetic / Zhuyin)
+description: |
+  Maps each Latin letter to its Bopomofo (Zhuyin / 注音符號) cognate.
+  Bopomofo (U3100-U312F) is Taiwan's phonetic input system for Mandarin.
+  Each symbol = one Mandarin sound (consonant or vowel).
+
+  Single-letter approximation — Bopomofo's multi-letter combos like
+  zh/ch/sh can't be expressed by per-letter substitution. For full
+  Bopomofo input (with multi-char composition + tone marks), an IME
+  like ibus-chewing or fcitx5-chewing is the practical path.
+
+  Compose on QWERTY for the standard Bopomofo positions on a typical
+  Taiwanese keyboard layout.
+map:
+  b: U3105   # ㄅ
+  B: U3105
+  p: U3106   # ㄆ
+  P: U3106
+  m: U3107   # ㄇ
+  M: U3107
+  f: U3108   # ㄈ
+  F: U3108
+  d: U3109   # ㄉ
+  D: U3109
+  t: U310A   # ㄊ
+  T: U310A
+  n: U310B   # ㄋ
+  N: U310B
+  l: U310C   # ㄌ
+  L: U310C
+  g: U310D   # ㄍ
+  G: U310D
+  k: U310E   # ㄎ
+  K: U310E
+  h: U310F   # ㄏ
+  H: U310F
+  j: U3110   # ㄐ
+  J: U3110
+  q: U3111   # ㄑ
+  Q: U3111
+  x: U3112   # ㄒ
+  X: U3112
+  z: U3117   # ㄗ
+  Z: U3117
+  c: U3118   # ㄘ
+  C: U3118
+  s: U3119   # ㄙ
+  S: U3119
+  r: U3116   # ㄖ
+  R: U3116
+  w: U3128   # ㄨ
+  W: U3128
+  y: U3127   # ㄧ
+  Y: U3127
+  v: U3129   # ㄩ (ü)
+  V: U3129
+  a: U311A   # ㄚ
+  A: U311A
+  o: U311B   # ㄛ
+  O: U311B
+  e: U311C   # ㄜ
+  E: U311C
+  i: U3127   # ㄧ
+  I: U3127
+  u: U3128   # ㄨ
+  U: U3128

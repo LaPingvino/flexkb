@@ -1,0 +1,42 @@
+file: cn
+variants:
+  # Chinese typing is fundamentally IME territory (Pinyin / Wubi / Cangjie /
+  # Zhuyin). flexkb provides the physical base; ibus-pinyin / fcitx5-pinyin
+  # do the kanji conversion on top.
+  - name: basic
+    description: Chinese (bare QWERTY for IME)
+    physical: iso
+    transformation: qwerty
+    default: true
+
+  - name: altgr-pinyin
+    description: Chinese (QWERTY + Pinyin tone-mark vowels on AltGr)
+    physical: iso
+    transformation: qwerty
+    additions: [pinyin-tones]
+
+  # Tibetan as written in China (PRC) — InScript-positional variant.
+  - name: tib
+    description: Tibetan (InScript positional)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-tib]
+
+  - name: tib-native
+    description: Tibetan (Dzongkha-style native positional)
+    physical: iso
+    transformation: tibetan-dzongkha
+
+  # Uyghur — Arabic-derived script with Uyghur additions
+  - name: ug
+    description: Uyghur (Arabic-101 + Uyghur extras)
+    physical: iso
+    transformation: arabic-101
+    additions: [uyghur-extras]
+
+  # Mongolian Cyrillic (PRC uses both Cyrillic and Traditional Mongolian)
+  - name: mon-cyrillic
+    description: Mongolian Cyrillic (PRC, ЙЦУКЕН + Mongolian extras)
+    physical: iso
+    transformation: ycuken
+    additions: [mongolian-extras]

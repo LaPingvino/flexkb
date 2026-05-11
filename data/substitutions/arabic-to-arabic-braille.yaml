@@ -1,0 +1,33 @@
+name: Arabic → Arabic Braille (Grade 1)
+description: |
+  Maps Arabic letters to Arabic Braille cells. Chain after
+  latin-arabic-phonetic to produce Arabic Braille from Latin input.
+map:
+  Arabic_alef:  U2801   # ا
+  Arabic_beh:   U2803   # ب
+  Arabic_teh:   U281E   # ت
+  Arabic_theh:  U2826   # ث
+  Arabic_jeem:  U281A   # ج
+  Arabic_hah:   U2813   # ح
+  Arabic_khah:  U282D   # خ
+  Arabic_dal:   U2819   # د
+  Arabic_thal:  U2825   # ذ
+  Arabic_ra:    U2817   # ر
+  Arabic_zain:  U2835   # ز
+  Arabic_seen:  U280E   # س
+  Arabic_sheen: U280D   # ش
+  Arabic_sad:   U2831   # ص
+  Arabic_dad:   U2837   # ض
+  Arabic_tah:   U281F   # ط
+  Arabic_zah:   U282E   # ظ
+  Arabic_ain:   U2807   # ع
+  Arabic_ghain: U281B   # غ
+  Arabic_feh:   U280B   # ف
+  Arabic_qaf:   U2805   # ق
+  Arabic_kaf:   U2809   # ك
+  Arabic_lam:   U2811   # ل
+  Arabic_meem:  U281D   # م
+  Arabic_noon:  U2815   # ن
+  Arabic_ha:    U2823   # ه
+  Arabic_waw:   U280A   # و
+  Arabic_yeh:   U283A   # ي

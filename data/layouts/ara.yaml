@@ -35,3 +35,9 @@ variants:
     physical: iso
     transformation: dvorak
     substitutions: [latin-tifinagh-phonetic]
+
+  - name: braille-output
+    description: Arabic Braille glyph output (Latin phonetic → Arabic → Braille)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-arabic-phonetic, arabic-to-arabic-braille]
