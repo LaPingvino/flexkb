@@ -44,7 +44,14 @@ build() {
 
 check() {
     cd "$startdir"
-    go test ./...
+    # Avoid `./...` because it would walk fakeroot's pkg/ tree which makepkg
+    # creates with root-owned permissions partway through.
+    go test ./cmd/... ./internal/... ./tests/...
+
+    # The drop-in promise: the built tree must be a strict superset of the
+    # upstream xkeyboard-config tree we replace. Anything missing fails the
+    # package build, so a regression in the generator can't silently ship.
+    ./flexkb dropin-check "$srcdir/staging" /usr/share/xkeyboard-config-2
 }
 
 package() {

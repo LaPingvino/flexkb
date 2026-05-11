@@ -1,10 +1,18 @@
-# flexkb pacman install hook — runs at pre/post install + upgrade.
+# flexkb pacman install hook — purely informational.
 #
-# Goal: detect the user's current keyboard layout BEFORE we replace
-# xkeyboard-config, confirm that the new flexkb tree still provides it
-# (either modularly or as an implicit passthrough from the upstream
-# source we mirrored at build time), and tell the user where to find
-# their config + how to customise.
+# THE DROP-IN COMPATIBILITY IS NOT IMPLEMENTED HERE. It's enforced at
+# build time by `flexkb dropin-check`, which fails the package build if
+# anything from upstream is missing in the generated tree. This hook
+# only prints diagnostic info — if pacman skipped running it for any
+# reason, the package would still be drop-in correct because the
+# correctness is baked into the file contents and metadata
+# (provides=, conflicts=).
+#
+# What this hook does:
+#  - Snapshots /etc/X11/xorg.conf.d/00-keyboard.conf etc. to
+#    /var/lib/flexkb/ so the user has a record of pre-install state
+#    if they ever need to debug.
+#  - Prints a banner explaining what just happened and how to customise.
 
 _snapshot_keyboard() {
     local snapshot="/var/lib/flexkb/pre-install-keyboard.txt"

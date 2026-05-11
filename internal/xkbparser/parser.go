@@ -148,7 +148,8 @@ func extractRaw(src string, offset int, name string) string {
 		break
 	}
 	// Now scan forward from the needle to find the opening { then walk
-	// braces.
+	// braces. Comments and string literals are skipped so we don't count
+	// braces that appear inside `//...` or `/* */` or quoted strings.
 	open := strings.IndexByte(tail[rel:], '{')
 	if open == -1 {
 		return ""
@@ -156,6 +157,33 @@ func extractRaw(src string, offset int, name string) string {
 	open += rel
 	depth := 0
 	for i := open; i < len(tail); i++ {
+		// Skip line comment.
+		if i+1 < len(tail) && tail[i] == '/' && tail[i+1] == '/' {
+			for i < len(tail) && tail[i] != '\n' {
+				i++
+			}
+			continue
+		}
+		// Skip block comment.
+		if i+1 < len(tail) && tail[i] == '/' && tail[i+1] == '*' {
+			i += 2
+			for i+1 < len(tail) && !(tail[i] == '*' && tail[i+1] == '/') {
+				i++
+			}
+			i++ // jump over the closing /
+			continue
+		}
+		// Skip quoted string.
+		if tail[i] == '"' {
+			i++
+			for i < len(tail) && tail[i] != '"' {
+				if tail[i] == '\\' && i+1 < len(tail) {
+					i++ // skip escaped char
+				}
+				i++
+			}
+			continue
+		}
 		switch tail[i] {
 		case '{':
 			depth++

@@ -21,6 +21,7 @@ import (
 
 	"github.com/lapingvino/flexkb/internal/bulkconvert"
 	"github.com/lapingvino/flexkb/internal/compose"
+	"github.com/lapingvino/flexkb/internal/dropincheck"
 	"github.com/lapingvino/flexkb/internal/model"
 	"github.com/lapingvino/flexkb/internal/rulespatch"
 	"github.com/lapingvino/flexkb/internal/xkbparser"
@@ -56,6 +57,8 @@ func main() {
 		runInfo(args)
 	case "migrate-suggest":
 		runMigrateSuggest(args)
+	case "dropin-check":
+		runDropinCheck(args)
 	case "-h", "--help", "help":
 		usage()
 	default:
@@ -95,6 +98,10 @@ Commands:
   migrate-  Pattern-match an old xkb variant name like dvorak-intl into a
    suggest  flexkb composition (transformation + additions + substitutions).
             Output is YAML ready to paste into data/layouts/<file>.yaml.
+  dropin-   Verify a built xkb tree is a strict superset of an upstream
+   check    one. Fails (exit 1) if any file, xkb_symbols block, or rules
+            registry layout/variant from upstream is missing in built.
+            Called by the PKGBUILD check() to enforce drop-in compat.
 
 --data DIR overrides discovery and uses only DIR. Without it, flexkb walks
 the user/system/dev paths in order — see "flexkb paths" for the resolved
@@ -779,6 +786,45 @@ func layoutDisplay(layout string) string {
 		return v
 	}
 	return strings.ToUpper(layout)
+}
+
+// runDropinCheck verifies the built tree is a strict superset of upstream
+// — the actual definition of "drop-in compatible". This is the property
+// the PKGBUILD's check() function enforces, so a regression in the build
+// pipeline fails the package build, not just an install-time warning.
+func runDropinCheck(args []string) {
+	if len(args) != 2 {
+		fmt.Fprintln(os.Stderr, "usage: flexkb dropin-check <built-tree> <upstream-tree>")
+		os.Exit(2)
+	}
+	report, err := dropincheck.Check(args[0], args[1])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "error:", err)
+		os.Exit(2)
+	}
+	if report.IsClean() {
+		fmt.Printf("OK: %s is a strict superset of %s\n", args[0], args[1])
+		return
+	}
+	if len(report.MissingFiles) > 0 {
+		fmt.Printf("FAIL: %d file(s) from upstream missing in built tree\n", len(report.MissingFiles))
+		for _, m := range report.MissingFiles {
+			fmt.Println("  ", m)
+		}
+	}
+	if len(report.MissingVariants) > 0 {
+		fmt.Printf("FAIL: %d xkb_symbols block(s) missing\n", len(report.MissingVariants))
+		for _, m := range report.MissingVariants {
+			fmt.Println("  ", m)
+		}
+	}
+	if len(report.MissingRules) > 0 {
+		fmt.Printf("FAIL: %d rules registry entry/entries missing\n", len(report.MissingRules))
+		for _, m := range report.MissingRules {
+			fmt.Println("  ", m)
+		}
+	}
+	os.Exit(1)
 }
 
 func check(err error) {
