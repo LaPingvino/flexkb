@@ -1,0 +1,22 @@
+name: Czech (hacek + dead keys)
+description: |
+  Czech overlay — dead_acute, dead_caron, dead_circumflex, plus the
+  characteristic placement of á, é, í, ó, ú, ů, ý, č, ď, ě, ň, ř, š, ť,
+  ž on the number row. This is the rough shape of cz(basic) without the
+  full QWERTZ reshuffle (which the user gets via the qwertz transformation).
+overlays:
+  AE01: { levels: [plus, "1"] }
+  AE02: { levels: [ecaron, "2", at] }
+  AE03: { levels: [scaron, "3", numbersign] }
+  AE04: { levels: [ccaron, "4", dollar] }
+  AE05: { levels: [rcaron, "5", percent] }
+  AE06: { levels: [zcaron, "6", asciicircum] }
+  AE07: { levels: [yacute, "7", ampersand] }
+  AE08: { levels: [aacute, "8", asterisk] }
+  AE09: { levels: [iacute, "9", braceleft] }
+  AE10: { levels: [eacute, "0", braceright] }
+  AC10: { levels: [uring, quotedbl, dollar] }
+  AC11: { levels: [section, exclam, ssharp] }
+  AB10: { levels: [minus, underscore, slash] }
+includes:
+  - level3(ralt_switch)

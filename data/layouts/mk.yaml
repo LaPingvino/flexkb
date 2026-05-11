@@ -1,0 +1,20 @@
+file: mk
+variants:
+  - name: phonetic
+    description: Macedonian (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-cyrillic-bg-phonetic]
+    default: true
+
+  - name: phonetic-dvorak
+    description: Macedonian (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-cyrillic-bg-phonetic]
+
+  - name: phonetic-colemak
+    description: Macedonian (phonetic, Colemak base)
+    physical: iso
+    transformation: colemak
+    substitutions: [latin-cyrillic-bg-phonetic]

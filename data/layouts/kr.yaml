@@ -1,0 +1,7 @@
+file: kr
+variants:
+  - name: basic
+    description: Korean (Dubeolsik / 두벌식)
+    physical: iso
+    transformation: dubeolsik
+    default: true

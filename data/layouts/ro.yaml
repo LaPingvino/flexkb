@@ -1,0 +1,14 @@
+file: ro
+variants:
+  - name: basic
+    description: Romanian
+    physical: iso
+    transformation: qwerty
+    additions: [romanian]
+    default: true
+
+  - name: dvorak
+    description: Romanian (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [romanian]

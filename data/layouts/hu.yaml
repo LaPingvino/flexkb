@@ -1,0 +1,20 @@
+file: hu
+variants:
+  - name: basic
+    description: Hungarian
+    physical: iso
+    transformation: qwertz
+    additions: [hungarian]
+    default: true
+
+  - name: qwerty
+    description: Hungarian (QWERTY)
+    physical: iso
+    transformation: qwerty
+    additions: [hungarian]
+
+  - name: dvorak
+    description: Hungarian (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [hungarian]

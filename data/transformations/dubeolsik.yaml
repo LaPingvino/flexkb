@@ -1,0 +1,64 @@
+name: Dubeolsik (Korean)
+description: |
+  Korean two-set keyboard layout (두벌식). Consonants on the left half
+  of the keyboard, vowels on the right. This is the de-facto Korean
+  keyboard arrangement and what most Korean users learn.
+
+  Note: typing real Korean requires an IME on top of this (to compose
+  individual jamo into syllabic blocks). flexkb provides the jamo
+  positions; the IME does the syllable composition.
+keys:
+  TLDE: { levels: [grave, asciitilde] }
+  AE01: { levels: ["1", exclam] }
+  AE02: { levels: ["2", at] }
+  AE03: { levels: ["3", numbersign] }
+  AE04: { levels: ["4", dollar] }
+  AE05: { levels: ["5", percent] }
+  AE06: { levels: ["6", asciicircum] }
+  AE07: { levels: ["7", ampersand] }
+  AE08: { levels: ["8", asterisk] }
+  AE09: { levels: ["9", parenleft] }
+  AE10: { levels: ["0", parenright] }
+  AE11: { levels: [minus, underscore] }
+  AE12: { levels: [equal, plus] }
+
+  # Top row: consonants ㅂ ㅈ ㄷ ㄱ ㅅ then vowels ㅛ ㅕ ㅑ ㅐ ㅔ
+  AD01: { levels: [U1107, U1108] }
+  AD02: { levels: [U110C, U110D] }
+  AD03: { levels: [U1103, U1104] }
+  AD04: { levels: [U1100, U1101] }
+  AD05: { levels: [U1109, U110A] }
+  AD06: { levels: [U116D, U116D] }
+  AD07: { levels: [U1167, U1167] }
+  AD08: { levels: [U1163, U1163] }
+  AD09: { levels: [U1162, U1164] }
+  AD10: { levels: [U1166, U1168] }
+  AD11: { levels: [bracketleft, braceleft] }
+  AD12: { levels: [bracketright, braceright] }
+
+  # Home row: consonants ㅁ ㄴ ㅇ ㄹ ㅎ then vowels ㅗ ㅓ ㅏ ㅣ
+  AC01: { levels: [U1106, U1106] }
+  AC02: { levels: [U1102, U1102] }
+  AC03: { levels: [U110B, U110B] }
+  AC04: { levels: [U1105, U1105] }
+  AC05: { levels: [U1112, U1112] }
+  AC06: { levels: [U1169, U1169] }
+  AC07: { levels: [U1165, U1165] }
+  AC08: { levels: [U1161, U1161] }
+  AC09: { levels: [U1175, U1175] }
+  AC10: { levels: [semicolon, colon] }
+  AC11: { levels: [apostrophe, quotedbl] }
+  BKSL: { levels: [backslash, bar] }
+
+  LSGT: { levels: [backslash, bar] }
+  # Bottom row: consonants ㅋ ㅌ ㅊ ㅍ then vowels ㅠ ㅜ ㅡ
+  AB01: { levels: [U110F, U110F] }
+  AB02: { levels: [U1110, U1110] }
+  AB03: { levels: [U110E, U110E] }
+  AB04: { levels: [U1111, U1111] }
+  AB05: { levels: [U1172, U1172] }
+  AB06: { levels: [U116E, U116E] }
+  AB07: { levels: [U1173, U1173] }
+  AB08: { levels: [comma, less] }
+  AB09: { levels: [period, greater] }
+  AB10: { levels: [slash, question] }

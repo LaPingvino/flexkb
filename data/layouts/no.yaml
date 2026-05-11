@@ -1,0 +1,20 @@
+file: no
+variants:
+  - name: basic
+    description: Norwegian
+    physical: iso
+    transformation: qwerty
+    additions: [nordic]
+    default: true
+
+  - name: dvorak
+    description: Norwegian (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [nordic]
+
+  - name: colemak
+    description: Norwegian (Colemak)
+    physical: iso
+    transformation: colemak
+    additions: [nordic]

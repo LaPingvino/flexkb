@@ -1,0 +1,13 @@
+name: Hungarian accents
+description: |
+  Hungarian overlay — á, é, í, ó, ö, ő, ú, ü, ű. The doubly-acute letters
+  ő and ű are unique to Hungarian. Placed on the punctuation slots that
+  hu(basic) uses traditionally.
+overlays:
+  AC10: { levels: [eacute, Eacute] }
+  AC11: { levels: [aacute, Aacute] }
+  AD11: { levels: [odoubleacute, Odoubleacute] }
+  AD12: { levels: [uacute, Uacute] }
+  AB10: { levels: [udiaeresis, Udiaeresis] }
+includes:
+  - level3(ralt_switch)

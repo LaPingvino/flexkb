@@ -1,0 +1,20 @@
+file: cz
+variants:
+  - name: basic
+    description: Czech
+    physical: iso
+    transformation: qwertz
+    additions: [czech-hacek]
+    default: true
+
+  - name: dvorak
+    description: Czech (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [czech-hacek]
+
+  - name: colemak
+    description: Czech (Colemak)
+    physical: iso
+    transformation: colemak
+    additions: [czech-hacek]

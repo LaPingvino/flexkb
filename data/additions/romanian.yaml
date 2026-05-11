@@ -1,0 +1,12 @@
+name: Romanian accents
+description: |
+  Romanian overlay — ă, â, î, ș, ț. Modern Romanian uses comma-below for
+  s and t (ș/ț), distinct from cedilla. xkb has scommaaccent / Scommaaccent.
+overlays:
+  AC10: { levels: [scommaaccent, Scommaaccent] }
+  AC11: { levels: [tcommaaccent, Tcommaaccent] }
+  AD11: { levels: [abreve, Abreve] }
+  AD12: { levels: [icircumflex, Icircumflex] }
+  AB10: { levels: [acircumflex, Acircumflex] }
+includes:
+  - level3(ralt_switch)

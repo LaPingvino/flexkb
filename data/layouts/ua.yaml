@@ -1,0 +1,23 @@
+file: ua
+variants:
+  - name: phonetic
+    description: Ukrainian (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras]
+    default: true
+
+  - name: phonetic-dvorak
+    description: Ukrainian (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras]
+
+  - name: phonetic-colemak
+    description: Ukrainian (phonetic, Colemak base)
+    physical: iso
+    transformation: colemak
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras]

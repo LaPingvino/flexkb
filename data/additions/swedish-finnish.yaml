@@ -1,0 +1,10 @@
+name: Swedish/Finnish letters (Ä/Ö/Å)
+description: |
+  Swedish and Finnish use ä/ö/å instead of Danish/Norwegian's æ/ø/å.
+  Same positions, different glyphs.
+overlays:
+  AD11: { levels: [aring, Aring] }
+  AC10: { levels: [odiaeresis, Odiaeresis] }
+  AC11: { levels: [adiaeresis, Adiaeresis] }
+includes:
+  - level3(ralt_switch)

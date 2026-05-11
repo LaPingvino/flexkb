@@ -1,0 +1,14 @@
+file: rs
+variants:
+  - name: phonetic
+    description: Serbian (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-cyrillic-bg-phonetic]
+    default: true
+
+  - name: phonetic-dvorak
+    description: Serbian (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-cyrillic-bg-phonetic]

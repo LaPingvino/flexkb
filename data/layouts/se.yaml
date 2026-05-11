@@ -1,0 +1,20 @@
+file: se
+variants:
+  - name: basic
+    description: Swedish
+    physical: iso
+    transformation: qwerty
+    additions: [swedish-finnish]
+    default: true
+
+  - name: dvorak
+    description: Swedish (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [swedish-finnish]
+
+  - name: colemak
+    description: Swedish (Colemak)
+    physical: iso
+    transformation: colemak
+    additions: [swedish-finnish]
