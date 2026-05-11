@@ -1,0 +1,57 @@
+name: Latin → Kannada (phonetic)
+description: |
+  Phonetic Kannada (U0C80-U0CFF). Sister script to Telugu with similar
+  Brahmic phonology; distinct codepoints.
+map:
+  a: U0C85   # ಅ
+  A: U0C86   # ಆ
+  b: U0CAC   # ಬ
+  B: U0CAD   # ಭ
+  c: U0C9A   # ಚ
+  C: U0C9B
+  d: U0CA6   # ದ
+  D: U0CA7
+  e: U0C8F   # ಏ
+  E: U0C90
+  f: U0CAB
+  F: U0CAB
+  g: U0C97   # ಗ
+  G: U0C98
+  h: U0CB9   # ಹ
+  H: U0CB9
+  i: U0C87   # ಇ
+  I: U0C88
+  j: U0C9C   # ಜ
+  J: U0C9D
+  k: U0C95   # ಕ
+  K: U0C96
+  l: U0CB2   # ಲ
+  L: U0CB3   # ಳ
+  m: U0CAE   # ಮ
+  M: U0CAE
+  n: U0CA8   # ನ
+  N: U0CA3
+  o: U0C93   # ಓ
+  O: U0C94
+  p: U0CAA   # ಪ
+  P: U0CAA
+  q: U0C95
+  Q: U0C95
+  r: U0CB0   # ರ
+  R: U0CB1
+  s: U0CB8   # ಸ
+  S: U0CB6
+  t: U0CA4   # ತ
+  T: U0CA5
+  u: U0C89   # ಉ
+  U: U0C8A
+  v: U0CB5   # ವ
+  V: U0CB5
+  w: U0CB5
+  W: U0CB5
+  x: U0C95
+  X: U0C95
+  y: U0CAF   # ಯ
+  Y: U0CAF
+  z: U0C9C
+  Z: U0C9C

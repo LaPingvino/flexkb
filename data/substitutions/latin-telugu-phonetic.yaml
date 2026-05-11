@@ -1,0 +1,57 @@
+name: Latin → Telugu (phonetic)
+description: |
+  Phonetic Telugu (U0C00-U0C7F). Maps each Latin letter to its closest
+  Telugu consonant or vowel. Full syllabic typing needs an IME.
+map:
+  a: U0C05   # అ
+  A: U0C06   # ఆ
+  b: U0C2C   # బ
+  B: U0C2D   # భ
+  c: U0C1A   # చ
+  C: U0C1B   # ఛ
+  d: U0C26   # ద
+  D: U0C27   # ధ
+  e: U0C0F   # ఏ
+  E: U0C10   # ఐ
+  f: U0C2B   # ఫ
+  F: U0C2B
+  g: U0C17   # గ
+  G: U0C18   # ఘ
+  h: U0C39   # హ
+  H: U0C39
+  i: U0C07   # ఇ
+  I: U0C08   # ఈ
+  j: U0C1C   # జ
+  J: U0C1D   # ఝ
+  k: U0C15   # క
+  K: U0C16   # ఖ
+  l: U0C32   # ల
+  L: U0C33   # ళ
+  m: U0C2E   # మ
+  M: U0C2E
+  n: U0C28   # న
+  N: U0C23   # ణ
+  o: U0C13   # ఓ
+  O: U0C14   # ఔ
+  p: U0C2A   # ప
+  P: U0C2A
+  q: U0C15
+  Q: U0C15
+  r: U0C30   # ర
+  R: U0C31   # ఱ
+  s: U0C38   # స
+  S: U0C36   # శ
+  t: U0C24   # త
+  T: U0C25   # థ
+  u: U0C09   # ఉ
+  U: U0C0A   # ఊ
+  v: U0C35   # వ
+  V: U0C35
+  w: U0C35
+  W: U0C35
+  x: U0C15
+  X: U0C15
+  y: U0C2F   # య
+  Y: U0C2F
+  z: U0C1C
+  Z: U0C1C

@@ -1,0 +1,56 @@
+name: Latin → Gujarati (phonetic)
+description: |
+  Phonetic Gujarati (U0A80-U0AFF).
+map:
+  a: U0A85   # અ
+  A: U0A86
+  b: U0AAC   # બ
+  B: U0AAD
+  c: U0A9A   # ચ
+  C: U0A9B
+  d: U0AA6   # દ
+  D: U0AA7
+  e: U0A8F   # એ
+  E: U0A90
+  f: U0AAB
+  F: U0AAB
+  g: U0A97   # ગ
+  G: U0A98
+  h: U0AB9   # હ
+  H: U0AB9
+  i: U0A87   # ઇ
+  I: U0A88
+  j: U0A9C   # જ
+  J: U0A9D
+  k: U0A95   # ક
+  K: U0A96
+  l: U0AB2   # લ
+  L: U0AB3   # ળ
+  m: U0AAE   # મ
+  M: U0AAE
+  n: U0AA8   # ન
+  N: U0AA3
+  o: U0A93   # ઓ
+  O: U0A94
+  p: U0AAA   # પ
+  P: U0AAA
+  q: U0A95
+  Q: U0A95
+  r: U0AB0   # ર
+  R: U0AB0
+  s: U0AB8   # સ
+  S: U0AB6
+  t: U0AA4   # ત
+  T: U0AA5
+  u: U0A89   # ઉ
+  U: U0A8A
+  v: U0AB5   # વ
+  V: U0AB5
+  w: U0AB5
+  W: U0AB5
+  x: U0A95
+  X: U0A95
+  y: U0AAF   # ય
+  Y: U0AAF
+  z: U0A9C
+  Z: U0A9C

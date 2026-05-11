@@ -1,0 +1,56 @@
+name: Latin → Malayalam (phonetic)
+description: |
+  Phonetic Malayalam (U0D00-U0D7F).
+map:
+  a: U0D05   # അ
+  A: U0D06   # ആ
+  b: U0D2C   # ബ
+  B: U0D2D
+  c: U0D1A   # ച
+  C: U0D1B
+  d: U0D26   # ദ
+  D: U0D27
+  e: U0D0F   # ഏ
+  E: U0D10
+  f: U0D2B
+  F: U0D2B
+  g: U0D17   # ഗ
+  G: U0D18
+  h: U0D39   # ഹ
+  H: U0D39
+  i: U0D07   # ഇ
+  I: U0D08
+  j: U0D1C   # ജ
+  J: U0D1D
+  k: U0D15   # ക
+  K: U0D16
+  l: U0D32   # ല
+  L: U0D33   # ള
+  m: U0D2E   # മ
+  M: U0D2E
+  n: U0D28   # ന
+  N: U0D23
+  o: U0D13   # ഓ
+  O: U0D14
+  p: U0D2A   # പ
+  P: U0D2A
+  q: U0D15
+  Q: U0D15
+  r: U0D30   # ര
+  R: U0D31   # റ
+  s: U0D38   # സ
+  S: U0D36
+  t: U0D24   # ത
+  T: U0D25
+  u: U0D09   # ഉ
+  U: U0D0A
+  v: U0D35   # വ
+  V: U0D35
+  w: U0D35
+  W: U0D35
+  x: U0D15
+  X: U0D15
+  y: U0D2F   # യ
+  Y: U0D2F
+  z: U0D1C
+  Z: U0D1C

@@ -18,3 +18,47 @@ variants:
     physical: iso
     transformation: colemak
     substitutions: [latin-devanagari-phonetic]
+
+  # India is a multi-script country; one layout file per script feels
+  # wrong, so all Indian scripts share `in` with named variants.
+  - name: tamil-phonetic
+    description: Tamil (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-tamil-phonetic]
+
+  - name: telugu-phonetic
+    description: Telugu (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-telugu-phonetic]
+
+  - name: kannada-phonetic
+    description: Kannada (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-kannada-phonetic]
+
+  - name: malayalam-phonetic
+    description: Malayalam (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-malayalam-phonetic]
+
+  - name: gujarati-phonetic
+    description: Gujarati (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-gujarati-phonetic]
+
+  - name: gurmukhi-phonetic
+    description: Punjabi / Gurmukhi (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-gurmukhi-phonetic]
+
+  - name: oriya-phonetic
+    description: Oriya / Odia (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-oriya-phonetic]

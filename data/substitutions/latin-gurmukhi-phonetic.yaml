@@ -1,0 +1,56 @@
+name: Latin → Punjabi (Gurmukhi, phonetic)
+description: |
+  Phonetic Gurmukhi (U0A00-U0A7F) — the script of Punjabi.
+map:
+  a: U0A05   # ਅ
+  A: U0A06
+  b: U0A2C   # ਬ
+  B: U0A2D
+  c: U0A1A   # ਚ
+  C: U0A1B
+  d: U0A26   # ਦ
+  D: U0A27
+  e: U0A0F   # ਏ
+  E: U0A10
+  f: U0A2B
+  F: U0A2B
+  g: U0A17   # ਗ
+  G: U0A18
+  h: U0A39   # ਹ
+  H: U0A39
+  i: U0A07   # ਇ
+  I: U0A08
+  j: U0A1C   # ਜ
+  J: U0A1D
+  k: U0A15   # ਕ
+  K: U0A16
+  l: U0A32   # ਲ
+  L: U0A33   # ਲ਼
+  m: U0A2E   # ਮ
+  M: U0A2E
+  n: U0A28   # ਨ
+  N: U0A23
+  o: U0A13   # ਓ
+  O: U0A14
+  p: U0A2A   # ਪ
+  P: U0A2A
+  q: U0A15
+  Q: U0A15
+  r: U0A30   # ਰ
+  R: U0A30
+  s: U0A38   # ਸ
+  S: U0A36
+  t: U0A24   # ਤ
+  T: U0A25
+  u: U0A09   # ਉ
+  U: U0A0A
+  v: U0A35   # ਵ
+  V: U0A35
+  w: U0A35
+  W: U0A35
+  x: U0A15
+  X: U0A15
+  y: U0A2F   # ਯ
+  Y: U0A2F
+  z: U0A1C
+  Z: U0A1C

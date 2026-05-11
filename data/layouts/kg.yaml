@@ -1,0 +1,15 @@
+file: kg
+variants:
+  - name: basic
+    description: Kyrgyz (Cyrillic, ЙЦУКЕН base + Kyrgyz extras)
+    physical: iso
+    transformation: ycuken
+    additions: [kyrgyz-cyrillic-extras]
+    default: true
+
+  - name: phonetic
+    description: Kyrgyz (phonetic Cyrillic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras, kyrgyz-cyrillic-extras]

@@ -1,0 +1,56 @@
+name: Latin → Oriya / Odia (phonetic)
+description: |
+  Phonetic Oriya (Odia) — U0B00-U0B7F.
+map:
+  a: U0B05   # ଅ
+  A: U0B06
+  b: U0B2C   # ବ
+  B: U0B2D
+  c: U0B1A   # ଚ
+  C: U0B1B
+  d: U0B26   # ଦ
+  D: U0B27
+  e: U0B0F   # ଏ
+  E: U0B10
+  f: U0B2B
+  F: U0B2B
+  g: U0B17   # ଗ
+  G: U0B18
+  h: U0B39   # ହ
+  H: U0B39
+  i: U0B07   # ଇ
+  I: U0B08
+  j: U0B1C   # ଜ
+  J: U0B1D
+  k: U0B15   # କ
+  K: U0B16
+  l: U0B32   # ଲ
+  L: U0B33   # ଳ
+  m: U0B2E   # ମ
+  M: U0B2E
+  n: U0B28   # ନ
+  N: U0B23
+  o: U0B13   # ଓ
+  O: U0B14
+  p: U0B2A   # ପ
+  P: U0B2A
+  q: U0B15
+  Q: U0B15
+  r: U0B30   # ର
+  R: U0B30
+  s: U0B38   # ସ
+  S: U0B36
+  t: U0B24   # ତ
+  T: U0B25
+  u: U0B09   # ଉ
+  U: U0B0A
+  v: U0B2C
+  V: U0B2C
+  w: U0B2C
+  W: U0B2C
+  x: U0B15
+  X: U0B15
+  y: U0B2F   # ଯ
+  Y: U0B2F
+  z: U0B1C
+  Z: U0B1C

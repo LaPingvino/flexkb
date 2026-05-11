@@ -1,0 +1,21 @@
+file: uz
+variants:
+  - name: basic
+    description: Uzbek (Cyrillic, ЙЦУКЕН base + Uzbek extras)
+    physical: iso
+    transformation: ycuken
+    additions: [uzbek-cyrillic-extras]
+    default: true
+
+  - name: phonetic
+    description: Uzbek (phonetic Cyrillic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras, uzbek-cyrillic-extras]
+
+  - name: latin
+    description: Uzbek (Latin script, QWERTY base with Turkish-i casing)
+    physical: iso
+    transformation: qwerty
+    additions: [turkish-i-pair]

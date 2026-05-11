@@ -1,0 +1,17 @@
+name: Uzbek Cyrillic extras
+description: |
+  Uzbek Cyrillic adds: ў (Byelorussian short-u), қ, ғ, ҳ on top of Russian
+  Cyrillic. Note: modern Uzbek is officially in Latin script; this is for
+  legacy Cyrillic users and Tajik-influenced typing.
+scripts: [cyrillic]
+letter_overlays:
+  Cyrillic_u:   { levels: ["", "", Byelorussian_shortu, Byelorussian_SHORTU] }
+  Cyrillic_U:   { levels: ["", "", Byelorussian_shortu, Byelorussian_SHORTU] }
+  Cyrillic_ka:  { levels: ["", "", U049B, U049A] }    # қ Қ
+  Cyrillic_KA:  { levels: ["", "", U049B, U049A] }
+  Cyrillic_ghe: { levels: ["", "", U0493, U0492] }    # ғ Ғ
+  Cyrillic_GHE: { levels: ["", "", U0493, U0492] }
+  Cyrillic_ha:  { levels: ["", "", U04B3, U04B2] }    # ҳ Ҳ
+  Cyrillic_HA:  { levels: ["", "", U04B3, U04B2] }
+includes:
+  - level3(ralt_switch)

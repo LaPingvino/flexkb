@@ -1,0 +1,15 @@
+file: tj
+variants:
+  - name: basic
+    description: Tajik (Cyrillic, ЙЦУКЕН base + Tajik extras)
+    physical: iso
+    transformation: ycuken
+    additions: [tajik-cyrillic-extras]
+    default: true
+
+  - name: phonetic
+    description: Tajik (phonetic Cyrillic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras, tajik-cyrillic-extras]

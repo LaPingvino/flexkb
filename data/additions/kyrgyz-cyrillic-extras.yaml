@@ -1,0 +1,14 @@
+name: Kyrgyz Cyrillic extras
+description: |
+  Kyrgyz Cyrillic adds: ң (en-with-descender), ө (o-bar), ү (u-straight).
+  Letter-following on the underlying Cyrillic cognates.
+scripts: [cyrillic]
+letter_overlays:
+  Cyrillic_en: { levels: ["", "", U04A3, U04A2] }    # ң Ң
+  Cyrillic_EN: { levels: ["", "", U04A3, U04A2] }
+  Cyrillic_o:  { levels: ["", "", U04E9, U04E8] }    # ө Ө
+  Cyrillic_O:  { levels: ["", "", U04E9, U04E8] }
+  Cyrillic_u:  { levels: ["", "", U04AF, U04AE] }    # ү Ү
+  Cyrillic_U:  { levels: ["", "", U04AF, U04AE] }
+includes:
+  - level3(ralt_switch)

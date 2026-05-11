@@ -1,0 +1,20 @@
+name: Tajik Cyrillic extras
+description: |
+  Tajik Cyrillic uses Russian Cyrillic plus: ғ, ӣ (i-macron), қ, ӯ
+  (u-macron), ҳ, ҷ. Letter-following on the underlying Cyrillic cognates.
+scripts: [cyrillic]
+letter_overlays:
+  Cyrillic_ghe: { levels: ["", "", U0493, U0492] }    # ғ Ғ
+  Cyrillic_GHE: { levels: ["", "", U0493, U0492] }
+  Cyrillic_i:   { levels: ["", "", U04E3, U04E2] }    # ӣ Ӣ
+  Cyrillic_I:   { levels: ["", "", U04E3, U04E2] }
+  Cyrillic_ka:  { levels: ["", "", U049B, U049A] }    # қ Қ
+  Cyrillic_KA:  { levels: ["", "", U049B, U049A] }
+  Cyrillic_u:   { levels: ["", "", U04EF, U04EE] }    # ӯ Ӯ
+  Cyrillic_U:   { levels: ["", "", U04EF, U04EE] }
+  Cyrillic_ha:  { levels: ["", "", U04B3, U04B2] }    # ҳ Ҳ
+  Cyrillic_HA:  { levels: ["", "", U04B3, U04B2] }
+  Cyrillic_che: { levels: ["", "", U04B7, U04B6] }    # ҷ Ҷ
+  Cyrillic_CHE: { levels: ["", "", U04B7, U04B6] }
+includes:
+  - level3(ralt_switch)
