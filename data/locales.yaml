@@ -1,0 +1,108 @@
+locales:
+  - code: en
+    name: English
+    chars: "abcdefghijklmnopqrstuvwxyz"
+  - code: de
+    name: German
+    chars: "abcdefghijklmnopqrstuvwxyzäöüß"
+  - code: fr
+    name: French
+    chars: "abcdefghijklmnopqrstuvwxyzàâæçéèêëîïôœùûüÿ"
+  - code: es
+    name: Spanish
+    chars: "abcdefghijklmnopqrstuvwxyzñáéíóúü¿¡"
+  - code: it
+    name: Italian
+    chars: "abcdefghijklmnopqrstuvwxyzàèéìíîòóùú"
+  - code: pt
+    name: Portuguese
+    chars: "abcdefghijklmnopqrstuvwxyzãçáàâéêíóôõú"
+  - code: pl
+    name: Polish
+    chars: "abcdefghijklmnopqrstuvwxyząćęłńóśźż"
+  - code: cs
+    name: Czech
+    chars: "abcdefghijklmnopqrstuvwxyzáčďéěíňóřšťúůýž"
+  - code: sk
+    name: Slovak
+    chars: "abcdefghijklmnopqrstuvwxyzáäčďéíĺľňóôŕšťúýž"
+  - code: hu
+    name: Hungarian
+    chars: "abcdefghijklmnopqrstuvwxyzáéíóöőúüű"
+  - code: ro
+    name: Romanian
+    chars: "abcdefghijklmnopqrstuvwxyzăâîșț"
+  - code: nl
+    name: Dutch
+    chars: "abcdefghijklmnopqrstuvwxyzë"
+  - code: sv
+    name: Swedish
+    chars: "abcdefghijklmnopqrstuvwxyzåäö"
+  - code: no
+    name: Norwegian
+    chars: "abcdefghijklmnopqrstuvwxyzåæø"
+  - code: da
+    name: Danish
+    chars: "abcdefghijklmnopqrstuvwxyzåæø"
+  - code: fi
+    name: Finnish
+    chars: "abcdefghijklmnopqrstuvwxyzäö"
+  - code: is
+    name: Icelandic
+    chars: "abcdefghijklmnopqrstuvwxyzáðéíóúýþæö"
+  - code: tr
+    name: Turkish
+    chars: "abcdefghijklmnopqrstuvwxyzçğıİöşü"
+  - code: hr
+    name: Croatian
+    chars: "abcdefghijklmnopqrstuvwxyzčćđšž"
+  - code: ga
+    name: Irish
+    chars: "abcdefghijklmnopqrstuvwxyzáéíóú"
+  - code: et
+    name: Estonian
+    chars: "abcdefghijklmnopqrstuvwxyzäöõüš"
+  - code: lt
+    name: Lithuanian
+    chars: "abcdefghijklmnopqrstuvwxyząčęėįšųūž"
+  - code: lv
+    name: Latvian
+    chars: "abcdefghijklmnopqrstuvwxyzāčēģīķļņšūž"
+
+# `layouts:` is an optional hint table mapping a layout-file basename
+# to the locales the GUI should report on. If a layout isn't listed
+# here, the GUI falls back to picking locales by matching the file
+# name as a code (us → en, de → de, ...).
+layout_hints:
+  us:   [en]
+  gb:   [en]
+  ie:   [en, ga]
+  ca:   [en, fr]
+  au:   [en]
+  nz:   [en]
+  de:   [de]
+  at:   [de]
+  ch:   [de, fr, it]
+  fr:   [fr]
+  be:   [fr, nl, de]
+  es:   [es]
+  latam: [es]
+  pt:   [pt]
+  br:   [pt]
+  it:   [it]
+  pl:   [pl]
+  cz:   [cs]
+  sk:   [sk]
+  hu:   [hu]
+  ro:   [ro]
+  nl:   [nl]
+  se:   [sv]
+  no:   [no]
+  dk:   [da]
+  fi:   [fi]
+  is:   [is]
+  tr:   [tr]
+  hr:   [hr]
+  ee:   [et]
+  lt:   [lt]
+  lv:   [lv]

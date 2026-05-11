@@ -118,6 +118,26 @@ func (r DataRoot) LayoutFile(name string) (LayoutFile, error) {
 // GUI can surface user-vs-system layering directly.
 func (r DataRoot) ResolvedPaths() []string { return r.resolved() }
 
+// ReadTopLevel reads a top-level YAML file (e.g. "locales.yaml") from
+// the highest-priority data path that contains it. Returns the raw
+// bytes plus the source path used. Layered semantics match the
+// subdir loaders: highest-priority data path wins.
+func (r DataRoot) ReadTopLevel(name string) ([]byte, string, error) {
+	var lastErr error
+	for _, p := range r.resolved() {
+		path := filepath.Join(p, name)
+		b, err := os.ReadFile(path)
+		if err == nil {
+			return b, path, nil
+		}
+		lastErr = err
+	}
+	if lastErr == nil {
+		return nil, "", fmt.Errorf("no data paths configured")
+	}
+	return nil, "", lastErr
+}
+
 // Find walks the data paths in priority order and returns the absolute
 // file path that would be used to load (subdir, name). Lets the GUI
 // label which data layer a given module is coming from.

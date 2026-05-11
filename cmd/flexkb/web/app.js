@@ -164,10 +164,59 @@ async function loadCompose() {
     return;
   }
   const data = await res.json();
-  // Pull the comparison side if a compare target is picked.
   const cmp = await loadCompareCompose();
   renderInto({ meta: metaEl, kb: kbEl, warn: warnEl }, data, cmp);
   updateDiffSummary(data, cmp);
+  loadCoverage(file, variant, false);
+}
+
+const coverageEl = document.getElementById("coverage");
+let coverageShowingAll = false;
+
+async function loadCoverage(file, variant, all) {
+  coverageShowingAll = !!all;
+  const q = all ? "&all=1" : "";
+  const res = await fetch(`/api/coverage?file=${encodeURIComponent(file)}&variant=${encodeURIComponent(variant)}${q}`);
+  if (!res.ok) {
+    coverageEl.innerHTML = "";
+    return;
+  }
+  const data = await res.json();
+  renderCoverage(data);
+}
+
+function renderCoverage(data) {
+  coverageEl.innerHTML = "";
+  if (!data.reports || data.reports.length === 0) {
+    return;
+  }
+  const label = document.createElement("span");
+  label.className = "label";
+  label.textContent = coverageShowingAll ? "all locales:" : "coverage:";
+  coverageEl.appendChild(label);
+  for (const r of data.reports) {
+    const pct = Math.round(r.coverage * 100);
+    const chip = document.createElement("span");
+    let cls = "low";
+    if (pct === 100) cls = "full";
+    else if (pct >= 90) cls = "high";
+    else if (pct >= 60) cls = "medium";
+    chip.className = `chip ${cls}`;
+    chip.innerHTML = `${escapeHTML(r.code)} <span class="pct">${pct}%</span>`;
+    let title = `${r.name}: ${r.covered}/${r.total} covered`;
+    if (r.missing && r.missing.length) {
+      title += `\nmissing: ${r.missing.join(" ")}`;
+    }
+    chip.title = title;
+    coverageEl.appendChild(chip);
+  }
+  const btn = document.createElement("button");
+  btn.className = "toggle-more";
+  btn.textContent = coverageShowingAll ? "hint only" : "all locales →";
+  btn.addEventListener("click", () => {
+    loadCoverage(fileSelect.value, variantSelect.value, !coverageShowingAll);
+  });
+  coverageEl.appendChild(btn);
 }
 
 async function loadCompareCompose() {

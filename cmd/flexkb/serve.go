@@ -28,6 +28,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/lapingvino/flexkb/internal/compose"
+	"github.com/lapingvino/flexkb/internal/coverage"
 	"github.com/lapingvino/flexkb/internal/model"
 	"github.com/lapingvino/flexkb/internal/xkbwriter"
 )
@@ -131,6 +132,9 @@ func startServer(rootFn func() model.DataRoot, addr string) (string, <-chan erro
 	})
 	mux.HandleFunc("/api/autofill-categories", func(w http.ResponseWriter, r *http.Request) {
 		handleAutofillCategories(w, r, rootFn())
+	})
+	mux.HandleFunc("/api/coverage", func(w http.ResponseWriter, r *http.Request) {
+		handleCoverage(w, r, rootFn())
 	})
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -975,6 +979,97 @@ func handleAutofillCategories(w http.ResponseWriter, _ *http.Request, root model
 		out = append(out, apiAutofillCategory{Name: c, Fillers: fs})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	writeJSON(w, out)
+}
+
+// apiCoverage carries the coverage analysis for one variant.
+type apiCoverage struct {
+	File     string             `json:"file"`
+	Variant  string             `json:"variant"`
+	Hints    []string           `json:"hints"` // locale codes picked for this layout
+	Reports  []coverage.Report  `json:"reports"`
+}
+
+func handleCoverage(w http.ResponseWriter, r *http.Request, root model.DataRoot) {
+	file := r.URL.Query().Get("file")
+	variant := r.URL.Query().Get("variant")
+	if file == "" {
+		http.Error(w, "file query param required", http.StatusBadRequest)
+		return
+	}
+	// Load the locales table from the data root (XDG-layered so a user
+	// can override or extend with ~/.config/flexkb/data/locales.yaml).
+	rawTable, _, err := root.ReadTopLevel("locales.yaml")
+	if err != nil {
+		http.Error(w, "locales.yaml not found: "+err.Error(), http.StatusNotFound)
+		return
+	}
+	table, err := coverage.LoadTable(rawTable)
+	if err != nil {
+		http.Error(w, "locales.yaml parse: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Resolve the variant and compose it.
+	lf, err := root.LayoutFile(file)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	var spec model.LayoutSpec
+	if variant == "" {
+		// Pick the default variant.
+		for _, v := range lf.Variants {
+			if v.Default {
+				spec = v
+				break
+			}
+		}
+		if spec.Name == "" && len(lf.Variants) > 0 {
+			spec = lf.Variants[0]
+		}
+	} else {
+		for _, v := range lf.Variants {
+			if v.Name == variant {
+				spec = v
+				break
+			}
+		}
+	}
+	if spec.Name == "" {
+		http.Error(w, "variant not found", http.StatusNotFound)
+		return
+	}
+	res, err := compose.Compose(root, spec)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	flat := map[string][]string{}
+	for k, sym := range res.Layout.Symbols {
+		flat[k] = sym.Levels
+	}
+	produced := coverage.CollectChars(flat)
+
+	out := apiCoverage{File: lf.File, Variant: spec.Name}
+	out.Hints = table.LocalesFor(file)
+	wantAll := r.URL.Query().Get("all") == "1"
+	if wantAll {
+		// Report against every locale, sorted by coverage descending so
+		// users can scan "which other languages does this layout
+		// already handle well?".
+		out.Reports = coverage.AnalyzeAll(produced, table)
+		sort.SliceStable(out.Reports, func(i, j int) bool { return out.Reports[i].Coverage > out.Reports[j].Coverage })
+	} else if len(out.Hints) > 0 {
+		for _, lc := range out.Hints {
+			for _, l := range table.Locales {
+				if l.Code == lc {
+					out.Reports = append(out.Reports, coverage.Analyze(produced, l.Code, l.Name, l.Chars))
+					break
+				}
+			}
+		}
+	}
 	writeJSON(w, out)
 }
 

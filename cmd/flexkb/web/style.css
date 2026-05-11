@@ -154,6 +154,44 @@ body.theme-light .picker input[type=search] {
 .meta .desc { color: #d9e0e9; font-weight: 600; margin-bottom: 0.3rem; }
 .meta .recipe { font-family: ui-monospace, "JetBrains Mono", Menlo, monospace; font-size: 0.8rem; }
 
+.coverage {
+  margin: -0.6rem 0 1rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.coverage .label { color: #768390; }
+.coverage .chip {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 12px;
+  padding: 0.15rem 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: help;
+}
+.coverage .chip .pct { font-weight: 600; }
+.coverage .chip.full   { border-color: var(--ok); color: var(--ok-fg); background: var(--ok-bg); }
+.coverage .chip.high   { border-color: #388bfd; color: #79b8ff; background: #0d2540; }
+.coverage .chip.medium { border-color: var(--warn); color: var(--warn-fg); background: var(--warn-bg); }
+.coverage .chip.low    { border-color: var(--err); color: var(--err-fg); background: var(--err-bg); }
+.coverage .toggle-more {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--fg-dim);
+  border-radius: 12px;
+  padding: 0.15rem 0.6rem;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+.coverage .toggle-more:hover { color: var(--fg); }
+body.theme-light .coverage .chip { background: var(--bg-panel); border-color: var(--border); }
+
 .legend {
   display: flex;
   gap: 0.75rem;
