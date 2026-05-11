@@ -53,6 +53,19 @@ letter_overlays:
   c: { levels: ["", "", copyright, cent] }
   n: { levels: ["", "", ntilde, Ntilde] }
   m: { levels: ["", "", mu, plusminus] }
+  # Punctuation tokens — these are also letter-following so dead_abovedot
+  # tracks the period key whether you're on QWERTY (period on AB09) or
+  # Dvorak (period on AD03). This is how the user's existing "AltGr+period,
+  # then i = ı / dead_abovedot on I = İ" muscle memory keeps working
+  # across transformations.
+  apostrophe:   { levels: [dead_acute, dead_diaeresis, apostrophe, quotedbl] }
+  semicolon:    { levels: ["", "", paragraph, degree] }
+  comma:        { levels: [comma, less, ccedilla, Ccedilla] }
+  period:       { levels: [period, greater, dead_abovedot, dead_caron] }
+  slash:        { levels: [slash, question, questiondown, dead_hook] }
+  minus:        { levels: [minus, underscore, yen, dead_belowdot] }
+  bracketleft:  { levels: ["", "", guillemotleft, leftdoublequotemark] }
+  bracketright: { levels: ["", "", guillemotright, rightdoublequotemark] }
 
 includes:
   - level3(ralt_switch)
