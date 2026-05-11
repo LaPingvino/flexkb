@@ -1,0 +1,84 @@
+name: InScript (positional template for Indic scripts)
+script: indic-template
+description: |
+  InScript is India's standard keyboard layout — positional, abugida-aware:
+  the SAME physical key holds the SAME phonetic class across Devanagari,
+  Bengali, Gujarati, Tamil, Telugu, Kannada, Malayalam, Oriya, Gurmukhi.
+  A Hindi typist who learns InScript can switch to Bengali and the
+  muscle memory transfers.
+
+  flexkb leverages this: the InScript layout is ONE transformation file
+  using class-token sentinels (indic_c_ka, indic_v_aa, indic_m_i, etc.)
+  at each key position. Then per-script resolution substitutions map
+  the class tokens to actual codepoints:
+
+    indic-classes-deva.yaml: indic_c_ka → U0915 (क), indic_v_a → U0905 …
+    indic-classes-ben.yaml:  indic_c_ka → U0995 (ক), indic_v_a → U0985 …
+    indic-classes-tam.yaml:  indic_c_ka → U0B95 (க), indic_v_a → U0B85 …
+
+  Layout spec:
+    transformation: inscript
+    substitutions: [indic-classes-deva]   # or -ben, -tam, etc.
+
+  This is the cleanest expression of the Indic-generalization opportunity
+  flagged in DESIGN.md. One template + N codepoint tables instead of N
+  hand-written InScript transformations.
+
+# Level 1 = matras (vowel signs) + lighter consonants
+# Level 2 = independent vowels + aspirated consonants
+# Level 3/4 = additional / Nukta forms (sparse)
+keys:
+  TLDE: { levels: [indic_m_o_candra, indic_v_o_short] }
+  AE01: { levels: [indic_digit_1, indic_v_candra_e] }
+  AE02: { levels: [indic_digit_2, indic_v_candra_e_alt] }
+  AE03: { levels: [indic_digit_3, numbersign] }
+  AE04: { levels: [indic_digit_4, dollar] }
+  AE05: { levels: [indic_digit_5, percent] }
+  AE06: { levels: [indic_digit_6, asciicircum] }
+  AE07: { levels: [indic_digit_7, ampersand] }
+  AE08: { levels: [indic_digit_8, asterisk] }
+  AE09: { levels: [indic_digit_9, parenleft] }
+  AE10: { levels: [indic_digit_0, parenright] }
+  AE11: { levels: [minus, indic_visarga] }
+  AE12: { levels: [indic_m_r, indic_v_r] }
+
+  # Top row D — long vowels + voiced consonants
+  AD01: { levels: [indic_m_au, indic_v_au] }
+  AD02: { levels: [indic_m_ai, indic_v_ai] }
+  AD03: { levels: [indic_m_aa, indic_v_aa] }
+  AD04: { levels: [indic_m_ii, indic_v_ii] }
+  AD05: { levels: [indic_m_uu, indic_v_uu] }
+  AD06: { levels: [indic_c_ba, indic_c_bha] }
+  AD07: { levels: [indic_c_ha, indic_c_nga] }
+  AD08: { levels: [indic_c_ga, indic_c_gha] }
+  AD09: { levels: [indic_c_da, indic_c_dha] }
+  AD10: { levels: [indic_c_ja, indic_c_jha] }
+  AD11: { levels: [indic_c_dda, indic_c_ddha] }
+  AD12: { levels: [indic_nukta, indic_c_nya] }
+  BKSL: { levels: [indic_m_o_candra_alt, indic_v_o_candra] }
+
+  # Home row C — short vowels + unvoiced consonants + virama
+  AC01: { levels: [indic_m_o, indic_v_o] }
+  AC02: { levels: [indic_m_e, indic_v_e] }
+  AC03: { levels: [indic_virama, indic_v_a] }
+  AC04: { levels: [indic_m_i, indic_v_i] }
+  AC05: { levels: [indic_m_u, indic_v_u] }
+  AC06: { levels: [indic_c_pa, indic_c_pha] }
+  AC07: { levels: [indic_c_ra, indic_c_rra] }
+  AC08: { levels: [indic_c_ka, indic_c_kha] }
+  AC09: { levels: [indic_c_ta, indic_c_tha] }
+  AC10: { levels: [indic_c_cha, indic_c_chha] }
+  AC11: { levels: [indic_c_tta, indic_c_ttha] }
+
+  # Bottom row B
+  LSGT: { levels: [backslash, bar] }
+  AB01: { levels: [indic_m_e_short, indic_v_e_short] }
+  AB02: { levels: [indic_anusvara, indic_candrabindu] }
+  AB03: { levels: [indic_c_ma, indic_c_nna] }
+  AB04: { levels: [indic_c_na, indic_c_nna_alt] }
+  AB05: { levels: [indic_c_va, indic_c_lla] }
+  AB06: { levels: [indic_c_la, indic_c_lla_alt] }
+  AB07: { levels: [indic_c_sa, indic_c_ssa] }
+  AB08: { levels: [comma, indic_c_sha] }
+  AB09: { levels: [period, indic_avagraha] }
+  AB10: { levels: [indic_c_ya, indic_c_yya] }

@@ -1,0 +1,96 @@
+name: Indic class tokens → Bengali codepoints
+description: |
+  Bengali (Bangla) resolution for the InScript template. Same physical
+  positions as Devanagari InScript, different codepoints. A user who
+  knows InScript Devanagari can switch to Bengali via this substitution
+  and keep their muscle memory.
+map:
+  indic_v_a:           U0985   # অ
+  indic_v_aa:          U0986   # আ
+  indic_v_i:           U0987   # ই
+  indic_v_ii:          U0988   # ঈ
+  indic_v_u:           U0989   # উ
+  indic_v_uu:          U098A   # ঊ
+  indic_v_r:           U098B   # ঋ
+  indic_v_l:           U098C   # ঌ
+  indic_v_e:           U098F   # এ
+  indic_v_e_short:     U098F
+  indic_v_ai:          U0990   # ঐ
+  indic_v_o:           U0993   # ও
+  indic_v_o_short:     U0993
+  indic_v_au:          U0994   # ঔ
+  indic_v_candra_e:    U098F
+  indic_v_candra_e_alt: U098F
+  indic_v_o_candra:    U0993
+
+  indic_m_aa:          U09BE   # া
+  indic_m_i:           U09BF   # ি
+  indic_m_ii:          U09C0   # ী
+  indic_m_u:           U09C1   # ু
+  indic_m_uu:          U09C2   # ূ
+  indic_m_r:           U09C3   # ৃ
+  indic_m_e:           U09C7   # ে
+  indic_m_e_short:     U09C7
+  indic_m_ai:          U09C8   # ৈ
+  indic_m_o:           U09CB   # ো
+  indic_m_o_short:     U09CB
+  indic_m_au:          U09CC   # ৌ
+  indic_m_o_candra:    U09CB
+  indic_m_o_candra_alt: U09CB
+
+  indic_virama:        U09CD   # ্
+  indic_anusvara:      U0982   # ং
+  indic_visarga:       U0983   # ঃ
+  indic_candrabindu:   U0981   # ঁ
+  indic_avagraha:      U09BD
+  indic_nukta:         U09BC   # ়
+
+  indic_c_ka:          U0995   # ক
+  indic_c_kha:         U0996   # খ
+  indic_c_ga:          U0997   # গ
+  indic_c_gha:         U0998   # ঘ
+  indic_c_nga:         U0999   # ঙ
+  indic_c_cha:         U099A   # চ
+  indic_c_chha:        U099B   # ছ
+  indic_c_ja:          U099C   # জ
+  indic_c_jha:         U099D   # ঝ
+  indic_c_nya:         U099E   # ঞ
+  indic_c_tta:         U099F   # ট
+  indic_c_ttha:        U09A0   # ঠ
+  indic_c_dda:         U09A1   # ড
+  indic_c_ddha:        U09A2   # ঢ
+  indic_c_nna:         U09A3   # ণ
+  indic_c_nna_alt:     U09A3
+  indic_c_ta:          U09A4   # ত
+  indic_c_tha:         U09A5   # থ
+  indic_c_da:          U09A6   # দ
+  indic_c_dha:         U09A7   # ধ
+  indic_c_na:          U09A8   # ন
+  indic_c_pa:          U09AA   # প
+  indic_c_pha:         U09AB   # ফ
+  indic_c_ba:          U09AC   # ব
+  indic_c_bha:         U09AD   # ভ
+  indic_c_ma:          U09AE   # ম
+  indic_c_ya:          U09AF   # য
+  indic_c_yya:         U09DF   # য়
+  indic_c_ra:          U09B0   # র
+  indic_c_rra:         U09B0
+  indic_c_la:          U09B2   # ল
+  indic_c_lla:         U09B2
+  indic_c_lla_alt:     U09B2
+  indic_c_va:          U09AC
+  indic_c_sha:         U09B6   # শ
+  indic_c_ssa:         U09B7   # ষ
+  indic_c_sa:          U09B8   # স
+  indic_c_ha:          U09B9   # হ
+
+  indic_digit_0:       U09E6   # ০
+  indic_digit_1:       U09E7
+  indic_digit_2:       U09E8
+  indic_digit_3:       U09E9
+  indic_digit_4:       U09EA
+  indic_digit_5:       U09EB
+  indic_digit_6:       U09EC
+  indic_digit_7:       U09ED
+  indic_digit_8:       U09EE
+  indic_digit_9:       U09EF

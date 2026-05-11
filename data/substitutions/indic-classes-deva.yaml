@@ -1,0 +1,116 @@
+name: Indic class tokens → Devanagari codepoints
+description: |
+  Resolution substitution for the InScript template. Maps the
+  inscript-transformation's class-token sentinels to Devanagari (Hindi /
+  Sanskrit / Marathi) Unicode codepoints. Pair with
+  `transformation: inscript` to get the native InScript Devanagari
+  layout.
+
+  Adding Bengali / Tamil / Gujarati InScript means writing one more
+  substitution file with that script's codepoints in place — same
+  positions, different glyphs. The transformation is shared.
+map:
+  # Independent vowels
+  indic_v_a:           U0905   # अ
+  indic_v_aa:          U0906   # आ
+  indic_v_i:           U0907   # इ
+  indic_v_ii:          U0908   # ई
+  indic_v_u:           U0909   # उ
+  indic_v_uu:          U090A   # ऊ
+  indic_v_r:           U090B   # ऋ
+  indic_v_l:           U090C   # ऌ
+  indic_v_candra_e:    U090D   # ऍ
+  indic_v_candra_e_alt: U0945  # ◌ॅ (candra-e matra)
+  indic_v_e_short:     U090E   # ऎ
+  indic_v_e:           U090F   # ए
+  indic_v_ai:          U0910   # ऐ
+  indic_v_o_short:     U0912   # ऒ
+  indic_v_o:           U0913   # ओ
+  indic_v_au:          U0914   # औ
+  indic_v_o_candra:    U0911   # ऑ
+
+  # Matras (vowel signs)
+  indic_m_aa:          U093E   # ◌ा
+  indic_m_i:           U093F   # ◌ि
+  indic_m_ii:          U0940   # ◌ी
+  indic_m_u:           U0941   # ◌ु
+  indic_m_uu:          U0942   # ◌ू
+  indic_m_r:           U0943   # ◌ृ
+  indic_m_e_short:     U0946   # ◌ॆ
+  indic_m_e:           U0947   # ◌े
+  indic_m_ai:          U0948   # ◌ै
+  indic_m_o_short:     U094A   # ◌ॊ
+  indic_m_o:           U094B   # ◌ो
+  indic_m_au:          U094C   # ◌ौ
+  indic_m_o_candra:    U0949   # ◌ॉ
+  indic_m_o_candra_alt: U0949  # ◌ॉ
+
+  # Virama / anusvara / visarga / candrabindu / avagraha / nukta
+  indic_virama:        U094D   # ◌्
+  indic_anusvara:      U0902   # ◌ं
+  indic_visarga:       U0903   # ◌ः
+  indic_candrabindu:   U0901   # ◌ँ
+  indic_avagraha:      U093D   # ऽ
+  indic_nukta:         U093C   # ◌़
+
+  # Consonants — velars
+  indic_c_ka:          U0915   # क
+  indic_c_kha:         U0916   # ख
+  indic_c_ga:          U0917   # ग
+  indic_c_gha:         U0918   # घ
+  indic_c_nga:         U0919   # ङ
+
+  # Palatals
+  indic_c_cha:         U091A   # च
+  indic_c_chha:        U091B   # छ
+  indic_c_ja:          U091C   # ज
+  indic_c_jha:         U091D   # झ
+  indic_c_nya:         U091E   # ञ
+
+  # Retroflexes
+  indic_c_tta:         U091F   # ट
+  indic_c_ttha:        U0920   # ठ
+  indic_c_dda:         U0921   # ड
+  indic_c_ddha:        U0922   # ढ
+  indic_c_nna:         U0923   # ण
+  indic_c_nna_alt:     U0929   # ऩ
+
+  # Dentals
+  indic_c_ta:          U0924   # त
+  indic_c_tha:         U0925   # थ
+  indic_c_da:          U0926   # द
+  indic_c_dha:         U0927   # ध
+  indic_c_na:          U0928   # न
+
+  # Labials
+  indic_c_pa:          U092A   # प
+  indic_c_pha:         U092B   # फ
+  indic_c_ba:          U092C   # ब
+  indic_c_bha:         U092D   # भ
+  indic_c_ma:          U092E   # म
+
+  # Semivowels and sibilants
+  indic_c_ya:          U092F   # य
+  indic_c_yya:         U095F   # य़
+  indic_c_ra:          U0930   # र
+  indic_c_rra:         U0931   # ऱ
+  indic_c_la:          U0932   # ल
+  indic_c_lla:         U0933   # ळ
+  indic_c_lla_alt:     U0934   # ऴ
+  indic_c_va:          U0935   # व
+  indic_c_sha:         U0936   # श
+  indic_c_ssa:         U0937   # ष
+  indic_c_sa:          U0938   # स
+  indic_c_ha:          U0939   # ह
+
+  # Digits
+  indic_digit_0:       U0966   # ०
+  indic_digit_1:       U0967   # १
+  indic_digit_2:       U0968   # २
+  indic_digit_3:       U0969   # ३
+  indic_digit_4:       U096A   # ४
+  indic_digit_5:       U096B   # ५
+  indic_digit_6:       U096C   # ६
+  indic_digit_7:       U096D   # ७
+  indic_digit_8:       U096E   # ८
+  indic_digit_9:       U096F   # ९

@@ -62,3 +62,18 @@ variants:
     physical: iso
     transformation: qwerty
     substitutions: [latin-oriya-phonetic]
+
+  # InScript — India's positional layout. Same physical positions across
+  # every Indic script; per-script codepoint tables resolve the shared
+  # template to actual glyphs. One transformation file, N substitutions.
+  - name: inscript-hindi
+    description: Hindi (Devanagari InScript)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-deva]
+
+  - name: inscript-bengali
+    description: Bengali (InScript, same key positions as Devanagari)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-ben]
