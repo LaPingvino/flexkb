@@ -30,6 +30,12 @@
         </label>
         <div class="layer-tag" id="browseSource"></div>
       </div>
+      <div class="row actions">
+        <button id="bEdit" title="Load this variant into the Compose tab">Edit in Compose →</button>
+        <button id="bActivate" class="primary" title="setxkbmap to this variant in the current session">Activate</button>
+        <button id="bShowXKB" title="Show the raw xkb_symbols block">View XKB</button>
+        <span class="status" id="bStatus"></span>
+      </div>
       <div class="meta" id="meta"></div>
       <div class="legend">
         <span class="src-transformation">transformation</span>
@@ -38,6 +44,7 @@
         <span class="src-substitution">substitution</span>
       </div>
       <div class="keyboard" id="keyboard"></div>
+      <pre class="xkb-output hidden" id="bXkb"></pre>
       <div class="warnings" id="warnings"></div>
     </section>
 
@@ -69,25 +76,30 @@
         </div>
         <div class="row">
           <label class="full">
-            <span>Additions <em>(applied in order — click to add, × to remove)</em></span>
+            <span>Additions <em>(applied in order — type to filter, click to add, × to remove)</em></span>
             <div class="multi" id="cAdditions">
               <div class="multi-chips" id="cAddChips"></div>
-              <select id="cAddPicker"><option value="">— add an addition —</option></select>
+              <input id="cAddFilter" type="search" placeholder="filter…" autocomplete="off">
+              <select id="cAddPicker" size="6"><option value="">— add an addition —</option></select>
             </div>
           </label>
         </div>
         <div class="row">
           <label class="full">
-            <span>Substitutions <em>(applied in order, after additions)</em></span>
+            <span>Substitutions <em>(applied in order, after additions; prefix ~ for inverse direction)</em></span>
             <div class="multi" id="cSubstitutions">
               <div class="multi-chips" id="cSubChips"></div>
-              <select id="cSubPicker"><option value="">— add a substitution —</option></select>
+              <input id="cSubFilter" type="search" placeholder="filter…" autocomplete="off">
+              <select id="cSubPicker" size="6"><option value="">— add a substitution —</option></select>
+              <label class="inline-check"><input type="checkbox" id="cSubInverse"> add as ~inverse</label>
             </div>
           </label>
         </div>
         <div class="row actions">
           <button id="cPreview">Preview</button>
           <button id="cSave" class="primary">Save to user data</button>
+          <button id="cActivate">Save &amp; Activate</button>
+          <button id="cShowXKB">View XKB</button>
           <span class="status" id="cStatus"></span>
         </div>
       </div>
@@ -99,6 +111,7 @@
         <span class="src-substitution">substitution</span>
       </div>
       <div class="keyboard" id="cKeyboard"></div>
+      <pre class="xkb-output hidden" id="cXkb"></pre>
       <div class="warnings" id="cWarnings"></div>
     </section>
 

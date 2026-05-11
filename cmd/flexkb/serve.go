@@ -28,6 +28,7 @@ import (
 
 	"github.com/lapingvino/flexkb/internal/compose"
 	"github.com/lapingvino/flexkb/internal/model"
+	"github.com/lapingvino/flexkb/internal/xkbwriter"
 )
 
 //go:embed web
@@ -105,6 +106,12 @@ func startServer(rootFn func() model.DataRoot, addr string) (string, <-chan erro
 	})
 	mux.HandleFunc("/api/save", func(w http.ResponseWriter, r *http.Request) {
 		handleSave(w, r, rootFn())
+	})
+	mux.HandleFunc("/api/activate", func(w http.ResponseWriter, r *http.Request) {
+		handleActivate(w, r, rootFn())
+	})
+	mux.HandleFunc("/api/xkb", func(w http.ResponseWriter, r *http.Request) {
+		handleXKB(w, r, rootFn())
 	})
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -625,6 +632,126 @@ func handleSave(w http.ResponseWriter, r *http.Request, _ model.DataRoot) {
 		return
 	}
 	writeJSON(w, apiSaveResponse{Path: path})
+}
+
+// apiActivateRequest selects what `flexkb activate` should apply.
+type apiActivateRequest struct {
+	File    string `json:"file"`
+	Variant string `json:"variant"`
+}
+
+type apiActivateResponse struct {
+	OK     bool   `json:"ok"`
+	Stdout string `json:"stdout"`
+	Stderr string `json:"stderr"`
+}
+
+// handleActivate shells out to `flexkb activate <file> <variant>` so
+// the existing CLI activation flow (xkb tree regen → setxkbmap →
+// xkbcomp) is reused verbatim. The handler captures stdout/stderr so
+// the GUI can surface any errors (typical case on Wayland: setxkbmap
+// can't talk to the session — we report it without crashing).
+func handleActivate(w http.ResponseWriter, r *http.Request, _ model.DataRoot) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "POST required", http.StatusMethodNotAllowed)
+		return
+	}
+	var req apiActivateRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "bad JSON: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	if req.File == "" || req.Variant == "" {
+		http.Error(w, "file and variant required", http.StatusBadRequest)
+		return
+	}
+	if !validFileName(req.File) || !validFileName(req.Variant) {
+		http.Error(w, "invalid file or variant name", http.StatusBadRequest)
+		return
+	}
+	exe, err := os.Executable()
+	if err != nil {
+		exe = os.Args[0]
+	}
+	cmd := exec.Command(exe, "activate", req.File, req.Variant)
+	var stdoutBuf, stderrBuf strings.Builder
+	cmd.Stdout = &stdoutBuf
+	cmd.Stderr = &stderrBuf
+	runErr := cmd.Run()
+	writeJSON(w, apiActivateResponse{
+		OK:     runErr == nil,
+		Stdout: stdoutBuf.String(),
+		Stderr: stderrBuf.String(),
+	})
+}
+
+// handleXKB returns the raw composed xkb_symbols block for a variant.
+// The Browse and Compose tabs use this to show the actual output that
+// `flexkb compose` would emit — the canonical artifact, not just the
+// pretty-printed grid.
+func handleXKB(w http.ResponseWriter, r *http.Request, root model.DataRoot) {
+	file := r.URL.Query().Get("file")
+	variant := r.URL.Query().Get("variant")
+	if file == "" || variant == "" {
+		// POST form: compose a user-supplied spec directly.
+		if r.Method == http.MethodPost {
+			var spec model.LayoutSpec
+			if err := json.NewDecoder(r.Body).Decode(&spec); err != nil {
+				http.Error(w, "bad JSON: "+err.Error(), http.StatusBadRequest)
+				return
+			}
+			if spec.Physical == "" || spec.Transformation == "" {
+				http.Error(w, "physical and transformation required", http.StatusBadRequest)
+				return
+			}
+			if spec.Name == "" {
+				spec.Name = "preview"
+			}
+			res, err := compose.Compose(root, spec)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			emitXKB(w, res.Layout, res.Warnings)
+			return
+		}
+		http.Error(w, "file and variant query params required (or POST a spec)", http.StatusBadRequest)
+		return
+	}
+	lf, err := root.LayoutFile(file)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	var spec model.LayoutSpec
+	found := false
+	for _, v := range lf.Variants {
+		if v.Name == variant {
+			spec = v
+			found = true
+			break
+		}
+	}
+	if !found {
+		http.Error(w, "variant not found", http.StatusNotFound)
+		return
+	}
+	res, err := compose.Compose(root, spec)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	emitXKB(w, res.Layout, res.Warnings)
+}
+
+func emitXKB(w http.ResponseWriter, layout model.ComposedLayout, warnings []string) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	for _, warn := range warnings {
+		fmt.Fprintf(w, "// warn: %s\n", warn)
+	}
+	if err := xkbwriter.WriteVariant(w, xkbwriter.Options{}, layout); err != nil {
+		fmt.Fprintf(w, "\n// error writing xkb: %v\n", err)
+	}
 }
 
 // userLayoutsDir returns the highest-priority writable layouts/ dir.

@@ -15,17 +15,7 @@ let modules = { physicals: [], transformations: [], additions: [], substitutions
 
 // === Tab switching ===
 document.querySelectorAll("nav.tabs button").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const name = btn.dataset.tab;
-    for (const b of document.querySelectorAll("nav.tabs button")) {
-      b.classList.toggle("active", b.dataset.tab === name);
-    }
-    for (const s of document.querySelectorAll("section.tab")) {
-      s.classList.toggle("hidden", s.dataset.tab !== name);
-    }
-    if (name === "paths") renderPathsTab();
-    if (name === "compose") ensureComposeReady();
-  });
+  btn.addEventListener("click", () => switchTab(btn.dataset.tab));
 });
 
 // === Browse tab ===
@@ -35,6 +25,11 @@ const metaEl = document.getElementById("meta");
 const kbEl = document.getElementById("keyboard");
 const warnEl = document.getElementById("warnings");
 const browseSource = document.getElementById("browseSource");
+const bEditBtn = document.getElementById("bEdit");
+const bActivateBtn = document.getElementById("bActivate");
+const bShowXKBBtn = document.getElementById("bShowXKB");
+const bStatus = document.getElementById("bStatus");
+const bXkb = document.getElementById("bXkb");
 
 async function loadLayouts() {
   const res = await fetch("/api/layouts");
@@ -77,12 +72,102 @@ async function loadCompose() {
   const file = fileSelect.value;
   const variant = variantSelect.value;
   if (!file || !variant) return;
+  bStatus.textContent = "";
+  bXkb.classList.add("hidden");
   const res = await fetch(`/api/compose?file=${encodeURIComponent(file)}&variant=${encodeURIComponent(variant)}`);
   if (!res.ok) {
     metaEl.textContent = `error: ${await res.text()}`;
     return;
   }
   renderInto({ meta: metaEl, kb: kbEl, warn: warnEl }, await res.json());
+}
+
+// === Browse-tab actions ===
+bEditBtn.addEventListener("click", async () => {
+  const file = fileSelect.value;
+  const variant = variantSelect.value;
+  const lf = layouts.find(l => l.file === file);
+  if (!lf) return;
+  const v = lf.variants.find(x => x.name === variant);
+  if (!v) return;
+  await ensureComposeReady();
+  // Prefill the Compose form with this variant's spec.
+  cFile.value = file;
+  cName.value = v.name;
+  cDesc.value = v.description || "";
+  if (v.physical) cPhysical.value = v.physical;
+  if (v.transformation) cTransformation.value = v.transformation;
+  composeAdditions = (v.additions || []).slice();
+  composeSubs = (v.substitutions || []).slice();
+  renderChips(cAddChips, composeAdditions, modules.additions, composeAdditions);
+  renderChips(cSubChips, composeSubs, modules.substitutions, composeSubs);
+  // Switch to Compose tab.
+  switchTab("compose");
+  composeLivePreview();
+});
+
+bActivateBtn.addEventListener("click", async () => {
+  const file = fileSelect.value;
+  const variant = variantSelect.value;
+  if (!file || !variant) return;
+  if (!confirm(`Activate ${file}(${variant}) in the current session?\n\nThis runs flexkb activate, which calls setxkbmap + xkbcomp against the live X / Xwayland session — replacing your current layout until logout.`)) return;
+  bStatus.textContent = "activating…";
+  bStatus.className = "status";
+  await activateRequest(file, variant, bStatus);
+});
+
+bShowXKBBtn.addEventListener("click", async () => {
+  const file = fileSelect.value;
+  const variant = variantSelect.value;
+  if (!file || !variant) return;
+  if (!bXkb.classList.contains("hidden") && bXkb.dataset.key === file + "/" + variant) {
+    bXkb.classList.add("hidden");
+    return;
+  }
+  const res = await fetch(`/api/xkb?file=${encodeURIComponent(file)}&variant=${encodeURIComponent(variant)}`);
+  bXkb.textContent = await res.text();
+  bXkb.dataset.key = file + "/" + variant;
+  bXkb.classList.remove("hidden");
+});
+
+async function activateRequest(file, variant, statusEl) {
+  try {
+    const res = await fetch("/api/activate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ file, variant }),
+    });
+    if (!res.ok) {
+      statusEl.textContent = "HTTP " + res.status + ": " + await res.text();
+      statusEl.className = "status err";
+      return false;
+    }
+    const data = await res.json();
+    if (data.ok) {
+      statusEl.textContent = "activated — " + (data.stdout.split("\n")[0] || "");
+      statusEl.className = "status ok";
+      return true;
+    }
+    statusEl.textContent = "activate failed: " + (data.stderr.split("\n")[0] || data.stdout || "(no output)");
+    statusEl.className = "status err";
+    statusEl.title = data.stderr + "\n---\n" + data.stdout;
+    return false;
+  } catch (e) {
+    statusEl.textContent = "activate failed: " + e.message;
+    statusEl.className = "status err";
+    return false;
+  }
+}
+
+function switchTab(name) {
+  for (const b of document.querySelectorAll("nav.tabs button")) {
+    b.classList.toggle("active", b.dataset.tab === name);
+  }
+  for (const s of document.querySelectorAll("section.tab")) {
+    s.classList.toggle("hidden", s.dataset.tab !== name);
+  }
+  if (name === "paths") renderPathsTab();
+  if (name === "compose") ensureComposeReady();
 }
 
 // === Compose tab ===
@@ -93,14 +178,20 @@ const cPhysical = document.getElementById("cPhysical");
 const cTransformation = document.getElementById("cTransformation");
 const cAddPicker = document.getElementById("cAddPicker");
 const cAddChips = document.getElementById("cAddChips");
+const cAddFilter = document.getElementById("cAddFilter");
 const cSubPicker = document.getElementById("cSubPicker");
 const cSubChips = document.getElementById("cSubChips");
+const cSubFilter = document.getElementById("cSubFilter");
+const cSubInverse = document.getElementById("cSubInverse");
 const cPreviewBtn = document.getElementById("cPreview");
 const cSaveBtn = document.getElementById("cSave");
+const cActivateBtn = document.getElementById("cActivate");
+const cShowXKBBtn = document.getElementById("cShowXKB");
 const cStatus = document.getElementById("cStatus");
 const cMeta = document.getElementById("cMeta");
 const cKb = document.getElementById("cKeyboard");
 const cWarn = document.getElementById("cWarnings");
+const cXkb = document.getElementById("cXkb");
 
 let composeAdditions = [];
 let composeSubs = [];
@@ -133,16 +224,22 @@ function fillModuleSelect(sel, mods, preferred) {
   if (preferred && mods.some(m => m.name === preferred)) sel.value = preferred;
 }
 
-function fillPicker(sel, mods) {
-  // Keep the existing placeholder option, append the rest.
+function fillPicker(sel, mods, filterText) {
+  const q = (filterText || "").toLowerCase().trim();
   sel.innerHTML = '<option value="">— add —</option>';
   for (const m of mods) {
+    if (q && !(m.name.toLowerCase().includes(q) || (m.description || "").toLowerCase().includes(q))) {
+      continue;
+    }
     const opt = document.createElement("option");
     opt.value = m.name;
     opt.textContent = `${m.name} [${m.sourceKind}]${m.description ? " — " + truncate(m.description, 60) : ""}`;
     sel.appendChild(opt);
   }
 }
+
+cAddFilter.addEventListener("input", () => fillPicker(cAddPicker, modules.additions, cAddFilter.value));
+cSubFilter.addEventListener("input", () => fillPicker(cSubPicker, modules.substitutions, cSubFilter.value));
 
 cAddPicker.addEventListener("change", () => {
   if (cAddPicker.value) {
@@ -154,7 +251,8 @@ cAddPicker.addEventListener("change", () => {
 });
 cSubPicker.addEventListener("change", () => {
   if (cSubPicker.value) {
-    composeSubs.push(cSubPicker.value);
+    const name = cSubInverse.checked ? "~" + cSubPicker.value : cSubPicker.value;
+    composeSubs.push(name);
     cSubPicker.value = "";
     renderChips(cSubChips, composeSubs, modules.substitutions, composeSubs);
     composeLivePreview();
@@ -195,14 +293,20 @@ cName.addEventListener("input", composeLivePreview);
 cDesc.addEventListener("input", composeLivePreview);
 cPreviewBtn.addEventListener("click", composeLivePreview);
 
-cSaveBtn.addEventListener("click", async () => {
+cSaveBtn.addEventListener("click", () => doSave(false));
+cActivateBtn.addEventListener("click", () => {
+  const file = cFile.value.trim();
+  const name = cName.value.trim() || "basic";
+  if (!confirm(`Save and activate ${file}(${name}) in the current session?\n\nWrites to ~/.config/flexkb/data/layouts/, then runs setxkbmap + xkbcomp against the live session.`)) return;
+  doSave(true);
+});
+
+async function doSave(thenActivate) {
   cStatus.textContent = "saving…";
   cStatus.className = "status";
-  const body = {
-    file: cFile.value.trim(),
-    merge: true,
-    variants: [composeSpec()],
-  };
+  const file = cFile.value.trim();
+  const spec = composeSpec();
+  const body = { file, merge: true, variants: [spec] };
   try {
     const res = await fetch("/api/save", {
       method: "POST",
@@ -210,19 +314,37 @@ cSaveBtn.addEventListener("click", async () => {
       body: JSON.stringify(body),
     });
     if (!res.ok) {
-      cStatus.textContent = "error: " + await res.text();
+      cStatus.textContent = "save error: " + await res.text();
       cStatus.className = "status err";
       return;
     }
     const data = await res.json();
     cStatus.textContent = "saved to " + data.path;
     cStatus.className = "status ok";
-    // Refresh browse-tab data so the new file is visible.
     await loadLayouts();
+    if (thenActivate) {
+      cStatus.textContent = "activating…";
+      cStatus.className = "status";
+      await activateRequest(file, spec.name, cStatus);
+    }
   } catch (e) {
     cStatus.textContent = "save failed: " + e.message;
     cStatus.className = "status err";
   }
+}
+
+cShowXKBBtn.addEventListener("click", async () => {
+  if (!cXkb.classList.contains("hidden")) {
+    cXkb.classList.add("hidden");
+    return;
+  }
+  const res = await fetch("/api/xkb", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(composeSpec()),
+  });
+  cXkb.textContent = await res.text();
+  cXkb.classList.remove("hidden");
 });
 
 function composeSpec() {

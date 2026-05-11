@@ -236,9 +236,77 @@ section.tab.hidden { display: none; }
 .compose-form button:hover { background: #2d333b; }
 .compose-form button.primary { background: #1f6feb; border-color: #1f6feb; color: white; }
 .compose-form button.primary:hover { background: #2876f1; }
-.compose-form .status { color: #adbac7; font-size: 0.85rem; }
-.compose-form .status.ok   { color: #7ee7a1; }
-.compose-form .status.err  { color: #ff7b72; }
+.compose-form .status, .row.actions .status { color: #adbac7; font-size: 0.85rem; }
+.compose-form .status.ok,   .row.actions .status.ok   { color: #7ee7a1; }
+.compose-form .status.err,  .row.actions .status.err  { color: #ff7b72; }
+
+.row.actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin: 0.4rem 0 1rem;
+  flex-wrap: wrap;
+}
+.row.actions button {
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #d9e0e9;
+  border-radius: 4px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.row.actions button:hover { background: #2d333b; }
+.row.actions button.primary { background: #1f6feb; border-color: #1f6feb; color: white; }
+.row.actions button.primary:hover { background: #2876f1; }
+
+.multi input[type=search] {
+  background: transparent;
+  border: 1px solid #30363d;
+  color: #d9e0e9;
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.85rem;
+  margin-right: 0.4rem;
+  font-family: inherit;
+}
+.multi select[size] {
+  background: #0e1116;
+  color: #adbac7;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  flex: 1 1 100%;
+  min-width: 320px;
+  margin-top: 0.25rem;
+}
+.multi select[size] option { padding: 0.15rem 0.4rem; }
+.multi .inline-check {
+  color: #adbac7;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: 0.4rem;
+}
+.multi .inline-check input { margin: 0; }
+
+.xkb-output {
+  background: #0e1116;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 0.7rem 1rem;
+  font-family: ui-monospace, "JetBrains Mono", Menlo, monospace;
+  font-size: 0.8rem;
+  color: #adbac7;
+  white-space: pre;
+  overflow: auto;
+  max-height: 360px;
+  margin-bottom: 1rem;
+}
+.xkb-output.hidden { display: none; }
 
 /* === Paths tab === */
 .hint { color: #768390; font-size: 0.9rem; max-width: 720px; }
