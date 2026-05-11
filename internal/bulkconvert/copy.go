@@ -17,7 +17,18 @@ import (
 // CopyTree copies every file under srcRoot into dstRoot, skipping files
 // whose relative path appears in skip. Directories are created as needed.
 // skip keys are relative paths from srcRoot, e.g. "symbols/us".
+//
+// srcRoot is resolved via EvalSymlinks before walking. filepath.Walk
+// won't descend into a symlinked root directory; if the build pipeline
+// passes a symlink (e.g. xkeyboard-config's meson install creates an
+// X11/xkb → /usr/share/xkeyboard-config-2 indirection), Walk would visit
+// only the symlink node and return — so rules/, compat/, keycodes/,
+// types/, geometry/ would silently never be copied. Resolving upfront
+// makes the symlink case behave identically to passing the real path.
 func CopyTree(srcRoot, dstRoot string, skip map[string]bool) error {
+	if resolved, err := filepath.EvalSymlinks(srcRoot); err == nil {
+		srcRoot = resolved
+	}
 	return filepath.Walk(srcRoot, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err

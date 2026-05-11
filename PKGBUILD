@@ -17,7 +17,7 @@
 
 pkgname=flexkb
 pkgver=0.1.0
-pkgrel=2
+pkgrel=3
 _xkbcver=2.47
 pkgdesc="Modular XKB layout generator and drop-in xkeyboard-config replacement"
 # CGO is enabled to link the webview engine, so the package is no
@@ -63,15 +63,25 @@ build() {
     arch-meson . _build
     meson compile -C _build
     DESTDIR="$srcdir/xkbc-install" meson install -C _build
-    # Assembled upstream xkb tree:
-    _xkbc_tree="$srcdir/xkbc-install/usr/share/X11/xkb"
-    if [[ ! -f "$_xkbc_tree/rules/evdev" ]]; then
-        # Some xkeyboard-config versions install under
-        # /usr/share/xkeyboard-config-2 instead. Find it either way.
-        _xkbc_tree="$srcdir/xkbc-install/usr/share/xkeyboard-config-2"
+    # Pick the REAL directory (not the X11/xkb symlink xkeyboard-config
+    # installs into the same DESTDIR). filepath.Walk inside the flexkb
+    # build pipeline doesn't descend into symlinked roots; passing the
+    # symlink path here previously yielded a build that copied nothing
+    # from rules/compat/keycodes/types/geometry. Prefer the canonical
+    # xkeyboard-config-2 directory; fall back to X11/xkb only if that's
+    # somehow the real one in a newer upstream layout.
+    _xkbc_tree="$srcdir/xkbc-install/usr/share/xkeyboard-config-2"
+    if [[ ! -d "$_xkbc_tree" || -L "$_xkbc_tree" ]]; then
+        _xkbc_tree="$srcdir/xkbc-install/usr/share/X11/xkb"
+    fi
+    # Refuse to proceed with a symlinked tree (bulkconvert also resolves
+    # symlinks defensively, but a real directory makes the staging path
+    # more readable in build logs).
+    if [[ -L "$_xkbc_tree" ]]; then
+        _xkbc_tree="$(readlink -f "$_xkbc_tree")"
     fi
     [[ -f "$_xkbc_tree/rules/evdev" ]] || \
-        { echo "fatal: xkeyboard-config build didn't produce rules/evdev"; exit 1; }
+        { echo "fatal: xkeyboard-config build didn't produce rules/evdev at $_xkbc_tree"; exit 1; }
 
     # Step 2 — build the flexkb binary.
     cd "$startdir"
