@@ -10,6 +10,10 @@
   <header>
     <h1>flexkb</h1>
     <p class="tag">keyboard layout composer</p>
+    <div class="header-right">
+      <span class="active-chip hidden" id="activeChip"></span>
+      <button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme">☾</button>
+    </div>
     <nav class="tabs">
       <button data-tab="browse" class="active">Browse</button>
       <button data-tab="compose">Compose your own</button>
@@ -73,6 +77,14 @@
           <label>
             <span>Transformation</span>
             <select id="cTransformation"></select>
+          </label>
+          <label class="inline-check" title="Mark this variant as the file's default (selected when the layout file is picked without specifying a variant)">
+            <input type="checkbox" id="cDefault">
+            <span>default</span>
+          </label>
+          <label class="inline-check" title="Skip modular composition — use upstream xkb verbatim. Use this when an xkb variant exists in xkeyboard-config and you just want to surface it.">
+            <input type="checkbox" id="cPassthrough">
+            <span>passthrough</span>
           </label>
         </div>
         <div class="row">

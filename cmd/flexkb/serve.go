@@ -119,6 +119,9 @@ func startServer(rootFn func() model.DataRoot, addr string) (string, <-chan erro
 	mux.HandleFunc("/api/variant", func(w http.ResponseWriter, r *http.Request) {
 		handleVariant(w, r, rootFn())
 	})
+	mux.HandleFunc("/api/active", func(w http.ResponseWriter, r *http.Request) {
+		handleActive(w, r)
+	})
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return "", nil, err
@@ -979,6 +982,98 @@ func handleVariant(w http.ResponseWriter, r *http.Request, root model.DataRoot) 
 		return
 	}
 	writeJSON(w, map[string]any{"deleted": true, "fileRemoved": false, "path": src})
+}
+
+// apiActive reports the currently-applied keyboard layout. We try
+// setxkbmap -query first (covers X11 + Xwayland); failing that we
+// fall back to /etc/X11/xorg.conf.d/00-keyboard.conf (persistent
+// system config) so the GUI still has something useful to show on
+// pure Wayland sessions where setxkbmap isn't meaningful.
+type apiActive struct {
+	Layout  string `json:"layout"`
+	Variant string `json:"variant"`
+	Model   string `json:"model"`
+	Source  string `json:"source"`
+	OK      bool   `json:"ok"`
+}
+
+func handleActive(w http.ResponseWriter, _ *http.Request) {
+	a := apiActive{}
+	if out, err := exec.Command("setxkbmap", "-query").Output(); err == nil {
+		for _, line := range strings.Split(string(out), "\n") {
+			parts := strings.SplitN(line, ":", 2)
+			if len(parts) != 2 {
+				continue
+			}
+			k := strings.TrimSpace(parts[0])
+			v := strings.TrimSpace(parts[1])
+			switch k {
+			case "layout":
+				a.Layout = v
+			case "variant":
+				a.Variant = v
+			case "model":
+				a.Model = v
+			}
+		}
+		if a.Layout != "" {
+			a.Source = "setxkbmap"
+			a.OK = true
+			writeJSON(w, a)
+			return
+		}
+	}
+	// Fallback: persistent system config.
+	if buf, err := os.ReadFile("/etc/X11/xorg.conf.d/00-keyboard.conf"); err == nil {
+		for _, line := range strings.Split(string(buf), "\n") {
+			line = strings.TrimSpace(line)
+			if strings.HasPrefix(line, "Option \"XkbLayout\"") {
+				if i := strings.Index(line[20:], "\""); i >= 0 {
+					a.Layout = strings.Trim(line[19+i+1:], " \t\"")
+				}
+				// Simpler: take the second quoted field.
+				fields := splitQuoted(line)
+				if len(fields) >= 2 {
+					a.Layout = fields[1]
+				}
+			} else if strings.HasPrefix(line, "Option \"XkbVariant\"") {
+				fields := splitQuoted(line)
+				if len(fields) >= 2 {
+					a.Variant = fields[1]
+				}
+			} else if strings.HasPrefix(line, "Option \"XkbModel\"") {
+				fields := splitQuoted(line)
+				if len(fields) >= 2 {
+					a.Model = fields[1]
+				}
+			}
+		}
+		if a.Layout != "" {
+			a.Source = "xorg.conf.d"
+			a.OK = true
+		}
+	}
+	writeJSON(w, a)
+}
+
+func splitQuoted(s string) []string {
+	var out []string
+	in := false
+	cur := strings.Builder{}
+	for _, r := range s {
+		if r == '"' {
+			if in {
+				out = append(out, cur.String())
+				cur.Reset()
+			}
+			in = !in
+			continue
+		}
+		if in {
+			cur.WriteRune(r)
+		}
+	}
+	return out
 }
 
 // userLayoutsDir returns the highest-priority writable layouts/ dir.

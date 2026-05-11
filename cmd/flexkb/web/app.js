@@ -12,10 +12,27 @@ const ROWS = [
 // Shared state
 let layouts = [];
 let modules = { physicals: [], transformations: [], additions: [], substitutions: [] };
+let activeLayout = null;
 // Latest compose response per render target — used by the per-key
 // popover so a click on a key can show the full level breakdown
 // without re-fetching.
 const lastCompose = new WeakMap();
+
+// === Theme ===
+const themeToggle = document.getElementById("themeToggle");
+function applyTheme(name) {
+  document.body.classList.toggle("theme-light", name === "light");
+  themeToggle.textContent = name === "light" ? "☀" : "☾";
+  try { localStorage.setItem("flexkb.theme", name); } catch (e) {}
+}
+themeToggle.addEventListener("click", () => {
+  const next = document.body.classList.contains("theme-light") ? "dark" : "light";
+  applyTheme(next);
+});
+try {
+  const saved = localStorage.getItem("flexkb.theme");
+  if (saved) applyTheme(saved);
+} catch (e) {}
 
 // === Tab switching ===
 document.querySelectorAll("nav.tabs button").forEach(btn => {
@@ -70,6 +87,7 @@ function populateVariants() {
   }
   const def = lf.variants.find(v => v.default) || lf.variants[0];
   if (def) variantSelect.value = def.name;
+  decorateActiveInPicker();
   updateBrowseControls();
   loadCompose();
 }
@@ -112,6 +130,8 @@ bEditBtn.addEventListener("click", async () => {
   if (v.transformation) cTransformation.value = v.transformation;
   composeAdditions = (v.additions || []).slice();
   composeSubs = (v.substitutions || []).slice();
+  cDefault.checked = !!v.default;
+  cPassthrough.checked = !!v.passthrough;
   renderChips(cAddChips, composeAdditions, modules.additions, composeAdditions);
   renderChips(cSubChips, composeSubs, modules.substitutions, composeSubs);
   // Switch to Compose tab.
@@ -181,6 +201,7 @@ async function activateRequest(file, variant, statusEl) {
     if (data.ok) {
       statusEl.textContent = "activated — " + (data.stdout.split("\n")[0] || "");
       statusEl.className = "status ok";
+      loadActive();
       return true;
     }
     statusEl.textContent = "activate failed: " + (data.stderr.split("\n")[0] || data.stdout || "(no output)");
@@ -224,6 +245,8 @@ const cActivateBtn = document.getElementById("cActivate");
 const cShowXKBBtn = document.getElementById("cShowXKB");
 const cDeleteBtn = document.getElementById("cDelete");
 const cStatus = document.getElementById("cStatus");
+const cDefault = document.getElementById("cDefault");
+const cPassthrough = document.getElementById("cPassthrough");
 const cMeta = document.getElementById("cMeta");
 const cKb = document.getElementById("cKeyboard");
 const cWarn = document.getElementById("cWarnings");
@@ -522,6 +545,8 @@ function composeSpec() {
     transformation: cTransformation.value,
     additions: composeAdditions.slice(),
     substitutions: composeSubs.slice(),
+    default: cDefault.checked,
+    passthrough: cPassthrough.checked,
   };
 }
 
@@ -800,3 +825,35 @@ function truncate(s, n) {
 fileSelect.addEventListener("change", populateVariants);
 variantSelect.addEventListener("change", loadCompose);
 loadLayouts();
+loadActive();
+
+const activeChip = document.getElementById("activeChip");
+
+async function loadActive() {
+  try {
+    const res = await fetch("/api/active");
+    if (!res.ok) return;
+    const a = await res.json();
+    if (a.ok && a.layout) {
+      activeLayout = a;
+      const v = a.variant || "basic";
+      activeChip.textContent = `live: ${a.layout}(${v})`;
+      activeChip.title = `source: ${a.source}` + (a.model ? ` · model: ${a.model}` : "");
+      activeChip.classList.remove("hidden");
+    } else {
+      activeChip.classList.add("hidden");
+    }
+    // Re-decorate the variant picker if it's already rendered.
+    decorateActiveInPicker();
+  } catch (e) {}
+}
+
+function decorateActiveInPicker() {
+  if (!activeLayout) return;
+  for (const opt of variantSelect.options) {
+    opt.textContent = opt.textContent.replace(/ \[live\]$/, "");
+    if (fileSelect.value === activeLayout.layout && opt.value === (activeLayout.variant || "basic")) {
+      opt.textContent = opt.textContent + " [live]";
+    }
+  }
+}
