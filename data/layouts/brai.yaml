@@ -1,7 +1,26 @@
 file: brai
 variants:
+  # INPUT: 8-key chord transformation. flexkb provides the consistent
+  # physical input layer; brltty/liblouis sit on top to translate chord
+  # patterns into target-language letters externally. Means a Braille
+  # user has the same chord input on every keyboard regardless of which
+  # language layout the OS thinks is active.
   - name: basic
-    description: Braille (home-row 8-dot input)
+    description: Braille (home-row 8-dot chord input)
     physical: iso
     transformation: braille-home-row
     default: true
+
+  # OUTPUT: type Latin text, get Braille glyphs. Grade 1 (uncontracted) —
+  # liblouis handles Grade 2 contractions externally.
+  - name: output-english
+    description: Braille glyph output (English Grade 1, from QWERTY)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-to-english-braille]
+
+  - name: output-english-dvorak
+    description: Braille glyph output (English Grade 1, from Dvorak)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-to-english-braille]

@@ -1,0 +1,78 @@
+name: Cyrillic → Russian Braille (Grade 1)
+description: |
+  Maps Russian Cyrillic letters to their Russian Braille cells. Chain
+  AFTER latin-cyrillic-phonetic (or apply on top of ycuken native input)
+  to get Russian Braille output:
+
+    substitutions: [latin-cyrillic-phonetic, cyrillic-to-russian-braille]
+
+  Letters with Latin cognates (а/b/в/г/etc.) reuse the same Braille
+  cells as English Braille; uniquely-Russian letters (й/ш/ъ/ы/ь/э/ю/я)
+  get their own conventional cells.
+map:
+  Cyrillic_a:        U2801   # ⠁
+  Cyrillic_A:        U2801
+  Cyrillic_be:       U2803   # ⠃
+  Cyrillic_BE:       U2803
+  Cyrillic_ve:       U283A   # ⠺
+  Cyrillic_VE:       U283A
+  Cyrillic_ghe:      U281B   # ⠛
+  Cyrillic_GHE:      U281B
+  Cyrillic_de:       U2819   # ⠙
+  Cyrillic_DE:       U2819
+  Cyrillic_ie:       U2811   # ⠑
+  Cyrillic_IE:       U2811
+  Cyrillic_io:       U2821   # ⠡
+  Cyrillic_IO:       U2821
+  Cyrillic_zhe:      U281A   # ⠚
+  Cyrillic_ZHE:      U281A
+  Cyrillic_ze:       U2835   # ⠵
+  Cyrillic_ZE:       U2835
+  Cyrillic_i:        U280A   # ⠊
+  Cyrillic_I:        U280A
+  Cyrillic_shorti:   U282F   # ⠯
+  Cyrillic_SHORTI:   U282F
+  Cyrillic_ka:       U2805   # ⠅
+  Cyrillic_KA:       U2805
+  Cyrillic_el:       U2807   # ⠇
+  Cyrillic_EL:       U2807
+  Cyrillic_em:       U280D   # ⠍
+  Cyrillic_EM:       U280D
+  Cyrillic_en:       U281D   # ⠝
+  Cyrillic_EN:       U281D
+  Cyrillic_o:        U2815   # ⠕
+  Cyrillic_O:        U2815
+  Cyrillic_pe:       U280F   # ⠏
+  Cyrillic_PE:       U280F
+  Cyrillic_er:       U2817   # ⠗
+  Cyrillic_ER:       U2817
+  Cyrillic_es:       U280E   # ⠎
+  Cyrillic_ES:       U280E
+  Cyrillic_te:       U281E   # ⠞
+  Cyrillic_TE:       U281E
+  Cyrillic_u:        U2825   # ⠥
+  Cyrillic_U:        U2825
+  Cyrillic_ef:       U280B   # ⠋
+  Cyrillic_EF:       U280B
+  Cyrillic_ha:       U2813   # ⠓
+  Cyrillic_HA:       U2813
+  Cyrillic_tse:      U2809   # ⠉
+  Cyrillic_TSE:      U2809
+  Cyrillic_che:      U281F   # ⠟
+  Cyrillic_CHE:      U281F
+  Cyrillic_sha:      U2831   # ⠱
+  Cyrillic_SHA:      U2831
+  Cyrillic_shcha:    U282D   # ⠭
+  Cyrillic_SHCHA:    U282D
+  Cyrillic_hardsign: U2837   # ⠷
+  Cyrillic_HARDSIGN: U2837
+  Cyrillic_yeru:     U282E   # ⠮
+  Cyrillic_YERU:     U282E
+  Cyrillic_softsign: U283E   # ⠾
+  Cyrillic_SOFTSIGN: U283E
+  Cyrillic_e:        U282A   # ⠪
+  Cyrillic_E:        U282A
+  Cyrillic_yu:       U2833   # ⠳
+  Cyrillic_YU:       U2833
+  Cyrillic_ya:       U282B   # ⠫
+  Cyrillic_YA:       U282B

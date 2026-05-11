@@ -78,6 +78,16 @@ variants:
     transformation: ycuken
     additions: [ukrainian-extras]
 
+  # Braille output: type Latin → Cyrillic phonetic → Russian Braille
+  # glyphs. liblouis handles Grade 2 contractions externally; this is
+  # the Grade 1 letter-by-letter substitution path.
+  - name: braille-output
+    description: Russian Braille glyph output (Latin phonetic input → Cyrillic → Braille)
+    physical: ansi
+    transformation: qwerty
+    substitutions: [latin-cyrillic-phonetic, cyrillic-to-russian-braille]
+    additions: [russian-phonetic-extras]
+
   - name: with-belarusian
     description: Russian + Belarusian ў
     physical: iso

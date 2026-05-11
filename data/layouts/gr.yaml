@@ -32,3 +32,10 @@ variants:
     physical: iso
     transformation: qwerty
     substitutions: [latin-greek-phonetic, greek-to-coptic]
+
+  # Greek Braille output: type Latin → Greek → Greek Braille glyphs.
+  - name: braille-output
+    description: Greek Braille glyph output (Latin phonetic → Greek → Braille)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-greek-phonetic, greek-to-greek-braille]

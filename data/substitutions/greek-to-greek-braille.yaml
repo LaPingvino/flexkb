@@ -1,0 +1,59 @@
+name: Greek → Greek Braille (Grade 1)
+description: |
+  Maps Greek letters to Greek Braille cells. Chain AFTER
+  latin-greek-phonetic to type Greek Braille via Latin input:
+
+    substitutions: [latin-greek-phonetic, greek-to-greek-braille]
+
+  Greek Braille shares the Unicode Braille block with all other
+  language Braille; each Greek letter gets a specific cell per
+  established Greek-Braille convention.
+map:
+  Greek_alpha:    U2801    # α → ⠁
+  Greek_ALPHA:    U2801
+  Greek_beta:     U2803    # β → ⠃
+  Greek_BETA:     U2803
+  Greek_gamma:    U281B    # γ → ⠛
+  Greek_GAMMA:    U281B
+  Greek_delta:    U2819    # δ → ⠙
+  Greek_DELTA:    U2819
+  Greek_epsilon:  U2811    # ε → ⠑
+  Greek_EPSILON:  U2811
+  Greek_zeta:     U2835    # ζ → ⠵
+  Greek_ZETA:     U2835
+  Greek_eta:      U2813    # η → ⠓
+  Greek_ETA:      U2813
+  Greek_theta:    U281A    # θ → ⠚
+  Greek_THETA:    U281A
+  Greek_iota:     U280A    # ι → ⠊
+  Greek_IOTA:     U280A
+  Greek_kappa:    U2805    # κ → ⠅
+  Greek_KAPPA:    U2805
+  Greek_lamda:    U2807    # λ → ⠇
+  Greek_LAMDA:    U2807
+  Greek_mu:       U280D    # μ → ⠍
+  Greek_MU:       U280D
+  Greek_nu:       U281D    # ν → ⠝
+  Greek_NU:       U281D
+  Greek_xi:       U282D    # ξ → ⠭
+  Greek_XI:       U282D
+  Greek_omicron:  U2815    # ο → ⠕
+  Greek_OMICRON:  U2815
+  Greek_pi:       U280F    # π → ⠏
+  Greek_PI:       U280F
+  Greek_rho:      U2817    # ρ → ⠗
+  Greek_RHO:      U2817
+  Greek_sigma:    U280E    # σ → ⠎
+  Greek_SIGMA:    U280E
+  Greek_tau:      U281E    # τ → ⠞
+  Greek_TAU:      U281E
+  Greek_upsilon:  U2825    # υ → ⠥
+  Greek_UPSILON:  U2825
+  Greek_phi:      U280B    # φ → ⠋
+  Greek_PHI:      U280B
+  Greek_chi:      U2809    # χ → ⠉
+  Greek_CHI:      U2809
+  Greek_psi:      U283D    # ψ → ⠽
+  Greek_PSI:      U283D
+  Greek_omega:    U283A    # ω → ⠺
+  Greek_OMEGA:    U283A

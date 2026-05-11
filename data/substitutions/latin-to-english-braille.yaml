@@ -1,0 +1,69 @@
+name: Latin → English Braille (Grade 1, uncontracted)
+description: |
+  Substitutes each Latin letter for its English Braille Grade 1 cell
+  (Unicode Braille Patterns block U2800-U28FF). Compose on any Latin
+  transformation to produce Braille text output from regular typing —
+  useful for sighted users producing Braille documents.
+
+  Grade 1 only; Grade 2 contractions (word-level shortenings like "the"
+  → ⠮) need a translation library like liblouis and can't be done by
+  per-letter substitution.
+
+  Together with the existing `braille-home-row` transformation, flexkb
+  now serves both directions:
+   - Braille INPUT (chord on 8 keys): braille-home-row transformation,
+     translated to target-language letters by brltty/liblouis externally
+   - Braille OUTPUT (Latin → Braille glyphs): this substitution
+map:
+  a: U2801   # ⠁
+  A: U2801
+  b: U2803   # ⠃
+  B: U2803
+  c: U2809   # ⠉
+  C: U2809
+  d: U2819   # ⠙
+  D: U2819
+  e: U2811   # ⠑
+  E: U2811
+  f: U280B   # ⠋
+  F: U280B
+  g: U281B   # ⠛
+  G: U281B
+  h: U2813   # ⠓
+  H: U2813
+  i: U280A   # ⠊
+  I: U280A
+  j: U281A   # ⠚
+  J: U281A
+  k: U2805   # ⠅
+  K: U2805
+  l: U2807   # ⠇
+  L: U2807
+  m: U280D   # ⠍
+  M: U280D
+  n: U281D   # ⠝
+  N: U281D
+  o: U2815   # ⠕
+  O: U2815
+  p: U280F   # ⠏
+  P: U280F
+  q: U281F   # ⠟
+  Q: U281F
+  r: U2817   # ⠗
+  R: U2817
+  s: U280E   # ⠎
+  S: U280E
+  t: U281E   # ⠞
+  T: U281E
+  u: U2825   # ⠥
+  U: U2825
+  v: U2827   # ⠧
+  V: U2827
+  w: U283A   # ⠺
+  W: U283A
+  x: U282D   # ⠭
+  X: U282D
+  y: U283D   # ⠽
+  Y: U283D
+  z: U2835   # ⠵
+  Z: U2835
