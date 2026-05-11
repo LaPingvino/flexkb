@@ -1,0 +1,63 @@
+name: Latin → Cherokee (phonetic, first-syllable approximation)
+description: |
+  Cherokee uses Sequoyah's syllabary — 85 characters, each a CV syllable
+  (consonant + vowel). Like Ge'ez, this is fundamentally syllabic, not
+  alphabetic. The substitution maps each Latin letter to the closest
+  Cherokee syllable starting with that sound (typically the consonant +
+  /a/ syllable). Full Cherokee typing wants an IME (m17n-chr) for the
+  remaining 84 syllables.
+
+  Cherokee codepoints U13A0-U13FF.
+map:
+  a: U13A0   # Ꭰ a
+  A: U13A0
+  b: U13A6   # closest: Ꭶ ga (no plain b in Cherokee)
+  B: U13A6
+  c: U13B3   # Ꮃ la (close-ish)
+  C: U13B3
+  d: U13E3   # Ꮣ da
+  D: U13E3
+  e: U13A1   # Ꭱ e
+  E: U13A1
+  f: U13EF   # Ꮯ tli
+  F: U13EF
+  g: U13A6   # Ꭶ ga
+  G: U13A6
+  h: U13BB   # Ꮋ ha
+  H: U13BB
+  i: U13A2   # Ꭲ i
+  I: U13A2
+  j: U13E3   # Ꮣ da (j → d-sound by convention)
+  J: U13E3
+  k: U13A6   # Ꭶ ga (Cherokee k = g sound)
+  K: U13A6
+  l: U13B3   # Ꮃ la
+  L: U13B3
+  m: U13B7   # Ꮇ ma
+  M: U13B7
+  n: U13C0   # Ꮏ hna
+  N: U13C0
+  o: U13A3   # Ꭳ o
+  O: U13A3
+  p: U13D0   # Ꮟ si (no p in Cherokee)
+  P: U13D0
+  q: U13CC   # Ꮜ sa
+  Q: U13CC
+  r: U13B3   # Ꮃ la (no r in Cherokee; use la)
+  R: U13B3
+  s: U13D0   # Ꮟ si
+  S: U13D0
+  t: U13E3   # Ꮣ da (Cherokee t = d sound)
+  T: U13E3
+  u: U13A4   # Ꭴ u
+  U: U13A4
+  v: U13A5   # Ꭵ v (nasalised vowel)
+  V: U13A5
+  w: U13F1   # Ᏼ ye (placeholder)
+  W: U13F1
+  x: U13D0
+  X: U13D0
+  y: U13EF   # Ꮯ tli
+  Y: U13EF
+  z: U13D0
+  Z: U13D0

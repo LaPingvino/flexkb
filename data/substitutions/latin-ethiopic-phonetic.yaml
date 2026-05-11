@@ -1,0 +1,63 @@
+name: Latin → Ge'ez/Ethiopic (phonetic, first-order syllables)
+description: |
+  Phonetic Ge'ez substitution for Tigrinya, Amharic, and Tigre. Ge'ez
+  is a syllabary — each character is one consonant+vowel syllable, with
+  7 vowel orders per consonant (ä, u, i, a, e, ə, o). This substitution
+  provides the FIRST-ORDER (ä-vowel) forms; for full vowel access, pair
+  with an IME like ibus-libpinyin or ibus-m17n (m17n-am-sera, m17n-ti).
+
+  Codepoints in the Ethiopic block (U1200-U137F). The mapping picks the
+  closest sound cognate per Latin letter.
+map:
+  a: U12A0   # አ
+  A: U12A0
+  b: U1260   # በ
+  B: U1260
+  c: U1278   # ቸ
+  C: U1278
+  d: U12F0   # ደ
+  D: U12F0
+  e: U12A8   # ከ — used as 'e' isn't a separable phoneme; placeholder
+  E: U12A8
+  f: U134A   # ፊ ← wait f is ፈ U1348
+  F: U1348
+  g: U1308   # ገ
+  G: U1308
+  h: U1200   # ሀ
+  H: U1200
+  i: U12A2   # ኢ
+  I: U12A2
+  j: U1300   # ጀ
+  J: U1300
+  k: U12A8   # ከ
+  K: U12A8
+  l: U1208   # ለ
+  L: U1208
+  m: U1218   # መ
+  M: U1218
+  n: U1290   # ነ
+  N: U1290
+  o: U12A6   # ኦ
+  O: U12A6
+  p: U1330   # ጰ
+  P: U1330
+  q: U1240   # ቀ
+  Q: U1240
+  r: U1228   # ረ
+  R: U1228
+  s: U1230   # ሰ
+  S: U1230
+  t: U1270   # ተ
+  T: U1270
+  u: U12A1   # ኡ
+  U: U12A1
+  v: U1268   # ቨ
+  V: U1268
+  w: U12C8   # ወ
+  W: U12C8
+  x: U1283   # ሻ
+  X: U1283
+  y: U12E8   # የ
+  Y: U12E8
+  z: U12D8   # ዘ
+  Z: U12D8

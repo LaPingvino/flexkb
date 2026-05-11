@@ -1,0 +1,24 @@
+file: et
+variants:
+  # Ethiopia. The base xkb 'et' layout is for Amharic; we provide a
+  # phonetic Ge'ez first-order substitution so users without an IME
+  # can type basic Amharic/Tigrinya. For full vowel order coverage,
+  # users should pair this with ibus-m17n + m17n-am-sera or m17n-ti.
+  - name: phonetic
+    description: Ethiopic (Amharic/Tigrinya phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-ethiopic-phonetic]
+    default: true
+
+  - name: phonetic-dvorak
+    description: Ethiopic (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-ethiopic-phonetic]
+
+  - name: phonetic-colemak
+    description: Ethiopic (phonetic, Colemak base)
+    physical: iso
+    transformation: colemak
+    substitutions: [latin-ethiopic-phonetic]

@@ -1,0 +1,14 @@
+file: er
+variants:
+  - name: phonetic
+    description: Tigrinya / Ge'ez (Eritrean Ethiopic, phonetic)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-ethiopic-phonetic]
+    default: true
+
+  - name: phonetic-dvorak
+    description: Tigrinya (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-ethiopic-phonetic]

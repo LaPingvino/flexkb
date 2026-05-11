@@ -85,3 +85,9 @@ variants:
     physical: ansi
     transformation: qwerty
     additions: [intl, esperanto]
+
+  - name: cherokee-phonetic
+    description: Cherokee (phonetic Sequoyah syllabary, first-syllable approximation)
+    physical: ansi
+    transformation: qwerty
+    substitutions: [latin-cherokee-phonetic]
