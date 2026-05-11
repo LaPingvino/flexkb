@@ -100,9 +100,15 @@
             <input type="checkbox" id="cPassthrough">
             <span>passthrough</span>
           </label>
-          <label class="inline-check" title="After composition, fill any still-empty levels from the pool of filler additions (categories like typography, math, cultural-extras). Empty-only: never overrides existing content.">
-            <input type="checkbox" id="cAutofill">
-            <span>autofill empty positions</span>
+        </div>
+        <div class="row">
+          <label class="full">
+            <span>Autofill empty positions <em>(fillers run after composition, empty-only — never overrides)</em></span>
+            <div class="autofill-cats" id="cAutofillCats">
+              <label class="inline-check"><input type="checkbox" id="cAutofillAll"><span>all</span></label>
+              <span class="autofill-cat-list" id="cAutofillCatList"></span>
+              <span class="fill-stats" id="cFillStats"></span>
+            </div>
           </label>
         </div>
         <div class="row">

@@ -1,0 +1,36 @@
+name: Currency filler
+description: |
+  Common world currency signs on AltGr levels — €, £, ¥, ¢, ₹, ₽, ₿,
+  ¤ — anchored on the letters that match each currency's English
+  name (e for Euro, l for Lira/Pound, y for Yen, c for Cent, etc.).
+  Universal because it uses letter-overlays, so it adapts to any
+  Latin-script base.
+
+  Applied via `autofill: [currency]`. Empty-only — if a layout already
+  puts EuroSign somewhere, this filler won't move or duplicate it.
+filler: true
+categories: [currency]
+scripts: [latin, any]
+letter_overlays:
+  # AltGr+e gets €. Most layouts already do this; the empty-only-merge
+  # makes this entry safe to ship — it'll only land if the user's base
+  # doesn't already place EuroSign here.
+  e: { levels: ["", "", EuroSign, ""] }
+  # Pound / Lira / Yen on their initials.
+  l: { levels: ["", "", sterling, U20A4] }    # £ ₤
+  y: { levels: ["", "", yen, ""] }            # ¥
+  # Cent on c.
+  c: { levels: ["", "", cent, ""] }           # ¢
+  # Rupee on r — letter overlay loses to intl's r (registered) and
+  # latin-extras (ř ŕ), but empty-only means anything still empty wins.
+  r: { levels: ["", "", U20B9, ""] }          # ₹
+  # Won on w, Peso on p.
+  w: { levels: ["", "", U20A9, ""] }          # ₩
+  p: { levels: ["", "", U20B1, ""] }          # ₱
+  # Generic currency sign on the dollar key would clobber existing $.
+  # Instead anchor on the "4" key whose level-1 is "4" not "dollar".
+  "4": { levels: ["", "", currency, ""] }     # ¤
+  # Bitcoin on b. Recent (Unicode 10) so older fonts may lack it.
+  b: { levels: ["", "", U20BF, ""] }          # ₿
+  # Ruble on... we don't have a great anchor on Latin; use 'p' would
+  # collide with peso. Skip — leave to a future cyrillic-currency filler.

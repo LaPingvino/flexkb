@@ -202,7 +202,13 @@ bEditBtn.addEventListener("click", async () => {
   composeSubs = (v.substitutions || []).slice();
   cDefault.checked = !!v.default;
   cPassthrough.checked = !!v.passthrough;
-  cAutofill.checked = !!(v.autofill && v.autofill.length);
+  selectedAutofillCats = new Set();
+  cAutofillAll.checked = false;
+  if (v.autofill && v.autofill.length) {
+    if (v.autofill.includes("*")) cAutofillAll.checked = true;
+    else for (const c of v.autofill) selectedAutofillCats.add(c);
+  }
+  renderAutofillCats();
   renderChips(cAddChips, composeAdditions, modules.additions, composeAdditions);
   renderChips(cSubChips, composeSubs, modules.substitutions, composeSubs);
   // Switch to Compose tab.
@@ -411,7 +417,11 @@ const cDeleteBtn = document.getElementById("cDelete");
 const cStatus = document.getElementById("cStatus");
 const cDefault = document.getElementById("cDefault");
 const cPassthrough = document.getElementById("cPassthrough");
-const cAutofill = document.getElementById("cAutofill");
+const cAutofillAll = document.getElementById("cAutofillAll");
+const cAutofillCatList = document.getElementById("cAutofillCatList");
+const cFillStats = document.getElementById("cFillStats");
+let autofillCategories = []; // [{name, fillers}]
+let selectedAutofillCats = new Set();
 const cMeta = document.getElementById("cMeta");
 const cKb = document.getElementById("cKeyboard");
 const cWarn = document.getElementById("cWarnings");
@@ -428,11 +438,46 @@ async function ensureComposeReady() {
   }
   const res = await fetch("/api/modules");
   modules = await res.json();
+  const catRes = await fetch("/api/autofill-categories");
+  autofillCategories = await catRes.json();
+  renderAutofillCats();
   modulesLoaded = true;
   populateModuleDropdowns();
   updateComposeControls();
   composeLivePreview();
 }
+
+function renderAutofillCats() {
+  cAutofillCatList.innerHTML = "";
+  for (const cat of autofillCategories) {
+    const label = document.createElement("label");
+    label.className = "inline-check";
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.value = cat.name;
+    cb.checked = selectedAutofillCats.has(cat.name);
+    cb.addEventListener("change", () => {
+      if (cb.checked) selectedAutofillCats.add(cat.name);
+      else selectedAutofillCats.delete(cat.name);
+      cAutofillAll.checked = false;
+      composeLivePreview();
+    });
+    const span = document.createElement("span");
+    span.textContent = `${cat.name} (${cat.fillers.length})`;
+    span.title = "fillers: " + cat.fillers.join(", ");
+    label.appendChild(cb);
+    label.appendChild(span);
+    cAutofillCatList.appendChild(label);
+  }
+}
+
+cAutofillAll.addEventListener("change", () => {
+  if (cAutofillAll.checked) {
+    selectedAutofillCats.clear();
+    for (const cb of cAutofillCatList.querySelectorAll("input")) cb.checked = false;
+  }
+  composeLivePreview();
+});
 
 function populateModuleDropdowns() {
   fillModuleSelect(cPhysical, modules.physicals, "ansi");
@@ -598,7 +643,6 @@ cPhysical.addEventListener("change", composeLivePreview);
 cTransformation.addEventListener("change", composeLivePreview);
 cName.addEventListener("input", composeLivePreview);
 cDesc.addEventListener("input", composeLivePreview);
-cAutofill.addEventListener("change", composeLivePreview);
 cDefault.addEventListener("change", composeLivePreview);
 cPassthrough.addEventListener("change", composeLivePreview);
 cPreviewBtn.addEventListener("click", composeLivePreview);
@@ -706,6 +750,9 @@ cShowXKBBtn.addEventListener("click", async () => {
 });
 
 function composeSpec() {
+  let autofill = [];
+  if (cAutofillAll.checked) autofill = ["*"];
+  else if (selectedAutofillCats.size > 0) autofill = Array.from(selectedAutofillCats);
   return {
     name: cName.value.trim() || "basic",
     description: cDesc.value.trim(),
@@ -715,7 +762,7 @@ function composeSpec() {
     substitutions: composeSubs.slice(),
     default: cDefault.checked,
     passthrough: cPassthrough.checked,
-    autofill: cAutofill.checked ? ["*"] : [],
+    autofill,
   };
 }
 
@@ -730,7 +777,35 @@ async function composeLivePreview() {
     cMeta.textContent = "error: " + await res.text();
     return;
   }
-  renderInto({ meta: cMeta, kb: cKb, warn: cWarn }, await res.json());
+  const data = await res.json();
+  renderInto({ meta: cMeta, kb: cKb, warn: cWarn }, data);
+  updateFillStats(data);
+}
+
+function updateFillStats(data) {
+  // Count autofill-sourced cells per filler slug.
+  const byFiller = {};
+  let total = 0;
+  for (const v of Object.values(data.symbols || {})) {
+    for (const c of v) {
+      if (c.source === "autofill") {
+        total++;
+        const m = c.module || "(unknown)";
+        byFiller[m] = (byFiller[m] || 0) + 1;
+      }
+    }
+  }
+  if (total === 0) {
+    cFillStats.textContent = "";
+    cFillStats.classList.remove("has-fills");
+    return;
+  }
+  cFillStats.classList.add("has-fills");
+  const detail = Object.entries(byFiller)
+    .sort((a, b) => b[1] - a[1])
+    .map(([m, n]) => `${m}: ${n}`)
+    .join(", ");
+  cFillStats.innerHTML = `${total} levels autofilled <span class="by-cat">(${escapeHTML(detail)})</span>`;
 }
 
 // === Paths tab ===

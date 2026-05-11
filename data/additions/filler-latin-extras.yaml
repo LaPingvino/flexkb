@@ -1,0 +1,52 @@
+name: Latin Extended-A filler
+description: |
+  Common Latin diacritic letters anchored on their base ASCII letter,
+  on AltGr / AltGr+Shift levels. Covers the supplements used by major
+  European languages: Polish (ą ć ę ł ń ó ś ź ż), Czech/Slovak
+  (č ď ě ň ř š ť ů ž), Hungarian (ő ű), Romanian (ă ț ș), Croatian/
+  Bosnian/Serbian (č ć ž š đ), Turkish (ğ ı ş, dotted İ), Catalan
+  (ll variants).
+
+  Each letter overlay tries the most-used diacritic at level 3 (AltGr)
+  and second-most at level 4 (AltGr+Shift). Because letter-overlay
+  matching uses level-1 of the base, anchoring works regardless of
+  which Latin transformation underlies the layout (qwerty / dvorak /
+  azerty / colemak all expose level-1 ASCII letters).
+
+  Applied via `autofill: [latin-extras]`. Empty-only — if the base
+  already provides a diacritic at the same level, this filler skips.
+filler: true
+categories: [latin-extras]
+scripts: [latin, any]
+letter_overlays:
+  # Vowels — acute is the highest-frequency diacritic in European
+  # Latin, then circumflex / breve / hook for the second slot.
+  a: { levels: ["", "", aacute, U0105] }    # á ą
+  e: { levels: ["", "", eacute, U0119] }    # é ę
+  i: { levels: ["", "", iacute, U012B] }    # í ī
+  o: { levels: ["", "", oacute, U0151] }    # ó ő
+  u: { levels: ["", "", uacute, U0171] }    # ú ű
+
+  # Consonants — covers Slavic háček + Polish hooks + Romanian commas
+  # + Turkish dotless. Each anchor's level-1 is the lowercase letter,
+  # so the level-3/4 lands wherever that letter is on the chosen
+  # transformation.
+  c: { levels: ["", "", U010D, U0107] }     # č ć
+  d: { levels: ["", "", U010F, U0111] }     # ď đ
+  g: { levels: ["", "", U011F, ""] }         # ğ (Turkish)
+  l: { levels: ["", "", U0142, U013E] }     # ł ľ
+  n: { levels: ["", "", U0144, U0148] }     # ń ň
+  r: { levels: ["", "", U0159, ""] }         # ř
+  s: { levels: ["", "", U0161, U015B] }     # š ś
+  t: { levels: ["", "", U0165, U021B] }     # ť ț
+  z: { levels: ["", "", U017E, U017A] }     # ž ź
+
+  # Special / less-common — these need specific anchors. Hungarian
+  # ű is on u/ő on o (covered above). Turkish dotless ı sits on i
+  # (above); paired dotted İ goes on level 4.
+  # Catalan l·l, Galician/Spanish ñ on n, Spanish ¿ ¡ on punctuation:
+  question:  { levels: ["", "", U00BF, ""] }  # ¿ on AltGr+/
+  exclam:    { levels: ["", "", U00A1, ""] }  # ¡ on AltGr+1
+  # Eszett on s — only at level-4 to leave level-3 for š.
+  # (Already covered s with š/ś. German ß typically lands on a
+  # dedicated AC11 in qwertz, so we don't anchor it here.)

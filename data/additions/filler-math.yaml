@@ -1,0 +1,30 @@
+name: Math filler
+description: |
+  Common mathematical operators and symbols anchored on letters that
+  visually or semantically match — ≤ ≥ ≠ ≈ ± ∞ √ ∑ ∫ π ∂ ∆ µ etc.
+  Universal across Latin-script transformations because everything
+  attaches via letter-overlays.
+
+  Applied via `autofill: [math]`. Empty-only — never clobbers existing
+  AltGr characters. Combine with `[typography, math]` for a generous
+  Latin-base layout without writing any addition by hand.
+filler: true
+categories: [math]
+scripts: [latin, any]
+letter_overlays:
+  # Inequality on the comparison letters.
+  less:    { levels: ["", "", U2264, U226A] }   # ≤ ≪ on AltGr < / Shift
+  greater: { levels: ["", "", U2265, U226B] }   # ≥ ≫
+  equal:   { levels: ["", "", U2260, U2248] }   # ≠ ≈
+  # Plus/minus and infinity on natural anchors.
+  plus:    { levels: ["", "", U00B1, U2213] }   # ± ∓
+  asterisk: { levels: ["", "", U2217, U22C6] }   # ∗ ⋆
+  # Letter anchors for common Greek-as-math:
+  p:       { levels: ["", "", U03C0, U03A0] }   # π Π
+  s:       { levels: ["", "", U03C3, U2211] }   # σ ∑
+  d:       { levels: ["", "", U2202, U0394] }   # ∂ Δ
+  i:       { levels: ["", "", U222B, U221E] }   # ∫ ∞
+  u:       { levels: ["", "", U00B5, ""] }       # µ (micro)
+  n:       { levels: ["", "", U00AC, U2229] }   # ¬ ∩
+  # Square root on the slash key's empty AltGr.
+  slash:   { levels: ["", "", U221A, ""] }       # √

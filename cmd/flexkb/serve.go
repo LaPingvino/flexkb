@@ -129,6 +129,9 @@ func startServer(rootFn func() model.DataRoot, addr string) (string, <-chan erro
 	mux.HandleFunc("/api/open-settings", func(w http.ResponseWriter, r *http.Request) {
 		handleOpenSettings(w, r)
 	})
+	mux.HandleFunc("/api/autofill-categories", func(w http.ResponseWriter, r *http.Request) {
+		handleAutofillCategories(w, r, rootFn())
+	})
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return "", nil, err
@@ -943,6 +946,36 @@ func handleVariant(w http.ResponseWriter, r *http.Request, root model.DataRoot) 
 		return
 	}
 	writeJSON(w, map[string]any{"deleted": true, "fileRemoved": false, "path": src})
+}
+
+// apiAutofillCategory describes one filler category surfaced in the
+// GUI's autofill picker. Fillers is the list of filler-addition slugs
+// that contribute to this category — useful for tooltip "what
+// categories=typography contains".
+type apiAutofillCategory struct {
+	Name    string   `json:"name"`
+	Fillers []string `json:"fillers"`
+}
+
+func handleAutofillCategories(w http.ResponseWriter, _ *http.Request, root model.DataRoot) {
+	fillers, err := root.ListFillers()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	byCat := map[string][]string{}
+	for _, f := range fillers {
+		for _, c := range f.Categories {
+			byCat[c] = append(byCat[c], f.Slug)
+		}
+	}
+	var out []apiAutofillCategory
+	for c, fs := range byCat {
+		sort.Strings(fs)
+		out = append(out, apiAutofillCategory{Name: c, Fillers: fs})
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	writeJSON(w, out)
 }
 
 // detectCompositor returns a short label for the running compositor /
