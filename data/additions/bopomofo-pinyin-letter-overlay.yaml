@@ -1,0 +1,48 @@
+name: Pinyin-phonetic Bopomofo (all 4 levels per letter, no Latin case)
+description: |
+  Full Bopomofo via letter-following overlays. Bopomofo has no
+  upper/lowercase distinction, so we use ALL 4 levels of each Latin
+  letter key for different Bopomofo symbols related to that letter's
+  Pinyin sound.
+
+  Pattern per vowel: level 1 = base Bopomofo, level 2 = compound
+  vowel, level 3 = another compound, level 4 = nasal form. Pattern
+  per consonant: level 1 = base, level 2 = aspirate or related
+  (zh/ch/sh on shifted z/c/s — "zh" starts with z, etc.).
+
+  Stack on QWERTY: `transformation: qwerty + additions: [bopomofo-
+  pinyin-letter-overlay]`. No substitution needed — this addition
+  overwrites all levels with Bopomofo, replacing Latin entirely.
+
+  Pair with ibus-chewing for syllable + tone composition. Or use
+  bopomofo-dachen for the standard positional Taiwanese keyboard.
+letter_overlays:
+  # Vowels — each key carries up to 4 related Bopomofo glyphs
+  a: { levels: [U311A, U311E, U3120, U3122] }   # ㄚ a, ㄞ ai, ㄠ ao, ㄢ an
+  e: { levels: [U311C, U311F, U3123, U3125] }   # ㄜ e, ㄟ ei, ㄣ en, ㄥ eng
+  i: { levels: [U3127, U311D, "", ""] }         # ㄧ i, ㄝ ie
+  o: { levels: [U311B, U3121, "", ""] }         # ㄛ o, ㄡ ou
+  u: { levels: [U3128, "", "", ""] }            # ㄨ u
+  v: { levels: [U3129, U3126, "", ""] }         # ㄩ ü, ㄦ er
+  y: { levels: [U3127, "", "", ""] }            # ㄧ i (semivowel)
+  w: { levels: [U3128, "", "", ""] }            # ㄨ u (semivowel)
+
+  # Consonants — initials, with zh/ch/sh on shifted z/c/s
+  b: { levels: [U3105, "", "", ""] }   # ㄅ
+  p: { levels: [U3106, "", "", ""] }   # ㄆ
+  m: { levels: [U3107, "", "", ""] }   # ㄇ
+  f: { levels: [U3108, "", "", ""] }   # ㄈ
+  d: { levels: [U3109, "", "", ""] }   # ㄉ
+  t: { levels: [U310A, "", "", ""] }   # ㄊ
+  n: { levels: [U310B, "", "", ""] }   # ㄋ
+  l: { levels: [U310C, "", "", ""] }   # ㄌ
+  g: { levels: [U310D, U3124, "", ""] } # ㄍ g, ㄤ ang (shifted)
+  k: { levels: [U310E, "", "", ""] }   # ㄎ
+  h: { levels: [U310F, "", "", ""] }   # ㄏ
+  j: { levels: [U3110, "", "", ""] }   # ㄐ
+  q: { levels: [U3111, "", "", ""] }   # ㄑ
+  x: { levels: [U3112, "", "", ""] }   # ㄒ
+  z: { levels: [U3117, U3113, "", ""] }  # ㄗ z, ㄓ zh
+  c: { levels: [U3118, U3114, "", ""] }  # ㄘ c, ㄔ ch
+  s: { levels: [U3119, U3115, "", ""] }  # ㄙ s, ㄕ sh
+  r: { levels: [U3116, "", "", ""] }   # ㄖ

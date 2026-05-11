@@ -1,0 +1,63 @@
+name: Bopomofo (Da-Chen / Standard Taiwanese)
+script: bopomofo
+description: |
+  Native Taiwanese Bopomofo (Zhuyin) keyboard layout — the standard
+  Da-Chen positional arrangement. Each physical key produces one
+  Bopomofo symbol; pair with an IME like ibus-chewing for Mandarin
+  syllable+tone composition.
+
+  This is the proper positional form of Bopomofo input — distinct from
+  the naive `latin-to-bopomofo` substitution (which is decorative only).
+  Mandarin tone marks (˙ˊˇˋ) are on the number row at AE03/AE04/AE06/
+  AE07 (positions 3,4,6,7 = light/2nd/3rd/4th tone).
+keys:
+  TLDE: { levels: [grave, asciitilde] }
+  AE01: { levels: [U3105, exclam] }     # ㄅ
+  AE02: { levels: [U3109, at] }         # ㄉ
+  AE03: { levels: [U02C7, numbersign] } # ˇ (3rd tone)
+  AE04: { levels: [U02CB, dollar] }     # ˋ (4th tone)
+  AE05: { levels: [U3113, percent] }    # ㄓ
+  AE06: { levels: [U02CA, asciicircum] }# ˊ (2nd tone)
+  AE07: { levels: [U02D9, ampersand] }  # ˙ (light tone)
+  AE08: { levels: [U311A, asterisk] }   # ㄚ
+  AE09: { levels: [U311E, parenleft] }  # ㄞ
+  AE10: { levels: [U3122, parenright] } # ㄢ
+  AE11: { levels: [U3126, underscore] } # ㄦ
+  AE12: { levels: [equal, plus] }
+
+  AD01: { levels: [U3106, q] }   # ㄆ
+  AD02: { levels: [U310A, w] }   # ㄊ
+  AD03: { levels: [U310D, e] }   # ㄍ
+  AD04: { levels: [U3110, r] }   # ㄐ
+  AD05: { levels: [U3114, t] }   # ㄔ
+  AD06: { levels: [U3117, y] }   # ㄗ
+  AD07: { levels: [U3127, u] }   # ㄧ
+  AD08: { levels: [U311B, i] }   # ㄛ
+  AD09: { levels: [U311F, o] }   # ㄟ
+  AD10: { levels: [U3123, p] }   # ㄣ
+  AD11: { levels: [bracketleft, braceleft] }
+  AD12: { levels: [bracketright, braceright] }
+
+  AC01: { levels: [U3107, a] }   # ㄇ
+  AC02: { levels: [U310B, s] }   # ㄋ
+  AC03: { levels: [U310E, d] }   # ㄎ
+  AC04: { levels: [U3111, f] }   # ㄑ
+  AC05: { levels: [U3115, g] }   # ㄕ
+  AC06: { levels: [U3118, h] }   # ㄘ
+  AC07: { levels: [U3128, j] }   # ㄨ
+  AC08: { levels: [U311C, k] }   # ㄜ
+  AC09: { levels: [U3120, l] }   # ㄠ
+  AC10: { levels: [U3124, semicolon] } # ㄤ
+  AC11: { levels: [apostrophe, quotedbl] }
+  BKSL: { levels: [backslash, bar] }
+
+  AB01: { levels: [U3108, z] }   # ㄈ
+  AB02: { levels: [U310C, x] }   # ㄌ
+  AB03: { levels: [U310F, c] }   # ㄏ
+  AB04: { levels: [U3112, v] }   # ㄒ
+  AB05: { levels: [U3116, b] }   # ㄖ
+  AB06: { levels: [U3119, n] }   # ㄙ
+  AB07: { levels: [U3129, m] }   # ㄩ
+  AB08: { levels: [U311D, less] } # ㄝ
+  AB09: { levels: [U3121, greater] } # ㄡ
+  AB10: { levels: [U3125, question] } # ㄥ

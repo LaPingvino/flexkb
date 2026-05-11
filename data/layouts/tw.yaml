@@ -1,7 +1,5 @@
 file: tw
 variants:
-  # Taiwanese typing uses Zhuyin (Bopomofo) or Cangjie IMEs. Bare QWERTY
-  # base for IME use.
   - name: basic
     description: Taiwanese (bare QWERTY for Zhuyin/Cangjie IME)
     physical: iso
@@ -19,11 +17,26 @@ variants:
     physical: iso
     transformation: dvorak
 
-  # Bopomofo glyph output: type Latin → see Bopomofo symbols. Useful for
-  # teaching/learning Zhuyin; real Mandarin typing uses ibus-chewing or
-  # similar IME on top of QWERTY.
+  # Native Da-Chen positional Bopomofo (standard Taiwanese keyboard).
+  - name: bopomofo-dachen
+    description: Bopomofo / Zhuyin (Da-Chen positional, standard Taiwanese)
+    physical: iso
+    transformation: bopomofo-dachen
+
+  # Pinyin-phonetic Bopomofo: each Latin letter key carries multiple
+  # Bopomofo symbols phonetically related to that letter (Bopomofo has
+  # no case so all 4 levels of each key are usable). a → ㄚ at level 1,
+  # ㄞ ai at level 2 (Shift), ㄠ ao at level 3 (AltGr), ㄢ an at level 4.
+  # zh/ch/sh on Shift+z/c/s.
+  - name: bopomofo-pinyin
+    description: Bopomofo (Pinyin-phonetic, compounds on shift/AltGr levels)
+    physical: iso
+    transformation: qwerty
+    additions: [bopomofo-pinyin-letter-overlay]
+
+  # Older simple substitution kept for back-compat (decorative output).
   - name: bopomofo
-    description: Bopomofo glyph output (Latin → Zhuyin via per-letter mapping)
+    description: Bopomofo (simple Latin→Zhuyin substitution, decorative only)
     physical: iso
     transformation: qwerty
     substitutions: [latin-to-bopomofo]
