@@ -1,0 +1,22 @@
+name: Azerbaijani Cyrillic extras
+description: |
+  Azerbaijani Cyrillic (legacy script) adds: ә (schwa), ҝ (ka-vertical-
+  stroke), ҹ (che-vertical-stroke), ү (u-straight), ө (o-bar), ғ
+  (ghe-bar), ј (Cyrillic je). Letter-following on the underlying Russian
+  Cyrillic cognates.
+scripts: [cyrillic]
+letter_overlays:
+  Cyrillic_a:   { levels: ["", "", U04D9, U04D8] }    # ә Ә schwa
+  Cyrillic_A:   { levels: ["", "", U04D9, U04D8] }
+  Cyrillic_ka:  { levels: ["", "", U049D, U049C] }    # ҝ Ҝ
+  Cyrillic_KA:  { levels: ["", "", U049D, U049C] }
+  Cyrillic_che: { levels: ["", "", U04B9, U04B8] }    # ҹ Ҹ
+  Cyrillic_CHE: { levels: ["", "", U04B9, U04B8] }
+  Cyrillic_u:   { levels: ["", "", U04AF, U04AE] }    # ү Ү
+  Cyrillic_U:   { levels: ["", "", U04AF, U04AE] }
+  Cyrillic_o:   { levels: ["", "", U04E9, U04E8] }    # ө Ө
+  Cyrillic_O:   { levels: ["", "", U04E9, U04E8] }
+  Cyrillic_ghe: { levels: ["", "", U0493, U0492] }    # ғ Ғ
+  Cyrillic_GHE: { levels: ["", "", U0493, U0492] }
+includes:
+  - level3(ralt_switch)

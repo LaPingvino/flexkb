@@ -1,0 +1,13 @@
+name: Sotho/Bantu tone diacritics (ṱ ḓ ḽ ṋ ṅ)
+description: |
+  Southern African Bantu languages (Sotho, Venda, Tswana) use Latin
+  letters with below-dot tone diacritics: ṱ ḓ ḽ ṋ ṅ. Letter-following
+  AltGr-overlays.
+letter_overlays:
+  t: { levels: ["", "", U1E71, U1E70] }   # ṱ Ṱ
+  d: { levels: ["", "", U1E13, U1E12] }   # ḓ Ḓ
+  l: { levels: ["", "", U1E3D, U1E3C] }   # ḽ Ḻ
+  n: { levels: ["", "", U1E4B, U1E4A] }   # ṋ Ṇ
+  g: { levels: ["", "", U1E45, U1E44] }   # ṅ Ṅ
+includes:
+  - level3(ralt_switch)

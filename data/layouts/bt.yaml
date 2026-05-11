@@ -1,0 +1,7 @@
+file: bt
+variants:
+  - name: basic
+    description: Dzongkha / Tibetan (native positional)
+    physical: iso
+    transformation: tibetan-dzongkha
+    default: true

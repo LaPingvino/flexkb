@@ -1,0 +1,64 @@
+name: Tibetan (Dzongkha standard)
+script: tibetan
+description: |
+  Native Tibetan/Dzongkha positional layout. Tibetan is Brahmic-family
+  but uses subscript-form consonants (U0F90-U0FBF) instead of virama-
+  based clustering, so it doesn't fit the InScript template cleanly —
+  shipping its own dedicated transformation rather than as an inscript
+  resolution substitution.
+
+  Levels: 1 = primary consonant/vowel, 2 = subscript form (shift),
+  3+ = less-common diacritics + brackets. Pair with level3(ralt_switch).
+keys:
+  TLDE: { levels: [U0F09, U0F0A, U0FD1, U0FD0] }
+
+  AE01: { levels: [U0F21, U0F04, "1", U0FD3] }
+  AE02: { levels: [U0F22, U0F05, "2", U0FD4] }
+  AE03: { levels: [U0F23, U0F06, "3", U0F3A] }
+  AE04: { levels: [U0F24, U0F48, "4", U0F3B] }
+  AE05: { levels: [U0F25, U0F0E, "5", U0F85] }
+  AE06: { levels: [U0F26, U0F08, "6", U0F01] }
+  AE07: { levels: [U0F27, U0F38, "7", U0F8A] }
+  AE08: { levels: [U0F28, U0F34, "8", asterisk] }
+  AE09: { levels: [U0F29, U0F3C, "9", parenleft] }
+  AE10: { levels: [U0F20, U0F3D, "0", parenright] }
+  AE11: { levels: [U0F14, U0F7F, minus, U0FD2] }
+  AE12: { levels: [U0F0D, U0F11, equal, plus] }
+
+  AD01: { levels: [U0F40, U0F90, U0F88, U0F8D] }
+  AD02: { levels: [U0F41, U0F91, U0F89, U0F8E] }
+  AD03: { levels: [U0F42, U0F92, U0F8C, U0F8F] }
+  AD04: { levels: [U0F44, U0F94, U0F83, U0F82] }
+  AD05: { levels: [U0F72, U0F80, U0F1A, U0F8B] }
+  AD06: { levels: [U0F74, U0F84, U0F1B, none] }
+  AD07: { levels: [U0F7A, U0F7B, U0F1C, none] }
+  AD08: { levels: [U0F7C, U0F7D, U0F1D, U0F17] }
+  AD09: { levels: [U0F45, U0F95, U0F1E, U0F18] }
+  AD10: { levels: [U0F46, U0F96, U0F1F, U0F19] }
+  AD11: { levels: [U0F47, U0F97, parenleft, U0F3F] }
+  AD12: { levels: [U0F49, U0F99, parenright, U0F3E] }
+  BKSL: { levels: [U0F5D, U0FAD, backslash, U0FBA] }
+
+  AC01: { levels: [U0F4F, U0F9F, U0F4A, U0F9A] }
+  AC02: { levels: [U0F50, U0FA0, U0F4B, U0F9B] }
+  AC03: { levels: [U0F51, U0FA1, U0F4C, U0F9C] }
+  AC04: { levels: [U0F53, U0FA3, U0F4E, U0F9E] }
+  AC05: { levels: [U0F54, U0FA4, U2039, guillemotleft] }
+  AC06: { levels: [U0F55, U0FA5, U203A, guillemotright] }
+  AC07: { levels: [U0F56, U0FA6, U0F37, U0F35] }
+  AC08: { levels: [U0F58, U0FA8, U0F7E, U0F87] }
+  AC09: { levels: [U0F59, U0FA9, U0F39, U0F86] }
+  AC10: { levels: [U0F5A, U0FAA, semicolon, colon] }
+  AC11: { levels: [U0F5B, U0FAB, apostrophe, quotedbl] }
+
+  LSGT: { levels: [U0F0D, U0F11, U0F10, U0F0F] }
+  AB01: { levels: [U0F5E, U0FAE, U0F13, U0F36] }
+  AB02: { levels: [U0F5F, U0FAF, U0FBE, U0FBF] }
+  AB03: { levels: [U0F60, U0F71, U0F03, U0FB0] }
+  AB04: { levels: [U0F61, U0FB1, U0F0F, U0FBB] }
+  AB05: { levels: [U0F62, U0FB2, U0F6A, U0FBC] }
+  AB06: { levels: [U0F63, U0FB3, U0F12, none] }
+  AB07: { levels: [U0F64, U0FB4, U0F65, U0FB5] }
+  AB08: { levels: [U0F66, U0FB6, comma, U0FD9] }
+  AB09: { levels: [U0F67, U0FB7, period, U0FDA] }
+  AB10: { levels: [U0F68, U0FB8, slash, question] }

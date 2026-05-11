@@ -1,0 +1,20 @@
+file: az
+variants:
+  - name: basic
+    description: Azerbaijani (Latin, modern)
+    physical: iso
+    transformation: qwerty
+    additions: [turkish-i-pair, azerbaijani-latin]
+    default: true
+
+  - name: cyrillic
+    description: Azerbaijani (Cyrillic, legacy)
+    physical: iso
+    transformation: ycuken
+    additions: [azerbaijani-cyrillic-extras]
+
+  - name: dvorak
+    description: Azerbaijani (Latin, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    additions: [turkish-i-pair, azerbaijani-latin]

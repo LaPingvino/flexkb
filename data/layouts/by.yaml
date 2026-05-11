@@ -1,0 +1,22 @@
+file: by
+variants:
+  - name: basic
+    description: Belarusian (ЙЦУКЕН + ў on AD09, standard)
+    physical: iso
+    transformation: ycuken
+    additions: [belarusian-basic]
+    default: true
+
+  - name: phonetic
+    description: Belarusian (Cyrillic phonetic on QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras, belarusian-extras]
+
+  - name: phonetic-dvorak
+    description: Belarusian (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-cyrillic-phonetic]
+    additions: [russian-phonetic-extras, belarusian-extras]

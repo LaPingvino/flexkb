@@ -1,0 +1,14 @@
+file: za
+variants:
+  - name: basic
+    description: English (South Africa) + Sotho/Bantu tone diacritics
+    physical: iso
+    transformation: qwerty
+    additions: [intl, sotho-tone]
+    default: true
+
+  - name: dvorak
+    description: South African (Dvorak base)
+    physical: iso
+    transformation: dvorak
+    additions: [intl, sotho-tone]

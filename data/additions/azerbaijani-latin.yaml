@@ -1,0 +1,17 @@
+name: Azerbaijani Latin letters (ə, ğ, ş, ç + reuse Turkish i/İ)
+description: |
+  Azerbaijani Latin uses ə, ğ, ı/İ (dotted/dotless i pair — SAME as
+  Turkish), ö, ş, ü, ç. The i-pair is identical to Turkish; reuse
+  turkish-i-pair for that. This addition adds ə (schwa), ğ, ş, ç, ö, ü
+  via letter-following overlays.
+
+  Stack: additions: [turkish-i-pair, azerbaijani-latin]
+letter_overlays:
+  e: { levels: ["", "", schwa, SCHWA] }
+  g: { levels: ["", "", gbreve, Gbreve] }
+  s: { levels: ["", "", scedilla, Scedilla] }
+  c: { levels: ["", "", ccedilla, Ccedilla] }
+  o: { levels: ["", "", odiaeresis, Odiaeresis] }
+  u: { levels: ["", "", udiaeresis, Udiaeresis] }
+includes:
+  - level3(ralt_switch)

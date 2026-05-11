@@ -1,0 +1,11 @@
+name: Belarusian basic position (ў on AD09, replacing щ)
+description: |
+  by/basic in xkb places Byelorussian_shortu (ў) at AD09 at LEVEL 1,
+  replacing the Cyrillic_shcha (щ) that ycuken would normally put there
+  — Belarusian doesn't use the Russian шч cluster the same way.
+
+  Position-based override (NOT letter-following, since AD09 in ycuken
+  holds shcha not "u"). For phonetic-style Belarusian (ў on AltGr+у)
+  use the existing belarusian-extras addition instead.
+overlays:
+  AD09: { levels: [Byelorussian_shortu, Byelorussian_SHORTU] }

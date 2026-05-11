@@ -1,0 +1,20 @@
+file: sn
+variants:
+  - name: basic
+    description: Wolof (AZERTY-French base + Wolof letters)
+    physical: iso
+    transformation: azerty
+    additions: [french-accents, wolof-extras]
+    default: true
+
+  - name: qwerty
+    description: Wolof (QWERTY base + Wolof letters)
+    physical: iso
+    transformation: qwerty
+    additions: [intl, wolof-extras]
+
+  - name: dvorak
+    description: Wolof (Dvorak base + Wolof letters)
+    physical: iso
+    transformation: dvorak
+    additions: [intl, wolof-extras]
