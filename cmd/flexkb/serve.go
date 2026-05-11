@@ -19,8 +19,12 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"sort"
 	"strings"
 	"time"
+
+	"gopkg.in/yaml.v3"
 
 	"github.com/lapingvino/flexkb/internal/compose"
 	"github.com/lapingvino/flexkb/internal/model"
@@ -33,6 +37,7 @@ func runServe(args []string) {
 	paths, rest := dataPaths(args)
 	addr := "localhost:7878"
 	openBrowser := false
+	overrideUsed := false
 	for i := 0; i < len(rest); i++ {
 		a := rest[i]
 		switch {
@@ -45,9 +50,17 @@ func runServe(args []string) {
 			openBrowser = true
 		}
 	}
-	root := makeRoot(paths)
+	// If the user passed --data explicitly we honour it as fixed.
+	// Otherwise rediscover on each request so saves to user XDG paths
+	// become visible without restart.
+	for _, a := range args {
+		if a == "--data" || strings.HasPrefix(a, "--data=") {
+			overrideUsed = true
+		}
+	}
+	rootFn := makeRootFn(paths, overrideUsed)
 
-	url, errCh, err := startServer(root, addr)
+	url, errCh, err := startServer(rootFn, addr)
 	check(err)
 	fmt.Printf("flexkb serve listening on %s\n", url)
 	fmt.Printf("data search path: %v\n", paths)
@@ -63,18 +76,35 @@ func runServe(args []string) {
 // returning the resolved URL (useful when addr uses port :0 or omits
 // the host) and a channel that receives the serve error if the server
 // stops on its own. Used by both `serve` and `gui`.
-func startServer(root model.DataRoot, addr string) (string, <-chan error, error) {
+//
+// rootFn is called on every request to compute the current DataRoot —
+// when the user is on auto-discovery (no --data) this means a freshly-
+// saved file under ~/.config/flexkb/data/ appears immediately in
+// /api/layouts without restarting the server.
+func startServer(rootFn func() model.DataRoot, addr string) (string, <-chan error, error) {
 	sub, err := fs.Sub(webFS, "web")
 	if err != nil {
 		return "", nil, err
 	}
 	mux := http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.FS(sub)))
+	mux.HandleFunc("/api/paths", func(w http.ResponseWriter, r *http.Request) {
+		handlePaths(w, r, rootFn())
+	})
+	mux.HandleFunc("/api/modules", func(w http.ResponseWriter, r *http.Request) {
+		handleModules(w, r, rootFn())
+	})
 	mux.HandleFunc("/api/layouts", func(w http.ResponseWriter, r *http.Request) {
-		handleLayouts(w, r, root)
+		handleLayouts(w, r, rootFn())
 	})
 	mux.HandleFunc("/api/compose", func(w http.ResponseWriter, r *http.Request) {
-		handleCompose(w, r, root)
+		handleCompose(w, r, rootFn())
+	})
+	mux.HandleFunc("/api/compose-spec", func(w http.ResponseWriter, r *http.Request) {
+		handleComposeSpec(w, r, rootFn())
+	})
+	mux.HandleFunc("/api/save", func(w http.ResponseWriter, r *http.Request) {
+		handleSave(w, r, rootFn())
 	})
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -109,8 +139,10 @@ type apiVariant struct {
 }
 
 type apiLayoutFile struct {
-	File     string       `json:"file"`
-	Variants []apiVariant `json:"variants"`
+	File       string       `json:"file"`
+	Variants   []apiVariant `json:"variants"`
+	SourcePath string       `json:"sourcePath"`
+	SourceKind string       `json:"sourceKind"`
 }
 
 func handleLayouts(w http.ResponseWriter, _ *http.Request, root model.DataRoot) {
@@ -125,7 +157,8 @@ func handleLayouts(w http.ResponseWriter, _ *http.Request, root model.DataRoot) 
 		if err != nil {
 			continue
 		}
-		af := apiLayoutFile{File: lf.File}
+		src, _ := root.Find("layouts", n)
+		af := apiLayoutFile{File: lf.File, SourcePath: src, SourceKind: classifyPath(src)}
 		for _, v := range lf.Variants {
 			af.Variants = append(af.Variants, apiVariant{
 				Name:           v.Name,
@@ -140,6 +173,110 @@ func handleLayouts(w http.ResponseWriter, _ *http.Request, root model.DataRoot) 
 		}
 		out = append(out, af)
 	}
+	writeJSON(w, out)
+}
+
+// classifyPath labels a data path as user / system / dev based on its
+// location. Same heuristic the `flexkb paths` CLI uses, kept in sync
+// so the GUI shows familiar terms.
+func classifyPath(p string) string {
+	if p == "" {
+		return ""
+	}
+	if home, _ := os.UserHomeDir(); home != "" && strings.HasPrefix(p, home) {
+		return "user"
+	}
+	if strings.Contains(p, "/usr/") {
+		return "system"
+	}
+	return "dev"
+}
+
+type apiPath struct {
+	Path string `json:"path"`
+	Kind string `json:"kind"`
+}
+
+func handlePaths(w http.ResponseWriter, _ *http.Request, root model.DataRoot) {
+	paths := root.ResolvedPaths()
+	out := make([]apiPath, 0, len(paths))
+	for _, p := range paths {
+		out = append(out, apiPath{Path: p, Kind: classifyPath(p)})
+	}
+	writeJSON(w, out)
+}
+
+type apiModule struct {
+	Name        string   `json:"name"`
+	Description string   `json:"description,omitempty"`
+	Script      string   `json:"script,omitempty"`  // transformations
+	Scripts     []string `json:"scripts,omitempty"` // additions
+	SourcePath  string   `json:"sourcePath"`
+	SourceKind  string   `json:"sourceKind"`
+}
+
+type apiModules struct {
+	Physicals       []apiModule `json:"physicals"`
+	Transformations []apiModule `json:"transformations"`
+	Additions       []apiModule `json:"additions"`
+	Substitutions   []apiModule `json:"substitutions"`
+}
+
+func handleModules(w http.ResponseWriter, _ *http.Request, root model.DataRoot) {
+	out := apiModules{}
+
+	if names, err := root.ListNames("physical"); err == nil {
+		for n, src := range names {
+			p, err := root.Physical(n)
+			if err != nil {
+				continue
+			}
+			out.Physicals = append(out.Physicals, apiModule{
+				Name: n, Description: p.Description,
+				SourcePath: src, SourceKind: classifyPath(src),
+			})
+		}
+	}
+	if names, err := root.ListNames("transformations"); err == nil {
+		for n, src := range names {
+			t, err := root.Transformation(n)
+			if err != nil {
+				continue
+			}
+			out.Transformations = append(out.Transformations, apiModule{
+				Name: n, Description: t.Description, Script: t.Script,
+				SourcePath: src, SourceKind: classifyPath(src),
+			})
+		}
+	}
+	if names, err := root.ListNames("additions"); err == nil {
+		for n, src := range names {
+			a, err := root.Addition(n)
+			if err != nil {
+				continue
+			}
+			out.Additions = append(out.Additions, apiModule{
+				Name: n, Description: a.Description, Scripts: a.Scripts,
+				SourcePath: src, SourceKind: classifyPath(src),
+			})
+		}
+	}
+	if names, err := root.ListNames("substitutions"); err == nil {
+		for n, src := range names {
+			s, err := root.Substitution(n)
+			if err != nil {
+				continue
+			}
+			out.Substitutions = append(out.Substitutions, apiModule{
+				Name: n, Description: s.Description,
+				SourcePath: src, SourceKind: classifyPath(src),
+			})
+		}
+	}
+	sort.Slice(out.Physicals, func(i, j int) bool { return out.Physicals[i].Name < out.Physicals[j].Name })
+	sort.Slice(out.Transformations, func(i, j int) bool { return out.Transformations[i].Name < out.Transformations[j].Name })
+	sort.Slice(out.Additions, func(i, j int) bool { return out.Additions[i].Name < out.Additions[j].Name })
+	sort.Slice(out.Substitutions, func(i, j int) bool { return out.Substitutions[i].Name < out.Substitutions[j].Name })
 	writeJSON(w, out)
 }
 
@@ -343,6 +480,182 @@ func classifyLevel(i int, final string, afterLetter, afterPos, afterTrans []stri
 		return "transformation"
 	}
 	return ""
+}
+
+// handleComposeSpec previews a user-built LayoutSpec without writing
+// anything. The frontend's Compose tab uses this for live preview as
+// the user tweaks pickers. POST body is a JSON LayoutSpec; response is
+// the same shape as /api/compose.
+func handleComposeSpec(w http.ResponseWriter, r *http.Request, root model.DataRoot) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "POST required", http.StatusMethodNotAllowed)
+		return
+	}
+	var spec model.LayoutSpec
+	if err := json.NewDecoder(r.Body).Decode(&spec); err != nil {
+		http.Error(w, "bad JSON: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	if spec.Physical == "" || spec.Transformation == "" {
+		http.Error(w, "physical and transformation required", http.StatusBadRequest)
+		return
+	}
+	if spec.Name == "" {
+		spec.Name = "preview"
+	}
+	tracked, warns, err := composeWithSources(root, spec)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	out := apiCompose{
+		File:           "",
+		Variant:        spec.Name,
+		Description:    spec.Description,
+		Physical:       spec.Physical,
+		Transformation: spec.Transformation,
+		Additions:      spec.Additions,
+		Substitutions:  spec.Substitutions,
+		Keys:           tracked.Keys,
+		Symbols:        tracked.Symbols,
+		Includes:       tracked.Includes,
+		Warnings:       warns,
+	}
+	writeJSON(w, out)
+}
+
+// apiSaveRequest is what the GUI's Compose tab POSTs to /api/save when
+// the user clicks "Save". A file name plus one or more variants — the
+// server appends to or replaces a file in the user's XDG data dir.
+type apiSaveRequest struct {
+	File     string             `json:"file"`
+	Variants []model.LayoutSpec `json:"variants"`
+	// Merge controls whether to merge into an existing file (replace
+	// matching variant names, keep the rest) or write fresh, dropping
+	// anything else in that file. Default true — safer.
+	Merge bool `json:"merge"`
+}
+
+type apiSaveResponse struct {
+	Path string `json:"path"`
+}
+
+// handleSave writes a LayoutFile to ~/.config/flexkb/data/layouts/.
+// Existing-file behaviour: if Merge=true (the default), variants in
+// the request replace same-named variants in the existing file and
+// new ones append; everything else stays. If Merge=false, the file is
+// overwritten verbatim. The system data tree is never touched.
+func handleSave(w http.ResponseWriter, r *http.Request, _ model.DataRoot) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "POST required", http.StatusMethodNotAllowed)
+		return
+	}
+	var req apiSaveRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "bad JSON: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	if req.File == "" {
+		http.Error(w, "file name required", http.StatusBadRequest)
+		return
+	}
+	if !validFileName(req.File) {
+		http.Error(w, "invalid file name (a-z, 0-9, _-. only, no slashes)", http.StatusBadRequest)
+		return
+	}
+	if len(req.Variants) == 0 {
+		http.Error(w, "at least one variant required", http.StatusBadRequest)
+		return
+	}
+
+	userDir, err := userLayoutsDir()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := os.MkdirAll(userDir, 0o755); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	path := filepath.Join(userDir, req.File+".yaml")
+
+	var lf model.LayoutFile
+	lf.File = req.File
+	if req.Merge {
+		if existing, err := os.ReadFile(path); err == nil {
+			if perr := yaml.Unmarshal(existing, &lf); perr != nil {
+				http.Error(w, "existing file at "+path+" failed to parse: "+perr.Error(), http.StatusConflict)
+				return
+			}
+			if lf.File == "" {
+				lf.File = req.File
+			}
+		}
+	}
+
+	// Merge: replace any same-named variant, append new ones.
+	for _, v := range req.Variants {
+		replaced := false
+		for i, ex := range lf.Variants {
+			if ex.Name == v.Name {
+				lf.Variants[i] = v
+				replaced = true
+				break
+			}
+		}
+		if !replaced {
+			lf.Variants = append(lf.Variants, v)
+		}
+	}
+
+	buf, err := yaml.Marshal(lf)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// Tempfile + rename for atomicity.
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, buf, 0o644); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		os.Remove(tmp)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	writeJSON(w, apiSaveResponse{Path: path})
+}
+
+// userLayoutsDir returns the highest-priority writable layouts/ dir.
+// Mirrors model.DiscoverPaths' first-path choice (XDG_CONFIG_HOME/flexkb/
+// data or ~/.config/flexkb/data) so a save lands where /api/layouts can
+// read it back.
+func userLayoutsDir() (string, error) {
+	if xdg := os.Getenv("XDG_CONFIG_HOME"); xdg != "" {
+		return filepath.Join(xdg, "flexkb", "data", "layouts"), nil
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, ".config", "flexkb", "data", "layouts"), nil
+}
+
+// validFileName guards the Save endpoint against path traversal and
+// nonsense values. xkb file names are short, lowercase ascii — match
+// that conservatively.
+func validFileName(s string) bool {
+	if s == "" || len(s) > 64 {
+		return false
+	}
+	for _, r := range s {
+		ok := (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '-' || r == '_' || r == '.'
+		if !ok {
+			return false
+		}
+	}
+	return s != "." && s != ".."
 }
 
 func writeJSON(w http.ResponseWriter, v any) {

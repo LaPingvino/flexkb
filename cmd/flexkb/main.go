@@ -158,6 +158,19 @@ func makeRoot(paths []string) model.DataRoot {
 	return model.DataRoot{Paths: paths}
 }
 
+// makeRootFn returns a per-request DataRoot factory. When override is
+// true (user passed --data) we freeze the resolved list; otherwise we
+// re-discover on every call so saves into ~/.config/flexkb/data/ that
+// just brought a new directory into existence show up immediately
+// without restarting the server.
+func makeRootFn(paths []string, override bool) func() model.DataRoot {
+	if override {
+		root := makeRoot(paths)
+		return func() model.DataRoot { return root }
+	}
+	return func() model.DataRoot { return makeRoot(model.DiscoverPaths()) }
+}
+
 // xkbDir extracts --xkb from args; used by build/verify which both need it.
 func xkbDir(args []string) (string, []string) {
 	out := defaultXKBRoot

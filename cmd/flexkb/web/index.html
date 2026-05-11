@@ -9,33 +9,110 @@
 <body>
   <header>
     <h1>flexkb</h1>
-    <p class="tag">live layout preview</p>
+    <p class="tag">keyboard layout composer</p>
+    <nav class="tabs">
+      <button data-tab="browse" class="active">Browse</button>
+      <button data-tab="compose">Compose your own</button>
+      <button data-tab="paths">Data layers</button>
+    </nav>
   </header>
 
   <main>
-    <section class="picker">
-      <label>
-        <span>Layout file</span>
-        <select id="file"></select>
-      </label>
-      <label>
-        <span>Variant</span>
-        <select id="variant"></select>
-      </label>
+    <section class="tab" data-tab="browse">
+      <div class="picker">
+        <label>
+          <span>Layout file</span>
+          <select id="file"></select>
+        </label>
+        <label>
+          <span>Variant</span>
+          <select id="variant"></select>
+        </label>
+        <div class="layer-tag" id="browseSource"></div>
+      </div>
+      <div class="meta" id="meta"></div>
+      <div class="legend">
+        <span class="src-transformation">transformation</span>
+        <span class="src-position">positional overlay</span>
+        <span class="src-letter">letter overlay</span>
+        <span class="src-substitution">substitution</span>
+      </div>
+      <div class="keyboard" id="keyboard"></div>
+      <div class="warnings" id="warnings"></div>
     </section>
 
-    <section class="meta" id="meta"></section>
-
-    <section class="legend">
-      <span class="src-transformation">transformation</span>
-      <span class="src-position">positional overlay</span>
-      <span class="src-letter">letter overlay</span>
-      <span class="src-substitution">substitution</span>
+    <section class="tab hidden" data-tab="compose">
+      <div class="compose-form">
+        <div class="row">
+          <label>
+            <span>File name <em>(creates ~/.config/flexkb/data/layouts/&lt;file&gt;.yaml)</em></span>
+            <input id="cFile" type="text" placeholder="e.g. mycustom" value="mycustom">
+          </label>
+          <label>
+            <span>Variant name</span>
+            <input id="cName" type="text" placeholder="e.g. basic" value="basic">
+          </label>
+          <label>
+            <span>Description</span>
+            <input id="cDesc" type="text" placeholder="Free-text name" value="My custom layout">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            <span>Physical</span>
+            <select id="cPhysical"></select>
+          </label>
+          <label>
+            <span>Transformation</span>
+            <select id="cTransformation"></select>
+          </label>
+        </div>
+        <div class="row">
+          <label class="full">
+            <span>Additions <em>(applied in order — click to add, × to remove)</em></span>
+            <div class="multi" id="cAdditions">
+              <div class="multi-chips" id="cAddChips"></div>
+              <select id="cAddPicker"><option value="">— add an addition —</option></select>
+            </div>
+          </label>
+        </div>
+        <div class="row">
+          <label class="full">
+            <span>Substitutions <em>(applied in order, after additions)</em></span>
+            <div class="multi" id="cSubstitutions">
+              <div class="multi-chips" id="cSubChips"></div>
+              <select id="cSubPicker"><option value="">— add a substitution —</option></select>
+            </div>
+          </label>
+        </div>
+        <div class="row actions">
+          <button id="cPreview">Preview</button>
+          <button id="cSave" class="primary">Save to user data</button>
+          <span class="status" id="cStatus"></span>
+        </div>
+      </div>
+      <div class="meta" id="cMeta"></div>
+      <div class="legend">
+        <span class="src-transformation">transformation</span>
+        <span class="src-position">positional overlay</span>
+        <span class="src-letter">letter overlay</span>
+        <span class="src-substitution">substitution</span>
+      </div>
+      <div class="keyboard" id="cKeyboard"></div>
+      <div class="warnings" id="cWarnings"></div>
     </section>
 
-    <section class="keyboard" id="keyboard"></section>
-
-    <section class="warnings" id="warnings"></section>
+    <section class="tab hidden" data-tab="paths">
+      <p class="hint">
+        flexkb walks these data paths in priority order. Files in
+        higher-priority directories shadow same-named files lower down,
+        new files just extend the set. Save from the Compose tab writes
+        to the highest-priority writable user directory.
+      </p>
+      <ol class="paths" id="pathsList"></ol>
+      <h3>Available modules</h3>
+      <div class="modules" id="modulesPanel"></div>
+    </section>
   </main>
 
   <script src="/app.js"></script>

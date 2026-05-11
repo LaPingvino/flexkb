@@ -1,16 +1,7 @@
-// flexkb live preview frontend. Talks to /api/layouts + /api/compose,
-// renders a 4-row physical keyboard with each cell color-coded by which
-// composition stage produced it.
+// flexkb live preview frontend. Three tabs: Browse, Compose, Data
+// layers. Talks to /api/layouts, /api/modules, /api/paths,
+// /api/compose, /api/compose-spec, /api/save.
 
-const fileSelect = document.getElementById("file");
-const variantSelect = document.getElementById("variant");
-const metaEl = document.getElementById("meta");
-const kbEl = document.getElementById("keyboard");
-const warnEl = document.getElementById("warnings");
-
-// XKB key rows. AE = top digit row, AD = QWERTYUIOP row, AC = home row,
-// AB = bottom row. We render in that visual order, with TLDE and BKSL
-// tucked at the ends. LSGT is the ISO extra key between LShift and Z.
 const ROWS = [
   ["TLDE", "AE01", "AE02", "AE03", "AE04", "AE05", "AE06", "AE07", "AE08", "AE09", "AE10", "AE11", "AE12", "AE13"],
   ["AD01", "AD02", "AD03", "AD04", "AD05", "AD06", "AD07", "AD08", "AD09", "AD10", "AD11", "AD12", "BKSL"],
@@ -18,7 +9,32 @@ const ROWS = [
   ["LSGT", "AB01", "AB02", "AB03", "AB04", "AB05", "AB06", "AB07", "AB08", "AB09", "AB10", "AB11"],
 ];
 
+// Shared state
 let layouts = [];
+let modules = { physicals: [], transformations: [], additions: [], substitutions: [] };
+
+// === Tab switching ===
+document.querySelectorAll("nav.tabs button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const name = btn.dataset.tab;
+    for (const b of document.querySelectorAll("nav.tabs button")) {
+      b.classList.toggle("active", b.dataset.tab === name);
+    }
+    for (const s of document.querySelectorAll("section.tab")) {
+      s.classList.toggle("hidden", s.dataset.tab !== name);
+    }
+    if (name === "paths") renderPathsTab();
+    if (name === "compose") ensureComposeReady();
+  });
+});
+
+// === Browse tab ===
+const fileSelect = document.getElementById("file");
+const variantSelect = document.getElementById("variant");
+const metaEl = document.getElementById("meta");
+const kbEl = document.getElementById("keyboard");
+const warnEl = document.getElementById("warnings");
+const browseSource = document.getElementById("browseSource");
 
 async function loadLayouts() {
   const res = await fetch("/api/layouts");
@@ -28,7 +44,8 @@ async function loadLayouts() {
     const opt = document.createElement("option");
     opt.value = lf.file;
     const defVar = lf.variants.find(v => v.default) || lf.variants[0];
-    opt.textContent = `${lf.file}${defVar ? " — " + defVar.description : ""}`;
+    const tag = lf.sourceKind ? ` [${lf.sourceKind}]` : "";
+    opt.textContent = `${lf.file}${tag}${defVar ? " — " + defVar.description : ""}`;
     fileSelect.appendChild(opt);
   }
   fileSelect.value = layouts[0]?.file || "";
@@ -38,12 +55,18 @@ async function loadLayouts() {
 function populateVariants() {
   const lf = layouts.find(l => l.file === fileSelect.value);
   variantSelect.innerHTML = "";
+  browseSource.textContent = "";
+  browseSource.className = "layer-tag";
   if (!lf) return;
   for (const v of lf.variants) {
     const opt = document.createElement("option");
     opt.value = v.name;
     opt.textContent = `${v.name}${v.passthrough ? " (passthrough)" : ""} — ${v.description}`;
     variantSelect.appendChild(opt);
+  }
+  if (lf.sourceKind) {
+    browseSource.textContent = `${lf.sourceKind}: ${lf.sourcePath}`;
+    browseSource.className = `layer-tag ${lf.sourceKind}`;
   }
   const def = lf.variants.find(v => v.default) || lf.variants[0];
   if (def) variantSelect.value = def.name;
@@ -59,36 +82,255 @@ async function loadCompose() {
     metaEl.textContent = `error: ${await res.text()}`;
     return;
   }
-  const data = await res.json();
-  render(data);
+  renderInto({ meta: metaEl, kb: kbEl, warn: warnEl }, await res.json());
 }
 
-function render(data) {
-  // Meta panel
+// === Compose tab ===
+const cFile = document.getElementById("cFile");
+const cName = document.getElementById("cName");
+const cDesc = document.getElementById("cDesc");
+const cPhysical = document.getElementById("cPhysical");
+const cTransformation = document.getElementById("cTransformation");
+const cAddPicker = document.getElementById("cAddPicker");
+const cAddChips = document.getElementById("cAddChips");
+const cSubPicker = document.getElementById("cSubPicker");
+const cSubChips = document.getElementById("cSubChips");
+const cPreviewBtn = document.getElementById("cPreview");
+const cSaveBtn = document.getElementById("cSave");
+const cStatus = document.getElementById("cStatus");
+const cMeta = document.getElementById("cMeta");
+const cKb = document.getElementById("cKeyboard");
+const cWarn = document.getElementById("cWarnings");
+
+let composeAdditions = [];
+let composeSubs = [];
+let modulesLoaded = false;
+
+async function ensureComposeReady() {
+  if (modulesLoaded) return;
+  const res = await fetch("/api/modules");
+  modules = await res.json();
+  modulesLoaded = true;
+  populateModuleDropdowns();
+  composeLivePreview();
+}
+
+function populateModuleDropdowns() {
+  fillModuleSelect(cPhysical, modules.physicals, "ansi");
+  fillModuleSelect(cTransformation, modules.transformations, "qwerty");
+  fillPicker(cAddPicker, modules.additions);
+  fillPicker(cSubPicker, modules.substitutions);
+}
+
+function fillModuleSelect(sel, mods, preferred) {
+  sel.innerHTML = "";
+  for (const m of mods) {
+    const opt = document.createElement("option");
+    opt.value = m.name;
+    opt.textContent = `${m.name} [${m.sourceKind}]${m.description ? " — " + truncate(m.description, 60) : ""}`;
+    sel.appendChild(opt);
+  }
+  if (preferred && mods.some(m => m.name === preferred)) sel.value = preferred;
+}
+
+function fillPicker(sel, mods) {
+  // Keep the existing placeholder option, append the rest.
+  sel.innerHTML = '<option value="">— add —</option>';
+  for (const m of mods) {
+    const opt = document.createElement("option");
+    opt.value = m.name;
+    opt.textContent = `${m.name} [${m.sourceKind}]${m.description ? " — " + truncate(m.description, 60) : ""}`;
+    sel.appendChild(opt);
+  }
+}
+
+cAddPicker.addEventListener("change", () => {
+  if (cAddPicker.value) {
+    composeAdditions.push(cAddPicker.value);
+    cAddPicker.value = "";
+    renderChips(cAddChips, composeAdditions, modules.additions, composeAdditions);
+    composeLivePreview();
+  }
+});
+cSubPicker.addEventListener("change", () => {
+  if (cSubPicker.value) {
+    composeSubs.push(cSubPicker.value);
+    cSubPicker.value = "";
+    renderChips(cSubChips, composeSubs, modules.substitutions, composeSubs);
+    composeLivePreview();
+  }
+});
+
+function renderChips(container, selected, allModules, listRef) {
+  container.innerHTML = "";
+  selected.forEach((name, idx) => {
+    const mod = allModules.find(m => m.name === name.replace(/^~/, ""));
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    const label = document.createElement("span");
+    label.textContent = name;
+    chip.appendChild(label);
+    if (mod) {
+      const km = document.createElement("span");
+      km.className = "layer-mark";
+      km.textContent = "[" + mod.sourceKind + "]";
+      chip.appendChild(km);
+    }
+    const x = document.createElement("button");
+    x.textContent = "×";
+    x.title = "remove";
+    x.addEventListener("click", () => {
+      listRef.splice(idx, 1);
+      renderChips(container, listRef, allModules, listRef);
+      composeLivePreview();
+    });
+    chip.appendChild(x);
+    container.appendChild(chip);
+  });
+}
+
+cPhysical.addEventListener("change", composeLivePreview);
+cTransformation.addEventListener("change", composeLivePreview);
+cName.addEventListener("input", composeLivePreview);
+cDesc.addEventListener("input", composeLivePreview);
+cPreviewBtn.addEventListener("click", composeLivePreview);
+
+cSaveBtn.addEventListener("click", async () => {
+  cStatus.textContent = "saving…";
+  cStatus.className = "status";
+  const body = {
+    file: cFile.value.trim(),
+    merge: true,
+    variants: [composeSpec()],
+  };
+  try {
+    const res = await fetch("/api/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      cStatus.textContent = "error: " + await res.text();
+      cStatus.className = "status err";
+      return;
+    }
+    const data = await res.json();
+    cStatus.textContent = "saved to " + data.path;
+    cStatus.className = "status ok";
+    // Refresh browse-tab data so the new file is visible.
+    await loadLayouts();
+  } catch (e) {
+    cStatus.textContent = "save failed: " + e.message;
+    cStatus.className = "status err";
+  }
+});
+
+function composeSpec() {
+  return {
+    name: cName.value.trim() || "basic",
+    description: cDesc.value.trim(),
+    physical: cPhysical.value,
+    transformation: cTransformation.value,
+    additions: composeAdditions.slice(),
+    substitutions: composeSubs.slice(),
+  };
+}
+
+async function composeLivePreview() {
+  if (!cPhysical.value || !cTransformation.value) return;
+  const res = await fetch("/api/compose-spec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(composeSpec()),
+  });
+  if (!res.ok) {
+    cMeta.textContent = "error: " + await res.text();
+    return;
+  }
+  renderInto({ meta: cMeta, kb: cKb, warn: cWarn }, await res.json());
+}
+
+// === Paths tab ===
+async function renderPathsTab() {
+  const pathsRes = await fetch("/api/paths");
+  const paths = await pathsRes.json();
+  const list = document.getElementById("pathsList");
+  list.innerHTML = "";
+  for (const p of paths) {
+    const li = document.createElement("li");
+    li.textContent = p.path;
+    const k = document.createElement("span");
+    k.className = "kind layer-tag " + p.kind;
+    k.textContent = p.kind;
+    li.appendChild(k);
+    list.appendChild(li);
+  }
+  await ensureComposeReady();
+  const panel = document.getElementById("modulesPanel");
+  panel.innerHTML = "";
+  for (const [title, items] of [
+    ["Physicals", modules.physicals],
+    ["Transformations", modules.transformations],
+    ["Additions", modules.additions],
+    ["Substitutions", modules.substitutions],
+  ]) {
+    panel.appendChild(renderModulesCard(title, items));
+  }
+}
+
+function renderModulesCard(title, items) {
+  const card = document.createElement("div");
+  card.className = "modules-card";
+  const h = document.createElement("h4");
+  h.textContent = `${title} (${items.length})`;
+  card.appendChild(h);
+  const ul = document.createElement("ul");
+  for (const m of items) {
+    const li = document.createElement("li");
+    const k = document.createElement("span");
+    k.className = `mod-kind ${m.sourceKind}`;
+    k.textContent = m.sourceKind;
+    li.appendChild(k);
+    const name = document.createElement("strong");
+    name.textContent = m.name;
+    li.appendChild(name);
+    if (m.description) {
+      const d = document.createElement("span");
+      d.style.color = "#768390";
+      d.textContent = " — " + truncate(m.description, 80);
+      li.appendChild(d);
+    }
+    ul.appendChild(li);
+  }
+  card.appendChild(ul);
+  return card;
+}
+
+// === Shared rendering ===
+function renderInto(targets, data) {
+  const { meta, kb, warn } = targets;
   const recipeBits = [];
   if (data.physical) recipeBits.push(`physical: ${data.physical}`);
   if (data.transformation) recipeBits.push(`transformation: ${data.transformation}`);
   if (data.additions && data.additions.length) recipeBits.push(`additions: [${data.additions.join(", ")}]`);
   if (data.substitutions && data.substitutions.length) recipeBits.push(`substitutions: [${data.substitutions.join(", ")}]`);
   if (data.passthrough) recipeBits.push("passthrough: true");
-  metaEl.innerHTML = `
-    <div class="desc">${escapeHTML(data.description || data.variant)}</div>
+  meta.innerHTML = `
+    <div class="desc">${escapeHTML(data.description || data.variant || "")}</div>
     <div class="recipe">${recipeBits.map(escapeHTML).join("  •  ")}</div>
   `;
 
-  // Warnings
   if (data.warnings && data.warnings.length) {
-    warnEl.classList.add("show");
-    warnEl.innerHTML = `<strong>${data.warnings.length} warning(s):</strong><ul>${
+    warn.classList.add("show");
+    warn.innerHTML = `<strong>${data.warnings.length} warning(s):</strong><ul>${
       data.warnings.map(w => `<li>${escapeHTML(w)}</li>`).join("")
     }</ul>`;
   } else {
-    warnEl.classList.remove("show");
-    warnEl.innerHTML = "";
+    warn.classList.remove("show");
+    warn.innerHTML = "";
   }
 
-  // Keyboard grid
-  kbEl.innerHTML = "";
+  kb.innerHTML = "";
   const presentKeys = new Set(data.keys || []);
   for (const row of ROWS) {
     const rowEl = document.createElement("div");
@@ -97,7 +339,7 @@ function render(data) {
       if (!presentKeys.has(code)) continue;
       rowEl.appendChild(renderKey(code, data.symbols[code] || []));
     }
-    if (rowEl.children.length) kbEl.appendChild(rowEl);
+    if (rowEl.children.length) kb.appendChild(rowEl);
   }
 }
 
@@ -108,8 +350,6 @@ function renderKey(code, levels) {
   codeEl.className = "code";
   codeEl.textContent = code;
   el.appendChild(codeEl);
-  // Render up to 4 levels in fixed grid positions; missing levels render
-  // as empty placeholder cells so the layout stays stable.
   for (let i = 0; i < 4; i++) {
     const lvl = levels[i] || { value: "", source: "" };
     const c = document.createElement("span");
@@ -121,20 +361,13 @@ function renderKey(code, levels) {
   return el;
 }
 
-// displayValue converts xkb symbol tokens to a more readable form for
-// the grid: U+XXXX codepoints to the actual glyph, well-known single-
-// letter tokens unchanged. Long descriptive names get truncated so they
-// don't break the cell grid.
 function displayValue(v) {
   if (!v) return "";
   const m = /^U([0-9A-Fa-f]{4,6})$/.exec(v);
   if (m) {
     try { return String.fromCodePoint(parseInt(m[1], 16)); } catch (e) { return v; }
   }
-  // Latin letter tokens: "a", "B", "comma", etc. — keep short ones,
-  // shorten long descriptive ones.
   if (v.length <= 3) return v;
-  // Common token shortcuts.
   const tokens = {
     "space": "␣", "Tab": "↹", "BackSpace": "⌫", "Return": "⏎",
     "Escape": "⎋", "comma": ",", "period": ".", "slash": "/",
@@ -148,7 +381,6 @@ function displayValue(v) {
     "question": "?",
   };
   if (tokens[v]) return tokens[v];
-  // Truncate long names so the grid stays usable.
   return v.length > 7 ? v.slice(0, 6) + "…" : v;
 }
 
@@ -156,6 +388,11 @@ function escapeHTML(s) {
   return String(s).replace(/[&<>"']/g, c => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   }[c]));
+}
+
+function truncate(s, n) {
+  if (!s) return "";
+  return s.length > n ? s.slice(0, n - 1) + "…" : s;
 }
 
 fileSelect.addEventListener("change", populateVariants);

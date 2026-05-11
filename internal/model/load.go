@@ -109,6 +109,55 @@ func (r DataRoot) LayoutFile(name string) (LayoutFile, error) {
 	return l, err
 }
 
+// ResolvedPaths returns the active data-search paths (in priority
+// order, highest first), filtered to non-empty entries. Exposed so the
+// GUI can surface user-vs-system layering directly.
+func (r DataRoot) ResolvedPaths() []string { return r.resolved() }
+
+// Find walks the data paths in priority order and returns the absolute
+// file path that would be used to load (subdir, name). Lets the GUI
+// label which data layer a given module is coming from.
+func (r DataRoot) Find(subdir, name string) (string, error) {
+	for _, p := range r.resolved() {
+		path := filepath.Join(p, subdir, name+".yaml")
+		if _, err := os.Stat(path); err == nil {
+			return path, nil
+		}
+	}
+	return "", fmt.Errorf("%s/%s.yaml not found in any data path", subdir, name)
+}
+
+// ListNames enumerates every YAML basename across all data paths in
+// the given subdir. The returned map is basename -> highest-priority
+// source path, matching the layered-lookup behaviour. Used by the GUI
+// to populate picker dropdowns and tag each entry with its origin.
+func (r DataRoot) ListNames(subdir string) (map[string]string, error) {
+	out := map[string]string{}
+	var lastErr error
+	for _, p := range r.resolved() {
+		dir := filepath.Join(p, subdir)
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		for _, e := range entries {
+			if e.IsDir() || !strings.HasSuffix(e.Name(), ".yaml") {
+				continue
+			}
+			n := strings.TrimSuffix(e.Name(), ".yaml")
+			if _, exists := out[n]; exists {
+				continue
+			}
+			out[n] = filepath.Join(dir, e.Name())
+		}
+	}
+	if len(out) == 0 && lastErr != nil {
+		return nil, lastErr
+	}
+	return out, nil
+}
+
 // ListLayoutFiles returns the basenames of all YAML files in any of the
 // configured Paths' layouts/ directories. Duplicates are deduplicated;
 // the union is what the user can actually compose, since lookups will

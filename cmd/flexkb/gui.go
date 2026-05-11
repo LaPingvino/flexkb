@@ -70,9 +70,15 @@ func runGui(args []string) {
 			listEnginesAndExit()
 		}
 	}
-	root := makeRoot(paths)
+	overrideUsed := false
+	for _, a := range args {
+		if a == "--data" || strings.HasPrefix(a, "--data=") {
+			overrideUsed = true
+		}
+	}
+	rootFn := makeRootFn(paths, overrideUsed)
 
-	url, errCh, err := startServer(root, addr)
+	url, errCh, err := startServer(rootFn, addr)
 	check(err)
 
 	chosen := pickEngine(requested)
