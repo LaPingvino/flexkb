@@ -1,0 +1,9 @@
+file: au
+variants:
+  # Australia uses US-style QWERTY; this file exists so AU appears in the
+  # picker as its own country entry.
+  - name: basic
+    description: English (Australia)
+    physical: ansi
+    transformation: qwerty
+    default: true

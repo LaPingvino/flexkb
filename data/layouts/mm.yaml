@@ -1,0 +1,7 @@
+file: mm
+variants:
+  - name: basic
+    description: Myanmar (Burmese, native positional)
+    physical: iso
+    transformation: myanmar-positional
+    default: true

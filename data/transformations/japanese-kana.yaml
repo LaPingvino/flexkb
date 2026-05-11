@@ -1,0 +1,67 @@
+name: Japanese Kana (JIS positional)
+script: japanese
+description: |
+  Native Japanese kana keyboard layout — JIS standard positional
+  arrangement. Each key carries a hiragana character at level 1; shift
+  gives katakana (or alternative kana form). Level 3 (AltGr) provides
+  ASCII fallback for mode-mixing.
+
+  Real Japanese typing uses an IME (anthy / mozc / fcitx5-mozc) for
+  kana→kanji conversion. flexkb provides the physical kana mapping;
+  the IME composes on top.
+
+  Modifier keys (Henkan/Muhenkan/Hiragana_Katakana/Zenkaku_Hankaku/
+  Eisu_toggle) are NOT modelled here — those need xkb's modifier
+  language which flexkb doesn't yet cover. Users wanting full mode-
+  switching should pair the symbols layout with the upstream
+  modifier config via passthrough.
+keys:
+  AE01: { levels: [kana_NU, "1"] }
+  AE02: { levels: [kana_FU, "2"] }
+  AE03: { levels: [kana_A, kana_a] }
+  AE04: { levels: [kana_U, kana_u] }
+  AE05: { levels: [kana_E, kana_e] }
+  AE06: { levels: [kana_O, kana_o] }
+  AE07: { levels: [kana_YA, kana_ya] }
+  AE08: { levels: [kana_YU, kana_yu] }
+  AE09: { levels: [kana_YO, kana_yo] }
+  AE10: { levels: [kana_WA, kana_WO] }
+  AE11: { levels: [kana_HO, equal] }
+  AE12: { levels: [kana_HE, asciitilde] }
+
+  AD01: { levels: [kana_TA, q] }
+  AD02: { levels: [kana_TE, w] }
+  AD03: { levels: [kana_I, kana_i] }
+  AD04: { levels: [kana_SU, r] }
+  AD05: { levels: [kana_KA, t] }
+  AD06: { levels: [kana_N, y] }
+  AD07: { levels: [kana_NA, u] }
+  AD08: { levels: [kana_NI, i] }
+  AD09: { levels: [kana_RA, o] }
+  AD10: { levels: [kana_SE, p] }
+  AD11: { levels: [voicedsound, kana_openingbracket] }
+  AD12: { levels: [semivoicedsound, kana_closingbracket] }
+
+  AC01: { levels: [kana_CHI, a] }
+  AC02: { levels: [kana_TO, s] }
+  AC03: { levels: [kana_SHI, d] }
+  AC04: { levels: [kana_HA, f] }
+  AC05: { levels: [kana_KI, g] }
+  AC06: { levels: [kana_KU, h] }
+  AC07: { levels: [kana_MA, j] }
+  AC08: { levels: [kana_NO, k] }
+  AC09: { levels: [kana_RI, l] }
+  AC10: { levels: [kana_RE, semicolon] }
+  AC11: { levels: [kana_KE, apostrophe] }
+  BKSL: { levels: [kana_RO, backslash] }
+
+  AB01: { levels: [kana_TSU, kana_tsu] }
+  AB02: { levels: [kana_SA, x] }
+  AB03: { levels: [kana_SO, c] }
+  AB04: { levels: [kana_HI, v] }
+  AB05: { levels: [kana_KO, b] }
+  AB06: { levels: [kana_MI, n] }
+  AB07: { levels: [kana_MO, m] }
+  AB08: { levels: [kana_NE, kana_comma] }
+  AB09: { levels: [kana_RU, kana_fullstop] }
+  AB10: { levels: [kana_ME, kana_conjunctive] }

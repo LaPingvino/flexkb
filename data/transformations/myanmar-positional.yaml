@@ -1,0 +1,59 @@
+name: Myanmar (Burmese positional, basic)
+script: myanmar
+description: |
+  Native Myanmar (Burmese) keyboard layout. Direct positional mapping —
+  not InScript-style since Myanmar's diacritic system (vowel signs,
+  medials, tone marks) is positionally distinct from Brahmic-Indian
+  patterns. Levels 1+2 = Myanmar script; levels 3+4 = Latin fallback
+  for code/file paths.
+keys:
+  TLDE: { levels: [grave, U100E, grave, asciitilde] }
+  AE01: { levels: [U1041, U100D, "1", exclam] }
+  AE02: { levels: [U1042, U1052, "2", at] }
+  AE03: { levels: [U1043, U100B, "3", numbersign] }
+  AE04: { levels: [U1044, dollar, "4", dollar] }
+  AE05: { levels: [U1045, percent, "5", percent] }
+  AE06: { levels: [U1046, asciicircum, "6", asciicircum] }
+  AE07: { levels: [U1047, U101B, "7", ampersand] }
+  AE08: { levels: [U1048, asterisk, "8", asterisk] }
+  AE09: { levels: [U1049, parenleft, "9", parenleft] }
+  AE10: { levels: [U1040, parenright, "0", parenright] }
+  AE11: { levels: [minus, underscore] }
+  AE12: { levels: [equal, plus] }
+
+  AD01: { levels: [U1006, U1008, q, Q] }
+  AD02: { levels: [U1010, U101D, w, W] }
+  AD03: { levels: [U1014, U1023, e, E] }
+  AD04: { levels: [U1019, U104E, r, R] }
+  AD05: { levels: [U1021, U1024, t, T] }
+  AD06: { levels: [U1015, U104C, y, Y] }
+  AD07: { levels: [U1000, U1025, u, U] }
+  AD08: { levels: [U1004, U104D, i, I] }
+  AD09: { levels: [U101E, U103F, o, O] }
+  AD10: { levels: [U1005, U100F, p, P] }
+  AD11: { levels: [U101F, U1027, bracketleft, braceleft] }
+  AD12: { levels: [U1029, U102A, bracketright, braceright] }
+
+  AC01: { levels: [U1031, U1017, a, A] }
+  AC02: { levels: [U103B, U103E, s, S] }
+  AC03: { levels: [U102D, U102E, d, D] }
+  AC04: { levels: [U103A, U1039, f, F] }
+  AC05: { levels: [U102B, U103D, g, G] }
+  AC06: { levels: [U1037, U1036, h, H] }
+  AC07: { levels: [U103C, U1032, j, J] }
+  AC08: { levels: [U102F, U1012, k, K] }
+  AC09: { levels: [U1030, U1013, l, L] }
+  AC10: { levels: [U1038, U1002, semicolon, colon] }
+  AC11: { levels: [apostrophe, quotedbl] }
+  BKSL: { levels: [U104F, backslash, backslash, bar] }
+
+  AB01: { levels: [U1016, U1007, z, Z] }
+  AB02: { levels: [U1011, U100C, x, X] }
+  AB03: { levels: [U1001, U1003, c, C] }
+  AB04: { levels: [U101C, U1020, v, V] }
+  AB05: { levels: [U1018, U101A, b, B] }
+  AB06: { levels: [U100A, U1009, n, N] }
+  AB07: { levels: [U102C, U1026, m, M] }
+  AB08: { levels: [comma, U104A, comma, less] }
+  AB09: { levels: [period, U104B, period, greater] }
+  AB10: { levels: [slash, question] }

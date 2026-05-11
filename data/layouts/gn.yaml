@@ -1,0 +1,7 @@
+file: gn
+variants:
+  - name: basic
+    description: N'Ko (Guinea, Manding languages — RTL)
+    physical: iso
+    transformation: nko
+    default: true

@@ -1,0 +1,12 @@
+name: Māori macron vowels (ā ē ī ō ū)
+description: |
+  Te Reo Māori marks long vowels with macrons. Letter-following AltGr
+  overlay so they track each vowel's position regardless of base.
+letter_overlays:
+  a: { levels: ["", "", amacron, Amacron] }
+  e: { levels: ["", "", emacron, Emacron] }
+  i: { levels: ["", "", imacron, Imacron] }
+  o: { levels: ["", "", omacron, Omacron] }
+  u: { levels: ["", "", umacron, Umacron] }
+includes:
+  - level3(ralt_switch)

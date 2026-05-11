@@ -1,0 +1,60 @@
+name: N'Ko (Guinea, RTL West African)
+script: nko
+description: |
+  N'Ko script (U07C0-U07FF) — used for Manding languages (Bambara,
+  Maninka, Dyula). Right-to-left like Arabic/Hebrew. Designed by
+  Solomana Kanté in 1949.
+
+  Native positional layout from Guinea's xkb gn/basic. Pair with the
+  arabic-101 / hebrew-style RTL handling at xkb runtime.
+keys:
+  TLDE: { levels: [U07EC, asciitilde, notsign] }
+  AE01: { levels: [U07F1, U07C1] }
+  AE02: { levels: [U07EB, U07C2] }
+  AE03: { levels: [U07F5, U07C3, numbersign, sterling] }
+  AE04: { levels: [U07F4, U07C4, U2E1C, dollar] }
+  AE05: { levels: [parenleft, U07C5, U2E1D] }
+  AE06: { levels: [minus, U07C6, bar] }
+  AE07: { levels: [U07EC, U07C7, grave] }
+  AE08: { levels: [U07FA, U07C8, backslash] }
+  AE09: { levels: [U07ED, U07C9, asciicircum, plusminus] }
+  AE10: { levels: [U07EE, U07C0, at, degree] }
+  AE11: { levels: [parenright] }
+  AE12: { levels: [equal, plus, braceright] }
+
+  AD01: { levels: [U07CA] }
+  AD02: { levels: [U07E0, less] }
+  AD03: { levels: [U07CD, U07CB] }
+  AD04: { levels: [U07D9, U07DA] }
+  AD05: { levels: [U07D5] }
+  AD06: { levels: [U07E6, U07E7] }
+  AD07: { levels: [U07CE, U07F6] }
+  AD08: { levels: [U07CC] }
+  AD09: { levels: [U07D0, U07CF] }
+  AD10: { levels: [U07D4] }
+  AD11: { levels: [U07F3] }
+  AD12: { levels: [dollar, sterling, currency] }
+
+  AC01: { levels: [U07EB] }
+  AC02: { levels: [U07DB] }
+  AC03: { levels: [U07D8] }
+  AC04: { levels: [U07DD] }
+  AC05: { levels: [U07DC, U07F7] }
+  AC06: { levels: [U07E4] }
+  AC07: { levels: [U07D6, U07E8] }
+  AC08: { levels: [U07DE] }
+  AC09: { levels: [U07DF, U07EA] }
+  AC10: { levels: [U07E1] }
+  AC11: { levels: [U07EF, U07F8, percent] }
+  BKSL: { levels: [U07D1, asterisk] }
+
+  AB01: { levels: [U07E5] }
+  AB02: { levels: [U060C] }
+  AB03: { levels: [U07D7, U07E9] }
+  AB04: { levels: [U07E2] }
+  AB05: { levels: [U07D3] }
+  AB06: { levels: [U07E3, U07D2] }
+  AB07: { levels: [U07F8, U061F] }
+  AB08: { levels: [U061B] }
+  AB09: { levels: [U060C, slash] }
+  AB10: { levels: [U07F9] }

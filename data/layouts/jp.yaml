@@ -1,0 +1,17 @@
+file: jp
+variants:
+  - name: basic
+    description: Japanese (kana, JIS)
+    physical: jis
+    transformation: japanese-kana
+    default: true
+
+  - name: ime-base
+    description: Japanese (bare QWERTY, intended for use with an IME like mozc/anthy)
+    physical: jis
+    transformation: qwerty
+
+  - name: dvorak
+    description: Japanese (Dvorak base for IME use)
+    physical: jis
+    transformation: dvorak

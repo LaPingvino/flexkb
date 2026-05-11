@@ -1,0 +1,13 @@
+file: nz
+variants:
+  - name: basic
+    description: English (New Zealand)
+    physical: ansi
+    transformation: qwerty
+    default: true
+
+  - name: mao
+    description: Māori (QWERTY base + macron vowels)
+    physical: ansi
+    transformation: qwerty
+    additions: [maori-macrons]
