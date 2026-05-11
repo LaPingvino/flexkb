@@ -1,0 +1,11 @@
+name: Euro sign on E
+description: |
+  Adds AltGr+E = € on whatever key currently bears 'e'. Composes
+  cleanly on top of any transformation: on Dvorak, that's AC03; on
+  QWERTY, that's AD03; on Colemak, AC08. The overlay refers to physical
+  keys, but you'd typically apply this in a context where you know which
+  transformation sits underneath.
+overlays:
+  AD03: { levels: ["", "", EuroSign] }
+includes:
+  - level3(ralt_switch)

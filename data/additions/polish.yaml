@@ -1,0 +1,24 @@
+name: Polish (programmers')
+description: |
+  Polish programmer's overlay — Polish diacritics on AltGr+letter. ą, ć,
+  ę, ł, ń, ó, ś, ź, ż mapped to phonetic-equivalent QWERTY keys. Stack
+  on top of any transformation: AltGr+a always produces ą regardless of
+  whether the base layout is QWERTY, Dvorak or Colemak (the addition is
+  applied after the transformation, so AltGr+the-key-where-a-is yields ą).
+
+  Note: the keys are addressed by physical position, so on Dvorak this
+  produces ą at the AC01 position (which is still 'a' in Dvorak — Dvorak
+  happens to keep A on AC01).
+overlays:
+  AC01: { levels: ["", "", aogonek, Aogonek] }
+  AB03: { levels: ["", "", cacute, Cacute] }
+  AD03: { levels: ["", "", eogonek, Eogonek] }
+  AC09: { levels: ["", "", lstroke, Lstroke] }
+  AB06: { levels: ["", "", nacute, Nacute] }
+  AD09: { levels: ["", "", oacute, Oacute] }
+  AC02: { levels: ["", "", sacute, Sacute] }
+  AB01: { levels: ["", "", zabovedot, Zabovedot] }
+  AB02: { levels: ["", "", zacute, Zacute] }
+
+includes:
+  - level3(ralt_switch)

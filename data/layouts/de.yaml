@@ -1,0 +1,20 @@
+file: de
+variants:
+  - name: basic
+    description: German
+    physical: iso
+    transformation: qwertz
+    additions: [german-umlauts, eurosign-e]
+    default: true
+
+  - name: dvorak
+    description: German (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [german-umlauts]
+
+  - name: us-intl
+    description: German on US-international physical
+    physical: ansi
+    transformation: qwerty
+    additions: [intl, german-umlauts]

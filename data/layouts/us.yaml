@@ -1,0 +1,34 @@
+file: us
+variants:
+  - name: basic
+    description: English (US)
+    physical: ansi
+    transformation: qwerty
+    default: true
+
+  - name: intl
+    description: English (US, intl., with dead keys)
+    physical: ansi
+    transformation: qwerty
+    additions: [intl]
+
+  - name: dvorak
+    description: English (Dvorak)
+    physical: ansi
+    transformation: dvorak
+
+  - name: colemak
+    description: English (Colemak)
+    physical: ansi
+    transformation: colemak
+
+  - name: workman
+    description: English (Workman)
+    physical: ansi
+    transformation: workman
+
+  - name: euro
+    description: English (US, euro on 5)
+    physical: ansi
+    transformation: qwerty
+    additions: [eurosign-5]

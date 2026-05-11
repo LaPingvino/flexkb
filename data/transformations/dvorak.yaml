@@ -1,0 +1,57 @@
+name: Dvorak
+description: |
+  Dvorak Simplified Keyboard — vowels on the left home row, common
+  consonants on the right home row. Punctuation occupies the top-left of
+  the letter rows so it's quickly reachable.
+keys:
+  TLDE: { levels: [grave, asciitilde] }
+  AE01: { levels: ["1", exclam] }
+  AE02: { levels: ["2", at] }
+  AE03: { levels: ["3", numbersign] }
+  AE04: { levels: ["4", dollar] }
+  AE05: { levels: ["5", percent] }
+  AE06: { levels: ["6", asciicircum] }
+  AE07: { levels: ["7", ampersand] }
+  AE08: { levels: ["8", asterisk] }
+  AE09: { levels: ["9", parenleft] }
+  AE10: { levels: ["0", parenright] }
+  AE11: { levels: [bracketleft, braceleft] }
+  AE12: { levels: [bracketright, braceright] }
+
+  AD01: { levels: [apostrophe, quotedbl] }
+  AD02: { levels: [comma, less] }
+  AD03: { levels: [period, greater] }
+  AD04: { levels: [p, P] }
+  AD05: { levels: [y, Y] }
+  AD06: { levels: [f, F] }
+  AD07: { levels: [g, G] }
+  AD08: { levels: [c, C] }
+  AD09: { levels: [r, R] }
+  AD10: { levels: [l, L] }
+  AD11: { levels: [slash, question] }
+  AD12: { levels: [equal, plus] }
+
+  AC01: { levels: [a, A] }
+  AC02: { levels: [o, O] }
+  AC03: { levels: [e, E] }
+  AC04: { levels: [u, U] }
+  AC05: { levels: [i, I] }
+  AC06: { levels: [d, D] }
+  AC07: { levels: [h, H] }
+  AC08: { levels: [t, T] }
+  AC09: { levels: [n, N] }
+  AC10: { levels: [s, S] }
+  AC11: { levels: [minus, underscore] }
+  BKSL: { levels: [backslash, bar] }
+
+  LSGT: { levels: [backslash, bar] }
+  AB01: { levels: [semicolon, colon] }
+  AB02: { levels: [q, Q] }
+  AB03: { levels: [j, J] }
+  AB04: { levels: [k, K] }
+  AB05: { levels: [x, X] }
+  AB06: { levels: [b, B] }
+  AB07: { levels: [m, M] }
+  AB08: { levels: [w, W] }
+  AB09: { levels: [v, V] }
+  AB10: { levels: [z, Z] }

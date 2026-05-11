@@ -1,0 +1,57 @@
+name: Colemak
+description: |
+  Colemak — modern Dvorak alternative. Keeps QWERTY's ZXCV positions for
+  cut/copy/paste muscle memory and swaps far fewer keys overall, while
+  putting the ten most common English letters on the home row.
+keys:
+  TLDE: { levels: [grave, asciitilde] }
+  AE01: { levels: ["1", exclam] }
+  AE02: { levels: ["2", at] }
+  AE03: { levels: ["3", numbersign] }
+  AE04: { levels: ["4", dollar] }
+  AE05: { levels: ["5", percent] }
+  AE06: { levels: ["6", asciicircum] }
+  AE07: { levels: ["7", ampersand] }
+  AE08: { levels: ["8", asterisk] }
+  AE09: { levels: ["9", parenleft] }
+  AE10: { levels: ["0", parenright] }
+  AE11: { levels: [minus, underscore] }
+  AE12: { levels: [equal, plus] }
+
+  AD01: { levels: [q, Q] }
+  AD02: { levels: [w, W] }
+  AD03: { levels: [f, F] }
+  AD04: { levels: [p, P] }
+  AD05: { levels: [g, G] }
+  AD06: { levels: [j, J] }
+  AD07: { levels: [l, L] }
+  AD08: { levels: [u, U] }
+  AD09: { levels: [y, Y] }
+  AD10: { levels: [semicolon, colon] }
+  AD11: { levels: [bracketleft, braceleft] }
+  AD12: { levels: [bracketright, braceright] }
+
+  AC01: { levels: [a, A] }
+  AC02: { levels: [r, R] }
+  AC03: { levels: [s, S] }
+  AC04: { levels: [t, T] }
+  AC05: { levels: [d, D] }
+  AC06: { levels: [h, H] }
+  AC07: { levels: [n, N] }
+  AC08: { levels: [e, E] }
+  AC09: { levels: [i, I] }
+  AC10: { levels: [o, O] }
+  AC11: { levels: [apostrophe, quotedbl] }
+  BKSL: { levels: [backslash, bar] }
+
+  LSGT: { levels: [backslash, bar] }
+  AB01: { levels: [z, Z] }
+  AB02: { levels: [x, X] }
+  AB03: { levels: [c, C] }
+  AB04: { levels: [v, V] }
+  AB05: { levels: [b, B] }
+  AB06: { levels: [k, K] }
+  AB07: { levels: [m, M] }
+  AB08: { levels: [comma, less] }
+  AB09: { levels: [period, greater] }
+  AB10: { levels: [slash, question] }

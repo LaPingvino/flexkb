@@ -1,0 +1,7 @@
+name: Euro sign on 5
+description: |
+  Adds AltGr+5 = € (the convention on UK/IE/many EU layouts).
+overlays:
+  AE05: { levels: ["", "", EuroSign] }
+includes:
+  - level3(ralt_switch)

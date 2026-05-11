@@ -1,0 +1,55 @@
+name: International (dead keys)
+description: |
+  US-international addition — adds dead keys on level 1/2 plus Latin
+  accented characters on AltGr. Matches xkb's us(intl) variant. Level
+  ordering: [base, shift, altgr, altgr+shift].
+overlays:
+  TLDE: { levels: [dead_grave, dead_tilde, grave, asciitilde] }
+  AE01: { levels: ["1", exclam, exclamdown, onesuperior] }
+  AE02: { levels: ["2", at, twosuperior, dead_doubleacute] }
+  AE03: { levels: ["3", numbersign, threesuperior, dead_macron] }
+  AE04: { levels: ["4", dollar, currency, sterling] }
+  AE05: { levels: ["5", percent, EuroSign, dead_cedilla] }
+  AE06: { levels: ["6", dead_circumflex, onequarter, asciicircum] }
+  AE07: { levels: ["7", ampersand, onehalf, dead_horn] }
+  AE08: { levels: ["8", asterisk, threequarters, dead_ogonek] }
+  AE09: { levels: ["9", parenleft, leftsinglequotemark, dead_breve] }
+  AE10: { levels: ["0", parenright, rightsinglequotemark, dead_abovering] }
+  AE11: { levels: [minus, underscore, yen, dead_belowdot] }
+  AE12: { levels: [equal, plus, multiply, division] }
+
+  AD01: { levels: ["", "", adiaeresis, Adiaeresis] }
+  AD02: { levels: ["", "", aring, Aring] }
+  AD03: { levels: ["", "", eacute, Eacute] }
+  AD04: { levels: ["", "", registered, trademark] }
+  AD05: { levels: ["", "", thorn, THORN] }
+  AD06: { levels: ["", "", udiaeresis, Udiaeresis] }
+  AD07: { levels: ["", "", uacute, Uacute] }
+  AD08: { levels: ["", "", iacute, Iacute] }
+  AD09: { levels: ["", "", oacute, Oacute] }
+  AD10: { levels: ["", "", odiaeresis, Odiaeresis] }
+  AD11: { levels: ["", "", guillemotleft, leftdoublequotemark] }
+  AD12: { levels: ["", "", guillemotright, rightdoublequotemark] }
+
+  AC01: { levels: ["", "", aacute, Aacute] }
+  AC02: { levels: ["", "", ssharp, section] }
+  AC03: { levels: ["", "", eth, ETH] }
+  AC04: { levels: ["", "", ediaeresis, Ediaeresis] }
+  AC07: { levels: ["", "", idiaeresis, Idiaeresis] }
+  AC08: { levels: ["", "", oe, OE] }
+  AC09: { levels: ["", "", oslash, Oslash] }
+  AC10: { levels: ["", "", paragraph, degree] }
+  AC11: { levels: [dead_acute, dead_diaeresis, apostrophe, quotedbl] }
+
+  AB01: { levels: ["", "", ae, AE] }
+  AB02: { levels: ["", "", periodcentered, dead_stroke] }
+  AB03: { levels: ["", "", copyright, cent] }
+  AB06: { levels: ["", "", ntilde, Ntilde] }
+  AB07: { levels: ["", "", mu, plusminus] }
+  AB08: { levels: [comma, less, ccedilla, Ccedilla] }
+  AB09: { levels: [period, greater, dead_abovedot, dead_caron] }
+  AB10: { levels: [slash, question, questiondown, dead_hook] }
+  BKSL: { levels: [backslash, bar, notsign, brokenbar] }
+
+includes:
+  - level3(ralt_switch)

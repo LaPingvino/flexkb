@@ -1,0 +1,17 @@
+name: German umlauts
+description: |
+  German umlaut overlay — ä, ö, ü, ß replace specific keys. Unlike the
+  AltGr-based Polish addition, the German layout traditionally puts these
+  on dedicated keys: ü on AD11, ö on AC10, ä on AC11, ß on AE11.
+
+  This is an example of an addition that overwrites levels 1 and 2 rather
+  than only extending levels 3 and 4 — it works because Addition overlays
+  can target any level.
+overlays:
+  AE11: { levels: [ssharp, question, backslash, questiondown] }
+  AD11: { levels: [udiaeresis, Udiaeresis] }
+  AC10: { levels: [odiaeresis, Odiaeresis] }
+  AC11: { levels: [adiaeresis, Adiaeresis] }
+
+includes:
+  - level3(ralt_switch)

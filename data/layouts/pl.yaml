@@ -1,0 +1,26 @@
+file: pl
+variants:
+  - name: basic
+    description: Polish
+    physical: iso
+    transformation: qwerty
+    additions: [polish]
+    default: true
+
+  - name: dvorak
+    description: Polish (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [polish]
+
+  - name: colemak
+    description: Polish (Colemak)
+    physical: iso
+    transformation: colemak
+    additions: [polish]
+
+  - name: workman
+    description: Polish (Workman)
+    physical: iso
+    transformation: workman
+    additions: [polish]

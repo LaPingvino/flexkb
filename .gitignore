@@ -1,0 +1,21 @@
+# Binaries
+/flexkb
+/bin/
+
+# Build output
+/build/
+/dist/
+/out/
+
+# Go workspace
+/vendor/
+
+# Editor / OS
+*.swp
+*.swo
+.DS_Store
+.idea/
+.vscode/
+
+# Generated XKB tree from convert/build commands
+/generated/
