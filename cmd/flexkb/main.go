@@ -538,15 +538,7 @@ func runPaths(args []string) {
 		return
 	}
 	for i, p := range paths {
-		marker := "system"
-		if home, _ := os.UserHomeDir(); home != "" && strings.HasPrefix(p, home) {
-			marker = "user"
-		} else if strings.Contains(p, "/usr/") {
-			marker = "system"
-		} else {
-			marker = "dev/local"
-		}
-		fmt.Printf("  %d. %s  [%s]\n", i+1, p, marker)
+		fmt.Printf("  %d. %s  [%s]\n", i+1, p, classifyPath(p))
 	}
 	fmt.Println("\nFiles in higher-priority directories shadow same-named files lower\ndown. New files just add to the available set; see `flexkb list`.")
 }

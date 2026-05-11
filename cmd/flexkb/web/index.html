@@ -49,7 +49,9 @@
         <button id="bEdit" title="Load this variant into the Compose tab">Edit in Compose →</button>
         <button id="bActivate" class="primary" title="setxkbmap to this variant in the current session">Activate</button>
         <button id="bShowXKB" title="Show the raw xkb_symbols block">View XKB</button>
+        <button id="bYAML" title="View or edit the raw layout YAML">YAML…</button>
         <button id="bDelete" class="danger hidden" title="Delete this variant from your user data">Delete</button>
+        <button id="bOpenSettings" class="hidden" title="Open the OS keyboard panel (Wayland: real layout switching happens here, not via Activate)">OS keyboard settings…</button>
         <span class="status" id="bStatus"></span>
       </div>
       <div class="meta" id="meta"></div>
@@ -142,6 +144,20 @@
     </section>
 
     <div class="key-popover hidden" id="keyPopover"></div>
+
+    <div class="inspect-overlay hidden" id="yamlOverlay">
+      <div class="inspect-panel">
+        <button class="inspect-close" id="yamlClose">×</button>
+        <h3 id="yamlTitle">Layout YAML</h3>
+        <p class="inspect-meta" id="yamlMeta"></p>
+        <textarea class="yaml-editor" id="yamlEditor" spellcheck="false"></textarea>
+        <div class="row actions">
+          <button id="yamlSave" class="primary" title="Write to user data — system-layer files become a user override">Save to user data</button>
+          <button id="yamlReload">Reload</button>
+          <span class="status" id="yamlStatus"></span>
+        </div>
+      </div>
+    </div>
 
     <div class="inspect-overlay hidden" id="inspectOverlay">
       <div class="inspect-panel">

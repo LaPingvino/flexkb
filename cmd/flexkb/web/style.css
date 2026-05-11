@@ -405,6 +405,22 @@ section.tab.hidden { display: none; }
   margin: 0.4rem 0 0;
 }
 
+.yaml-editor {
+  width: 100%;
+  min-height: 360px;
+  background: #0e1116;
+  color: #d9e0e9;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  font-family: ui-monospace, "JetBrains Mono", Menlo, monospace;
+  font-size: 0.82rem;
+  padding: 0.6rem 0.8rem;
+  resize: vertical;
+}
+body.theme-light .yaml-editor {
+  background: var(--bg-input); color: var(--fg); border-color: var(--border-strong);
+}
+
 .multi input[type=search] {
   background: transparent;
   border: 1px solid #30363d;
@@ -582,8 +598,10 @@ header { position: relative; }
   border: 1px solid var(--ok);
   color: var(--ok-fg);
   border-radius: 12px;
+  cursor: help;
 }
 .active-chip.hidden { display: none; }
+.active-chip.warn { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn-fg); }
 
 /* The "Active" tag inside a select option / list — added inline. */
 .active-mark {

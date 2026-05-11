@@ -14,6 +14,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
 	"net"
 	"net/http"
@@ -122,6 +123,12 @@ func startServer(rootFn func() model.DataRoot, addr string) (string, <-chan erro
 	mux.HandleFunc("/api/active", func(w http.ResponseWriter, r *http.Request) {
 		handleActive(w, r)
 	})
+	mux.HandleFunc("/api/file", func(w http.ResponseWriter, r *http.Request) {
+		handleFile(w, r, rootFn())
+	})
+	mux.HandleFunc("/api/open-settings", func(w http.ResponseWriter, r *http.Request) {
+		handleOpenSettings(w, r)
+	})
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return "", nil, err
@@ -192,18 +199,54 @@ func handleLayouts(w http.ResponseWriter, _ *http.Request, root model.DataRoot) 
 	writeJSON(w, out)
 }
 
-// classifyPath labels a data path as user / system / dev based on its
-// location. Same heuristic the `flexkb paths` CLI uses, kept in sync
-// so the GUI shows familiar terms.
+// classifyPath labels a data path as user / system / dev based on
+// where the path lives. Priority:
+//   - dev:    anywhere under the current working dir (e.g. a git
+//             checkout's ./data)
+//   - system: under /usr/share
+//   - user:   the configured XDG locations
+//   - dev:    fallback for anything else
+//
+// Done in this order so a dev checkout that happens to be under $HOME
+// (the common case) is correctly labelled "dev", not "user". The CLI
+// uses the same classification — both call this single helper.
 func classifyPath(p string) string {
 	if p == "" {
 		return ""
 	}
-	if home, _ := os.UserHomeDir(); home != "" && strings.HasPrefix(p, home) {
+	abs, err := filepath.Abs(p)
+	if err != nil {
+		abs = p
+	}
+	if cwd, err := os.Getwd(); err == nil {
+		if cabs, err := filepath.Abs(cwd); err == nil {
+			rel, err := filepath.Rel(cabs, abs)
+			if err == nil && !strings.HasPrefix(rel, "..") && rel != "." {
+				// The path lives under the current working directory.
+				return "dev"
+			}
+		}
+	}
+	if strings.HasPrefix(abs, "/usr/") || strings.HasPrefix(abs, "/opt/") {
+		return "system"
+	}
+	// XDG user paths.
+	if xdg := os.Getenv("XDG_CONFIG_HOME"); xdg != "" && strings.HasPrefix(abs, xdg) {
 		return "user"
 	}
-	if strings.Contains(p, "/usr/") {
-		return "system"
+	if xdg := os.Getenv("XDG_DATA_HOME"); xdg != "" && strings.HasPrefix(abs, xdg) {
+		return "user"
+	}
+	if home, _ := os.UserHomeDir(); home != "" {
+		if strings.HasPrefix(abs, filepath.Join(home, ".config")) ||
+			strings.HasPrefix(abs, filepath.Join(home, ".local", "share")) {
+			return "user"
+		}
+		if strings.HasPrefix(abs, home) {
+			// Under home but not in a standard XDG path — treat as
+			// dev/local (e.g. a checkout in $HOME/projects/).
+			return "dev"
+		}
 	}
 	return "dev"
 }
@@ -984,21 +1027,233 @@ func handleVariant(w http.ResponseWriter, r *http.Request, root model.DataRoot) 
 	writeJSON(w, map[string]any{"deleted": true, "fileRemoved": false, "path": src})
 }
 
+// detectCompositor returns a short label for the running compositor /
+// desktop environment. Best-effort using XDG_CURRENT_DESKTOP first,
+// XDG_SESSION_DESKTOP next, then known env vars. Used by /api/active
+// (display only) and /api/open-settings (action routing).
+func detectCompositor() string {
+	chk := func(s string) string {
+		s = strings.ToLower(s)
+		switch {
+		case strings.Contains(s, "gnome"):
+			return "gnome"
+		case strings.Contains(s, "kde") || strings.Contains(s, "plasma"):
+			return "kde"
+		case strings.Contains(s, "cinnamon"):
+			return "cinnamon"
+		case strings.Contains(s, "mate"):
+			return "mate"
+		case strings.Contains(s, "xfce"):
+			return "xfce"
+		case strings.Contains(s, "sway"):
+			return "sway"
+		case strings.Contains(s, "hyprland"):
+			return "hyprland"
+		case strings.Contains(s, "niri"):
+			return "niri"
+		case strings.Contains(s, "river"):
+			return "river"
+		case strings.Contains(s, "wayfire"):
+			return "wayfire"
+		}
+		return ""
+	}
+	for _, env := range []string{"XDG_CURRENT_DESKTOP", "XDG_SESSION_DESKTOP", "DESKTOP_SESSION"} {
+		if v := chk(os.Getenv(env)); v != "" {
+			return v
+		}
+	}
+	// Hyprland sets HYPRLAND_INSTANCE_SIGNATURE.
+	if os.Getenv("HYPRLAND_INSTANCE_SIGNATURE") != "" {
+		return "hyprland"
+	}
+	if os.Getenv("SWAYSOCK") != "" {
+		return "sway"
+	}
+	return ""
+}
+
+// settingsCommands maps a compositor label to candidate commands that
+// open its keyboard-input settings panel. We try each in order; first
+// to launch wins. The keyboard panel is the right target — on Wayland
+// xkb layout selection is compositor-controlled, not xkb-controlled,
+// so this is the workflow our Activate button can't actually replace.
+var settingsCommands = map[string][][]string{
+	"gnome": {
+		{"gnome-control-center", "keyboard"},
+		{"gnome-control-center", "region"},
+		{"gnome-control-center"},
+	},
+	"kde": {
+		// Plasma 6 / 5 cascade.
+		{"systemsettings", "kcm_keyboard"},
+		{"systemsettings5", "kcm_keyboard"},
+		{"kcmshell6", "kcm_keyboard"},
+		{"kcmshell5", "kcm_keyboard"},
+	},
+	"cinnamon": {{"cinnamon-settings", "keyboard"}},
+	"mate":     {{"mate-keyboard-properties"}},
+	"xfce":     {{"xfce4-keyboard-settings"}},
+	// Tilers: no system panel; offer to open the config file in the user's editor.
+	"sway":     {{"xdg-open", homeRel(".config/sway/config")}},
+	"hyprland": {{"xdg-open", homeRel(".config/hypr/hyprland.conf")}},
+	"niri":     {{"xdg-open", homeRel(".config/niri/config.kdl")}},
+}
+
+func homeRel(sub string) string {
+	home := os.Getenv("HOME")
+	if home == "" {
+		home = "~"
+	}
+	return filepath.Join(home, sub)
+}
+
+type apiOpenSettingsRequest struct {
+	Compositor string `json:"compositor"` // optional override; otherwise auto-detected
+}
+type apiOpenSettingsResponse struct {
+	OK         bool   `json:"ok"`
+	Compositor string `json:"compositor"`
+	Tried      []string `json:"tried"`
+	Used       string `json:"used,omitempty"`
+	Error      string `json:"error,omitempty"`
+}
+
+func handleOpenSettings(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "POST required", http.StatusMethodNotAllowed)
+		return
+	}
+	var req apiOpenSettingsRequest
+	if r.ContentLength > 0 {
+		_ = json.NewDecoder(r.Body).Decode(&req)
+	}
+	comp := req.Compositor
+	if comp == "" {
+		comp = detectCompositor()
+	}
+	resp := apiOpenSettingsResponse{Compositor: comp}
+	if comp == "" {
+		resp.Error = "couldn't identify compositor (XDG_CURRENT_DESKTOP unset?)"
+		writeJSON(w, resp)
+		return
+	}
+	cmds := settingsCommands[comp]
+	for _, c := range cmds {
+		resp.Tried = append(resp.Tried, strings.Join(c, " "))
+		if _, err := exec.LookPath(c[0]); err != nil {
+			continue
+		}
+		err := exec.Command(c[0], c[1:]...).Start()
+		if err == nil {
+			resp.OK = true
+			resp.Used = strings.Join(c, " ")
+			writeJSON(w, resp)
+			return
+		}
+	}
+	resp.Error = "no candidate command succeeded"
+	writeJSON(w, resp)
+}
+
+// handleFile — GET returns the raw YAML for a layout file (any layer);
+// PUT writes raw YAML to the user XDG layouts dir. The raw write path
+// is the only way to keep hand-written YAML comments / formatting
+// intact across a GUI edit, because re-marshalling through go-yaml
+// strips them. The handler validates that the body parses as a
+// LayoutFile before writing.
+func handleFile(w http.ResponseWriter, r *http.Request, root model.DataRoot) {
+	switch r.Method {
+	case http.MethodGet:
+		file := r.URL.Query().Get("file")
+		if !validFileName(file) {
+			http.Error(w, "invalid file name", http.StatusBadRequest)
+			return
+		}
+		src, err := root.Find("layouts", file)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		buf, err := os.ReadFile(src)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "text/yaml; charset=utf-8")
+		w.Header().Set("X-Source-Path", src)
+		w.Header().Set("X-Source-Kind", classifyPath(src))
+		w.Write(buf)
+		return
+	case http.MethodPut:
+		file := r.URL.Query().Get("file")
+		if !validFileName(file) {
+			http.Error(w, "invalid file name", http.StatusBadRequest)
+			return
+		}
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		var lf model.LayoutFile
+		if err := yaml.Unmarshal(body, &lf); err != nil {
+			http.Error(w, "YAML parse error: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+		if lf.File == "" {
+			http.Error(w, "YAML missing top-level `file:` field", http.StatusBadRequest)
+			return
+		}
+		if lf.File != file {
+			http.Error(w, fmt.Sprintf("body `file: %s` doesn't match query file=%s", lf.File, file), http.StatusBadRequest)
+			return
+		}
+		userDir, err := userLayoutsDir()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if err := os.MkdirAll(userDir, 0o755); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		dst := filepath.Join(userDir, file+".yaml")
+		tmp := dst + ".tmp"
+		if err := os.WriteFile(tmp, body, 0o644); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if err := os.Rename(tmp, dst); err != nil {
+			os.Remove(tmp)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		writeJSON(w, map[string]string{"path": dst})
+		return
+	default:
+		http.Error(w, "GET or PUT required", http.StatusMethodNotAllowed)
+		return
+	}
+}
+
 // apiActive reports the currently-applied keyboard layout. We try
 // setxkbmap -query first (covers X11 + Xwayland); failing that we
 // fall back to /etc/X11/xorg.conf.d/00-keyboard.conf (persistent
 // system config) so the GUI still has something useful to show on
 // pure Wayland sessions where setxkbmap isn't meaningful.
 type apiActive struct {
-	Layout  string `json:"layout"`
-	Variant string `json:"variant"`
-	Model   string `json:"model"`
-	Source  string `json:"source"`
-	OK      bool   `json:"ok"`
+	Layout      string `json:"layout"`
+	Variant     string `json:"variant"`
+	Model       string `json:"model"`
+	Source      string `json:"source"`
+	SessionType string `json:"sessionType"` // "wayland" / "x11" / "tty" / ""
+	Compositor  string `json:"compositor"`  // "gnome" / "kde" / "sway" / "hyprland" / ...
+	OK          bool   `json:"ok"`
 }
 
 func handleActive(w http.ResponseWriter, _ *http.Request) {
-	a := apiActive{}
+	a := apiActive{SessionType: os.Getenv("XDG_SESSION_TYPE"), Compositor: detectCompositor()}
 	if out, err := exec.Command("setxkbmap", "-query").Output(); err == nil {
 		for _, line := range strings.Split(string(out), "\n") {
 			parts := strings.SplitN(line, ":", 2)

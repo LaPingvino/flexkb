@@ -52,6 +52,7 @@ const diffSummary = document.getElementById("diffSummary");
 const bEditBtn = document.getElementById("bEdit");
 const bActivateBtn = document.getElementById("bActivate");
 const bShowXKBBtn = document.getElementById("bShowXKB");
+const bYAMLBtn = document.getElementById("bYAML");
 const bDeleteBtn = document.getElementById("bDelete");
 const bStatus = document.getElementById("bStatus");
 const bXkb = document.getElementById("bXkb");
@@ -213,11 +214,104 @@ bActivateBtn.addEventListener("click", async () => {
   const file = fileSelect.value;
   const variant = variantSelect.value;
   if (!file || !variant) return;
-  if (!confirm(`Activate ${file}(${variant}) in the current session?\n\nThis runs flexkb activate, which calls setxkbmap + xkbcomp against the live X / Xwayland session — replacing your current layout until logout.`)) return;
+  if (!confirm(activatePrompt(file, variant))) return;
   bStatus.textContent = "activating…";
   bStatus.className = "status";
   await activateRequest(file, variant, bStatus);
 });
+
+// activatePrompt builds the confirm-dialog text and tailors the
+// warning for Wayland users — under Wayland, flexkb activate only
+// affects Xwayland apps, not the compositor's input subsystem.
+function activatePrompt(file, variant) {
+  const base = `Activate ${file}(${variant}) in the current session?\n\nRuns flexkb activate (setxkbmap + xkbcomp).`;
+  if (activeLayout && activeLayout.sessionType === "wayland") {
+    return base + "\n\n⚠ You're on Wayland — this only affects Xwayland apps. Your real keyboard layout is controlled by the Wayland compositor (mutter / kwin / sway / niri / hyprland / …) and won't change. Configure it in your compositor's input settings instead.";
+  }
+  return base + "\n\nReplaces your current X11 layout until logout.";
+}
+
+bYAMLBtn.addEventListener("click", () => openYAMLEditor(fileSelect.value));
+
+const bOpenSettingsBtn = document.getElementById("bOpenSettings");
+bOpenSettingsBtn.addEventListener("click", async () => {
+  bStatus.textContent = "launching OS settings…";
+  bStatus.className = "status";
+  const res = await fetch("/api/open-settings", { method: "POST" });
+  const data = await res.json();
+  if (data.ok) {
+    bStatus.textContent = `launched: ${data.used}`;
+    bStatus.className = "status ok";
+  } else {
+    bStatus.textContent = `couldn't launch (compositor=${data.compositor || "?"}): ${data.error}`;
+    bStatus.className = "status err";
+    bStatus.title = "tried: " + (data.tried || []).join(" / ");
+  }
+});
+
+// === YAML edit-as-text overlay ===
+const yamlOverlay = document.getElementById("yamlOverlay");
+const yamlEditor = document.getElementById("yamlEditor");
+const yamlTitle = document.getElementById("yamlTitle");
+const yamlMeta = document.getElementById("yamlMeta");
+const yamlStatus = document.getElementById("yamlStatus");
+const yamlSave = document.getElementById("yamlSave");
+const yamlReload = document.getElementById("yamlReload");
+document.getElementById("yamlClose").addEventListener("click", closeYAMLEditor);
+yamlOverlay.addEventListener("click", (e) => {
+  if (e.target === yamlOverlay) closeYAMLEditor();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !yamlOverlay.classList.contains("hidden")) closeYAMLEditor();
+});
+
+let yamlEditingFile = "";
+
+async function openYAMLEditor(file) {
+  yamlEditingFile = file;
+  yamlTitle.textContent = `YAML: ${file}.yaml`;
+  yamlMeta.textContent = "loading…";
+  yamlStatus.textContent = "";
+  yamlEditor.value = "";
+  const res = await fetch(`/api/file?file=${encodeURIComponent(file)}`);
+  if (!res.ok) {
+    yamlMeta.textContent = `error: ${await res.text()}`;
+    yamlOverlay.classList.remove("hidden");
+    return;
+  }
+  const src = res.headers.get("X-Source-Path") || "";
+  const kind = res.headers.get("X-Source-Kind") || "";
+  yamlEditor.value = await res.text();
+  let m = `${kind}: ${src}`;
+  if (kind !== "user") {
+    m += "  ·  saving will create a user override at ~/.config/flexkb/data/layouts/" + file + ".yaml";
+  }
+  yamlMeta.textContent = m;
+  yamlOverlay.classList.remove("hidden");
+}
+
+function closeYAMLEditor() { yamlOverlay.classList.add("hidden"); }
+
+yamlSave.addEventListener("click", async () => {
+  yamlStatus.textContent = "saving…";
+  yamlStatus.className = "status";
+  const res = await fetch(`/api/file?file=${encodeURIComponent(yamlEditingFile)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "text/yaml" },
+    body: yamlEditor.value,
+  });
+  if (!res.ok) {
+    yamlStatus.textContent = "error: " + await res.text();
+    yamlStatus.className = "status err";
+    return;
+  }
+  const data = await res.json();
+  yamlStatus.textContent = "saved to " + data.path;
+  yamlStatus.className = "status ok";
+  await loadLayouts();
+});
+
+yamlReload.addEventListener("click", () => openYAMLEditor(yamlEditingFile));
 
 bDeleteBtn.addEventListener("click", async () => {
   const file = fileSelect.value;
@@ -508,7 +602,7 @@ cSaveBtn.addEventListener("click", () => doSave(false));
 cActivateBtn.addEventListener("click", () => {
   const file = cFile.value.trim();
   const name = cName.value.trim() || "basic";
-  if (!confirm(`Save and activate ${file}(${name}) in the current session?\n\nWrites to ~/.config/flexkb/data/layouts/, then runs setxkbmap + xkbcomp against the live session.`)) return;
+  if (!confirm("Save & " + activatePrompt(file, name))) return;
   doSave(true);
 });
 
@@ -951,11 +1045,23 @@ async function loadActive() {
     if (a.ok && a.layout) {
       activeLayout = a;
       const v = a.variant || "basic";
-      activeChip.textContent = `live: ${a.layout}(${v})`;
-      activeChip.title = `source: ${a.source}` + (a.model ? ` · model: ${a.model}` : "");
+      const sess = a.sessionType ? ` · ${a.sessionType}` : "";
+      activeChip.textContent = `live: ${a.layout}(${v})${sess}`;
+      activeChip.title = `source: ${a.source}` + (a.model ? ` · model: ${a.model}` : "") + (a.sessionType === "wayland" ? "\nWayland session — Activate affects Xwayland apps only" : "");
+      activeChip.classList.toggle("warn", a.sessionType === "wayland");
       activeChip.classList.remove("hidden");
     } else {
+      activeLayout = a;
       activeChip.classList.add("hidden");
+    }
+    // Show the "OS keyboard settings" button only on Wayland — that's
+    // the session type where Activate genuinely can't change the real
+    // input layout, so we redirect users to the compositor's own panel.
+    if (a.sessionType === "wayland" && a.compositor) {
+      bOpenSettingsBtn.classList.remove("hidden");
+      bOpenSettingsBtn.title = `Open the ${a.compositor} keyboard panel (Wayland's real layout selection lives there, not in xkb)`;
+    } else {
+      bOpenSettingsBtn.classList.add("hidden");
     }
     // Re-decorate the variant picker if it's already rendered.
     decorateActiveInPicker();
