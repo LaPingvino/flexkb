@@ -34,6 +34,7 @@
         <button id="bEdit" title="Load this variant into the Compose tab">Edit in Compose →</button>
         <button id="bActivate" class="primary" title="setxkbmap to this variant in the current session">Activate</button>
         <button id="bShowXKB" title="Show the raw xkb_symbols block">View XKB</button>
+        <button id="bDelete" class="danger hidden" title="Delete this variant from your user data">Delete</button>
         <span class="status" id="bStatus"></span>
       </div>
       <div class="meta" id="meta"></div>
@@ -100,6 +101,7 @@
           <button id="cSave" class="primary">Save to user data</button>
           <button id="cActivate">Save &amp; Activate</button>
           <button id="cShowXKB">View XKB</button>
+          <button id="cDelete" class="danger hidden" title="Delete this variant from your user data">Delete</button>
           <span class="status" id="cStatus"></span>
         </div>
       </div>
@@ -114,6 +116,21 @@
       <pre class="xkb-output hidden" id="cXkb"></pre>
       <div class="warnings" id="cWarnings"></div>
     </section>
+
+    <div class="inspect-overlay hidden" id="inspectOverlay">
+      <div class="inspect-panel">
+        <button class="inspect-close" id="inspectClose">×</button>
+        <h3 id="inspectTitle"></h3>
+        <p class="inspect-meta" id="inspectMeta"></p>
+        <p class="inspect-desc" id="inspectDesc"></p>
+        <h4>Summary</h4>
+        <table class="inspect-summary"><tbody id="inspectSummary"></tbody></table>
+        <details>
+          <summary>Raw YAML</summary>
+          <pre class="inspect-raw" id="inspectRaw"></pre>
+        </details>
+      </div>
+    </div>
 
     <section class="tab hidden" data-tab="paths">
       <p class="hint">

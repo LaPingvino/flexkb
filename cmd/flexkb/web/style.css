@@ -260,6 +260,82 @@ section.tab.hidden { display: none; }
 .row.actions button:hover { background: #2d333b; }
 .row.actions button.primary { background: #1f6feb; border-color: #1f6feb; color: white; }
 .row.actions button.primary:hover { background: #2876f1; }
+.row.actions button.danger { background: #491614; border-color: #f85149; color: #ff9492; }
+.row.actions button.danger:hover { background: #5a1d1b; }
+.row.actions button.hidden, .compose-form button.hidden { display: none; }
+
+.modules-card .name-link {
+  cursor: pointer;
+  color: #79b8ff;
+  text-decoration: none;
+}
+.modules-card .name-link:hover { text-decoration: underline; }
+.multi select[size] option.inspectable { color: #79b8ff; }
+
+.inspect-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 50;
+  padding: 4rem 1rem;
+  overflow: auto;
+}
+.inspect-overlay.hidden { display: none; }
+.inspect-panel {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1.2rem 1.5rem;
+  width: min(960px, 100%);
+  max-width: 100%;
+  color: #d9e0e9;
+  position: relative;
+}
+.inspect-panel h3 { margin: 0 0 0.4rem; }
+.inspect-panel h4 { margin: 1rem 0 0.4rem; color: #79b8ff; }
+.inspect-panel .inspect-meta { color: #768390; font-size: 0.8rem; margin: 0 0 0.4rem; font-family: ui-monospace, monospace; }
+.inspect-panel .inspect-desc { color: #adbac7; font-size: 0.9rem; margin: 0 0 0.4rem; white-space: pre-wrap; }
+.inspect-panel .inspect-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.8rem;
+  background: transparent;
+  border: none;
+  color: #768390;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+.inspect-panel .inspect-close:hover { color: #d9e0e9; }
+.inspect-summary {
+  border-collapse: collapse;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  width: 100%;
+}
+.inspect-summary td {
+  padding: 0.18rem 0.6rem 0.18rem 0;
+  vertical-align: top;
+  border-bottom: 1px solid #21262d;
+}
+.inspect-summary td.k { color: #79b8ff; white-space: nowrap; }
+.inspect-summary td.v { color: #d9e0e9; }
+.inspect-summary td.n { color: #768390; font-style: italic; }
+.inspect-raw {
+  background: #0e1116;
+  border: 1px solid #21262d;
+  border-radius: 4px;
+  padding: 0.6rem 0.8rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  color: #adbac7;
+  white-space: pre;
+  overflow: auto;
+  max-height: 320px;
+  margin: 0.4rem 0 0;
+}
 
 .multi input[type=search] {
   background: transparent;

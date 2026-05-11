@@ -113,6 +113,12 @@ func startServer(rootFn func() model.DataRoot, addr string) (string, <-chan erro
 	mux.HandleFunc("/api/xkb", func(w http.ResponseWriter, r *http.Request) {
 		handleXKB(w, r, rootFn())
 	})
+	mux.HandleFunc("/api/module", func(w http.ResponseWriter, r *http.Request) {
+		handleModule(w, r, rootFn())
+	})
+	mux.HandleFunc("/api/variant", func(w http.ResponseWriter, r *http.Request) {
+		handleVariant(w, r, rootFn())
+	})
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return "", nil, err
@@ -752,6 +758,227 @@ func emitXKB(w http.ResponseWriter, layout model.ComposedLayout, warnings []stri
 	if err := xkbwriter.WriteVariant(w, xkbwriter.Options{}, layout); err != nil {
 		fmt.Fprintf(w, "\n// error writing xkb: %v\n", err)
 	}
+}
+
+// apiModuleDetail is the inspect-a-module response. Carries the raw
+// YAML source for power users plus a `summary` slice the frontend
+// renders as a quick what-it-does view without re-parsing YAML.
+type apiModuleDetail struct {
+	Kind        string             `json:"kind"`
+	Name        string             `json:"name"`
+	Description string             `json:"description,omitempty"`
+	SourcePath  string             `json:"sourcePath"`
+	SourceKind  string             `json:"sourceKind"`
+	Raw         string             `json:"raw"`
+	Summary     []apiSummaryEntry  `json:"summary,omitempty"`
+	Levels      [][]string         `json:"levels,omitempty"` // for transformations: ordered level samples
+}
+
+// apiSummaryEntry is one row in the module inspect panel — a key/value
+// pair where Key is something stable (xkb code, letter, source token)
+// and Value is the contributed levels or target glyph.
+type apiSummaryEntry struct {
+	Key   string   `json:"key"`
+	Value []string `json:"value"`
+	Note  string   `json:"note,omitempty"`
+}
+
+func handleModule(w http.ResponseWriter, r *http.Request, root model.DataRoot) {
+	kind := r.URL.Query().Get("kind")
+	name := r.URL.Query().Get("name")
+	if kind == "" || name == "" {
+		http.Error(w, "kind and name required", http.StatusBadRequest)
+		return
+	}
+	subdir := map[string]string{
+		"physical":       "physical",
+		"transformation": "transformations",
+		"addition":       "additions",
+		"substitution":   "substitutions",
+	}[kind]
+	if subdir == "" {
+		http.Error(w, "unknown kind", http.StatusBadRequest)
+		return
+	}
+	src, err := root.Find(subdir, strings.TrimPrefix(name, "~"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	raw, err := os.ReadFile(src)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	out := apiModuleDetail{
+		Kind: kind, Name: name,
+		SourcePath: src, SourceKind: classifyPath(src),
+		Raw: string(raw),
+	}
+	switch kind {
+	case "physical":
+		p, err := root.Physical(name)
+		if err == nil {
+			out.Description = p.Description
+			out.Summary = append(out.Summary, apiSummaryEntry{Key: "keys", Value: p.Keys})
+		}
+	case "transformation":
+		t, err := root.Transformation(name)
+		if err == nil {
+			out.Description = t.Description
+			for _, k := range sortedKeys(t.Keys) {
+				out.Summary = append(out.Summary, apiSummaryEntry{Key: k, Value: t.Keys[k].Levels})
+			}
+		}
+	case "addition":
+		a, err := root.Addition(name)
+		if err == nil {
+			out.Description = a.Description
+			for _, k := range sortedKeys(a.Overlays) {
+				out.Summary = append(out.Summary, apiSummaryEntry{Key: "pos " + k, Value: a.Overlays[k].Levels})
+			}
+			for _, l := range sortedLetterKeys(a.LetterOverlays) {
+				lo := a.LetterOverlays[l]
+				note := ""
+				if lo.Priority != "" {
+					note = "priority=" + lo.Priority
+				}
+				if len(lo.Fallback) > 0 {
+					if note != "" {
+						note += " · "
+					}
+					note += "fallback: " + strings.Join(lo.Fallback, ",")
+				}
+				out.Summary = append(out.Summary, apiSummaryEntry{Key: "letter " + l, Value: lo.Levels, Note: note})
+			}
+		}
+	case "substitution":
+		// Resolve the substitution, applying the inverse if asked.
+		looked := name
+		if strings.HasPrefix(name, "~") {
+			looked = name
+		}
+		s, err := root.Substitution(looked)
+		if err == nil {
+			out.Description = s.Description
+			ks := make([]string, 0, len(s.Map))
+			for k := range s.Map {
+				ks = append(ks, k)
+			}
+			sort.Strings(ks)
+			for _, k := range ks {
+				out.Summary = append(out.Summary, apiSummaryEntry{Key: k, Value: []string{s.Map[k]}})
+			}
+		}
+	}
+	writeJSON(w, out)
+}
+
+func sortedKeys(m map[string]model.KeySymbols) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	sort.Strings(out)
+	return out
+}
+func sortedLetterKeys(m map[string]model.LetterOverlay) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	sort.Strings(out)
+	return out
+}
+
+// handleVariant — DELETE removes a single variant from a USER-layer
+// layout file. System and dev paths are read-only by design (would
+// silently fail on next `flexkb generate`); refuse instead of doing
+// something the next CLI run won't honour.
+func handleVariant(w http.ResponseWriter, r *http.Request, root model.DataRoot) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "DELETE required", http.StatusMethodNotAllowed)
+		return
+	}
+	file := r.URL.Query().Get("file")
+	variant := r.URL.Query().Get("variant")
+	if file == "" || variant == "" {
+		http.Error(w, "file and variant query params required", http.StatusBadRequest)
+		return
+	}
+	if !validFileName(file) || !validFileName(variant) {
+		http.Error(w, "invalid file or variant name", http.StatusBadRequest)
+		return
+	}
+	src, err := root.Find("layouts", file)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	if classifyPath(src) != "user" {
+		http.Error(w, "refusing to modify non-user file at "+src, http.StatusForbidden)
+		return
+	}
+	userDir, err := userLayoutsDir()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	expected := filepath.Join(userDir, file+".yaml")
+	if src != expected {
+		http.Error(w, "user-layer file is at "+src+" not the expected "+expected, http.StatusForbidden)
+		return
+	}
+	buf, err := os.ReadFile(src)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	var lf model.LayoutFile
+	if err := yaml.Unmarshal(buf, &lf); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	filtered := lf.Variants[:0]
+	removed := false
+	for _, v := range lf.Variants {
+		if v.Name == variant {
+			removed = true
+			continue
+		}
+		filtered = append(filtered, v)
+	}
+	if !removed {
+		http.Error(w, "variant not present in user file", http.StatusNotFound)
+		return
+	}
+	lf.Variants = filtered
+	if len(lf.Variants) == 0 {
+		// Empty file — remove it so the layout disappears from listings
+		// rather than leaving a stub.
+		if err := os.Remove(src); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		writeJSON(w, map[string]any{"deleted": true, "fileRemoved": true, "path": src})
+		return
+	}
+	out, err := yaml.Marshal(lf)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	tmp := src + ".tmp"
+	if err := os.WriteFile(tmp, out, 0o644); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := os.Rename(tmp, src); err != nil {
+		os.Remove(tmp)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	writeJSON(w, map[string]any{"deleted": true, "fileRemoved": false, "path": src})
 }
 
 // userLayoutsDir returns the highest-priority writable layouts/ dir.

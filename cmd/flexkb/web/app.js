@@ -28,6 +28,7 @@ const browseSource = document.getElementById("browseSource");
 const bEditBtn = document.getElementById("bEdit");
 const bActivateBtn = document.getElementById("bActivate");
 const bShowXKBBtn = document.getElementById("bShowXKB");
+const bDeleteBtn = document.getElementById("bDelete");
 const bStatus = document.getElementById("bStatus");
 const bXkb = document.getElementById("bXkb");
 
@@ -65,7 +66,15 @@ function populateVariants() {
   }
   const def = lf.variants.find(v => v.default) || lf.variants[0];
   if (def) variantSelect.value = def.name;
+  updateBrowseControls();
   loadCompose();
+}
+
+// updateBrowseControls toggles the Delete button visibility — only
+// user-owned layout files are deletable from the GUI.
+function updateBrowseControls() {
+  const lf = layouts.find(l => l.file === fileSelect.value);
+  bDeleteBtn.classList.toggle("hidden", !lf || lf.sourceKind !== "user");
 }
 
 async function loadCompose() {
@@ -114,6 +123,27 @@ bActivateBtn.addEventListener("click", async () => {
   bStatus.textContent = "activating…";
   bStatus.className = "status";
   await activateRequest(file, variant, bStatus);
+});
+
+bDeleteBtn.addEventListener("click", async () => {
+  const file = fileSelect.value;
+  const variant = variantSelect.value;
+  if (!file || !variant) return;
+  if (!confirm(`Delete ${file}(${variant}) from your user data?\n\nThis edits ~/.config/flexkb/data/layouts/${file}.yaml; the system version is untouched.`)) return;
+  bStatus.textContent = "deleting…";
+  bStatus.className = "status";
+  const res = await fetch(`/api/variant?file=${encodeURIComponent(file)}&variant=${encodeURIComponent(variant)}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    bStatus.textContent = "delete failed: " + await res.text();
+    bStatus.className = "status err";
+    return;
+  }
+  const data = await res.json();
+  bStatus.textContent = data.fileRemoved ? "deleted (file removed)" : "deleted from " + data.path;
+  bStatus.className = "status ok";
+  await loadLayouts();
 });
 
 bShowXKBBtn.addEventListener("click", async () => {
@@ -187,6 +217,7 @@ const cPreviewBtn = document.getElementById("cPreview");
 const cSaveBtn = document.getElementById("cSave");
 const cActivateBtn = document.getElementById("cActivate");
 const cShowXKBBtn = document.getElementById("cShowXKB");
+const cDeleteBtn = document.getElementById("cDelete");
 const cStatus = document.getElementById("cStatus");
 const cMeta = document.getElementById("cMeta");
 const cKb = document.getElementById("cKeyboard");
@@ -265,6 +296,7 @@ function renderChips(container, selected, allModules, listRef) {
     const mod = allModules.find(m => m.name === name.replace(/^~/, ""));
     const chip = document.createElement("span");
     chip.className = "chip";
+    chip.title = "double-click to inspect";
     const label = document.createElement("span");
     label.textContent = name;
     chip.appendChild(label);
@@ -277,15 +309,93 @@ function renderChips(container, selected, allModules, listRef) {
     const x = document.createElement("button");
     x.textContent = "×";
     x.title = "remove";
-    x.addEventListener("click", () => {
+    x.addEventListener("click", (e) => {
+      e.stopPropagation();
       listRef.splice(idx, 1);
       renderChips(container, listRef, allModules, listRef);
       composeLivePreview();
     });
     chip.appendChild(x);
+    chip.addEventListener("dblclick", () => {
+      const kind = container === cAddChips ? "addition" : "substitution";
+      openInspect(kind, name);
+    });
     container.appendChild(chip);
   });
 }
+
+// === Module inspect overlay ===
+const inspectOverlay = document.getElementById("inspectOverlay");
+const inspectTitle = document.getElementById("inspectTitle");
+const inspectMeta = document.getElementById("inspectMeta");
+const inspectDesc = document.getElementById("inspectDesc");
+const inspectSummary = document.getElementById("inspectSummary");
+const inspectRaw = document.getElementById("inspectRaw");
+document.getElementById("inspectClose").addEventListener("click", closeInspect);
+inspectOverlay.addEventListener("click", (e) => {
+  if (e.target === inspectOverlay) closeInspect();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !inspectOverlay.classList.contains("hidden")) closeInspect();
+});
+
+async function openInspect(kind, name) {
+  const url = `/api/module?kind=${encodeURIComponent(kind)}&name=${encodeURIComponent(name)}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    alert("inspect failed: " + await res.text());
+    return;
+  }
+  const data = await res.json();
+  inspectTitle.textContent = `${kind}: ${name}`;
+  inspectMeta.textContent = `${data.sourceKind} · ${data.sourcePath}`;
+  inspectDesc.textContent = data.description || "";
+  inspectSummary.innerHTML = "";
+  for (const e of (data.summary || []).slice(0, 200)) {
+    const tr = document.createElement("tr");
+    const tdK = document.createElement("td");
+    tdK.className = "k";
+    tdK.textContent = e.key;
+    const tdV = document.createElement("td");
+    tdV.className = "v";
+    tdV.textContent = (e.value || []).map(displayValue).join("  ");
+    tdV.title = (e.value || []).join("  ");
+    const tdN = document.createElement("td");
+    tdN.className = "n";
+    tdN.textContent = e.note || "";
+    tr.appendChild(tdK);
+    tr.appendChild(tdV);
+    tr.appendChild(tdN);
+    inspectSummary.appendChild(tr);
+  }
+  if ((data.summary || []).length > 200) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 3;
+    td.style.color = "#768390";
+    td.textContent = `… ${data.summary.length - 200} more rows in raw YAML below`;
+    tr.appendChild(td);
+    inspectSummary.appendChild(tr);
+  }
+  inspectRaw.textContent = data.raw || "";
+  inspectOverlay.classList.remove("hidden");
+}
+
+function closeInspect() { inspectOverlay.classList.add("hidden"); }
+
+// Picker list-box: double-click an entry to inspect without adding it.
+cAddPicker.addEventListener("dblclick", () => {
+  if (cAddPicker.value) openInspect("addition", cAddPicker.value);
+});
+cSubPicker.addEventListener("dblclick", () => {
+  if (cSubPicker.value) openInspect("substitution", cSubPicker.value);
+});
+cPhysical.addEventListener("dblclick", () => {
+  if (cPhysical.value) openInspect("physical", cPhysical.value);
+});
+cTransformation.addEventListener("dblclick", () => {
+  if (cTransformation.value) openInspect("transformation", cTransformation.value);
+});
 
 cPhysical.addEventListener("change", composeLivePreview);
 cTransformation.addEventListener("change", composeLivePreview);
@@ -332,6 +442,40 @@ async function doSave(thenActivate) {
     cStatus.className = "status err";
   }
 }
+
+cDeleteBtn.addEventListener("click", async () => {
+  const file = cFile.value.trim();
+  const variant = cName.value.trim() || "basic";
+  if (!confirm(`Delete ${file}(${variant}) from your user data?`)) return;
+  cStatus.textContent = "deleting…";
+  cStatus.className = "status";
+  const res = await fetch(`/api/variant?file=${encodeURIComponent(file)}&variant=${encodeURIComponent(variant)}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    cStatus.textContent = "delete failed: " + await res.text();
+    cStatus.className = "status err";
+    return;
+  }
+  const data = await res.json();
+  cStatus.textContent = data.fileRemoved ? "deleted (file removed)" : "deleted";
+  cStatus.className = "status ok";
+  await loadLayouts();
+  updateComposeControls();
+});
+
+// updateComposeControls toggles the Delete button: only shows when
+// the current file is a user-layer file AND the variant name matches
+// one that exists in it.
+function updateComposeControls() {
+  const file = cFile.value.trim();
+  const name = cName.value.trim();
+  const lf = layouts.find(l => l.file === file);
+  const present = lf && lf.sourceKind === "user" && lf.variants.some(v => v.name === name);
+  cDeleteBtn.classList.toggle("hidden", !present);
+}
+cFile.addEventListener("input", updateComposeControls);
+cName.addEventListener("input", updateComposeControls);
 
 cShowXKBBtn.addEventListener("click", async () => {
   if (!cXkb.classList.contains("hidden")) {
@@ -401,6 +545,14 @@ async function renderPathsTab() {
 }
 
 function renderModulesCard(title, items) {
+  // Map title to the kind=… query the inspect API expects.
+  const kindByTitle = {
+    "Physicals": "physical",
+    "Transformations": "transformation",
+    "Additions": "addition",
+    "Substitutions": "substitution",
+  };
+  const kind = kindByTitle[title];
   const card = document.createElement("div");
   card.className = "modules-card";
   const h = document.createElement("h4");
@@ -413,8 +565,14 @@ function renderModulesCard(title, items) {
     k.className = `mod-kind ${m.sourceKind}`;
     k.textContent = m.sourceKind;
     li.appendChild(k);
-    const name = document.createElement("strong");
+    const name = document.createElement("a");
+    name.href = "#";
+    name.className = "name-link";
     name.textContent = m.name;
+    name.addEventListener("click", (e) => {
+      e.preventDefault();
+      openInspect(kind, m.name);
+    });
     li.appendChild(name);
     if (m.description) {
       const d = document.createElement("span");
