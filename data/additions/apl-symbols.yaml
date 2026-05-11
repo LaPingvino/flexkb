@@ -1,0 +1,40 @@
+name: APL symbols on AltGr (letter-following)
+description: |
+  APL programming language symbols at the AltGr level. Letter-following
+  so the symbol-on-letter associations track regardless of base
+  (QWERTY/Dvorak/Colemak). Mapping follows the Sharp APL / IBM APL2
+  conventions where AltGr+letter gives the symbol pictured on that key
+  on the classic APL keyboard.
+
+  Stack with any Latin transformation. Real APL programming benefits
+  from a dedicated APL keyboard but this addition is enough for
+  occasional editing.
+letter_overlays:
+  q: { levels: ["", "", U003F, U00BF] }       # ? ¿
+  w: { levels: ["", "", U2375, U2378] }       # ⍵ ⍸
+  e: { levels: ["", "", U220A, U2377] }       # ∊ ⍷
+  r: { levels: ["", "", U2374, U2373] }       # ⍴ ⍳
+  t: { levels: ["", "", U223C, U2368] }       # ∼ ⍨
+  y: { levels: ["", "", U2191, U00A5] }       # ↑ ¥
+  u: { levels: ["", "", U2193, U2374] }       # ↓ ⍴
+  i: { levels: ["", "", U2373, U2376] }       # ⍳ ⍶
+  o: { levels: ["", "", U2218, U2365] }       # ∘ ⍥
+  p: { levels: ["", "", U002A, U2363] }       # *
+  a: { levels: ["", "", U237A, U2376] }       # ⍺ ⍶
+  s: { levels: ["", "", U2308, U2351] }       # ⌈
+  d: { levels: ["", "", U230A, U2236] }       # ⌊ ∶
+  f: { levels: ["", "", U005F, U2356] }       # _ ⍖
+  g: { levels: ["", "", U2207, U2362] }       # ∇ ⍢
+  h: { levels: ["", "", U2206, U2359] }       # ∆ ⍙
+  j: { levels: ["", "", U2218, U22A5] }       # ∘ ⊥
+  k: { levels: ["", "", U0027, U2371] }       # ' ⍱
+  l: { levels: ["", "", U2395, U2337] }       # ⎕ ⌷
+  z: { levels: ["", "", U2282, U2286] }       # ⊂ ⊆
+  x: { levels: ["", "", U2283, U2287] }       # ⊃ ⊇
+  c: { levels: ["", "", U2229, U2342] }       # ∩
+  v: { levels: ["", "", U222A, U2367] }       # ∪
+  b: { levels: ["", "", U22A5, U00A3] }       # ⊥ £
+  n: { levels: ["", "", U22A4, U00A2] }       # ⊤ ¢
+  m: { levels: ["", "", U007C, U00A6] }       # | ¦
+includes:
+  - level3(ralt_switch)

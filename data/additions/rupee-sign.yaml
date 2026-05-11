@@ -1,0 +1,8 @@
+name: Indian Rupee sign (₹)
+description: |
+  Places ₹ (U20B9, Indian Rupee Sign) on AltGr+4. Optional addition for
+  Indian users, equivalent to xkb's rupeesign options.
+overlays:
+  AE04: { levels: ["", "", U20B9] }
+includes:
+  - level3(ralt_switch)

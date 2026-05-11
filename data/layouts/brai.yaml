@@ -1,0 +1,7 @@
+file: brai
+variants:
+  - name: basic
+    description: Braille (home-row 8-dot input)
+    physical: iso
+    transformation: braille-home-row
+    default: true

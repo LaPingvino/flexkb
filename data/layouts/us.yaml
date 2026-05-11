@@ -91,3 +91,16 @@ variants:
     physical: ansi
     transformation: qwerty
     substitutions: [latin-cherokee-phonetic]
+
+  # Programming-language keyboards. Letter-following AltGr overlays.
+  - name: apl
+    description: English (US) + APL symbols on AltGr
+    physical: ansi
+    transformation: qwerty
+    additions: [apl-symbols]
+
+  - name: bqn
+    description: English (US) + BQN symbols on AltGr
+    physical: ansi
+    transformation: qwerty
+    additions: [bqn-symbols]

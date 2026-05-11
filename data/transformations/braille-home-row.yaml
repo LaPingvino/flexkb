@@ -1,0 +1,20 @@
+name: Braille (home-row 8-dot input)
+script: braille
+description: |
+  Braille input via the home row. Each key is one of the 8 Braille dots;
+  the chord pattern (which keys are held together) determines the
+  resulting Braille cell.
+
+    AC01 = dot 7    AC02 = dot 3    AC03 = dot 2    AC04 = dot 1
+    AC07 = dot 4    AC08 = dot 5    AC09 = dot 6    AC10 = dot 8
+
+  Equivalent to xkb's brai/home_row.
+keys:
+  AC01: { levels: [braille_dot_7] }
+  AC02: { levels: [braille_dot_3] }
+  AC03: { levels: [braille_dot_2] }
+  AC04: { levels: [braille_dot_1] }
+  AC07: { levels: [braille_dot_4] }
+  AC08: { levels: [braille_dot_5] }
+  AC09: { levels: [braille_dot_6] }
+  AC10: { levels: [braille_dot_8] }

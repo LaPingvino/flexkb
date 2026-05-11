@@ -1,0 +1,36 @@
+name: BQN symbols on AltGr (letter-following)
+description: |
+  BQN array-programming language symbols at AltGr level. Letter-following
+  so the symbol assignments track across transformations. Based on the
+  reference BQN keyboard at https://mlochbaum.github.io/BQN/help/index.html
+
+  Stack with any Latin transformation for occasional BQN editing.
+letter_overlays:
+  q: { levels: ["", "", U00AC, U02DC] }     # ¬ ˜
+  w: { levels: ["", "", U1D54E, U02D8] }    # 𝕎 ˘
+  e: { levels: ["", "", U2207, U00A8] }     # ∇ ¨
+  r: { levels: ["", "", U1D563, U207C] }    # 𝕣 ⁼
+  t: { levels: ["", "", U228F, U231C] }     # ⊏ ⌜
+  y: { levels: ["", "", U25F6, U00B4] }     # ◶ ´
+  u: { levels: ["", "", U228E, U02DD] }     # ⊎ ˝
+  i: { levels: ["", "", U234E, U22C4] }     # ⍎
+  o: { levels: ["", "", U2355, U221E] }     # ⍕ ∞
+  p: { levels: ["", "", U27E8, U00AF] }     # ⟨ ¯
+  a: { levels: ["", "", U2193, U21D9] }     # ↓
+  s: { levels: ["", "", U1D54A, U2191] }    # 𝕊 ↑
+  d: { levels: ["", "", U1D53D, U1D557] }   # 𝔽 𝕗
+  f: { levels: ["", "", U1D53E, U1D558] }   # 𝔾 𝕘
+  g: { levels: ["", "", U00AB, U228B] }     # «
+  h: { levels: ["", "", U2294, U22C4] }     # ⊔
+  j: { levels: ["", "", U22BE, U2218] }     # ⌾ ∘
+  k: { levels: ["", "", U00BB, U25CB] }     # »
+  l: { levels: ["", "", U22C5, U02D9] }     # · ˙
+  z: { levels: ["", "", U22C8, U221A] }     # ⋈ √
+  x: { levels: ["", "", U1D54F, U22C6] }    # 𝕏 ⋆
+  c: { levels: ["", "", U25C9, U2218] }     # ⊘
+  v: { levels: ["", "", U2352, U2308] }     # ⍒ ⌈
+  b: { levels: ["", "", U2308, U230A] }     # ⌈ ⌊
+  n: { levels: ["", "", U2262, U2229] }     # ≢
+  m: { levels: ["", "", U2264, U2261] }     # ≤
+includes:
+  - level3(ralt_switch)
