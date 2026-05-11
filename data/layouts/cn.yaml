@@ -40,3 +40,11 @@ variants:
     physical: iso
     transformation: ycuken
     additions: [mongolian-extras]
+
+  # Bopomofo glyph output via same Pinyin-style Latin mapping. Each
+  # Latin letter (Pinyin sound) maps to its Zhuyin/Bopomofo symbol.
+  - name: bopomofo
+    description: Bopomofo / Zhuyin glyph output (Latin Pinyin → Zhuyin)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-to-bopomofo]
