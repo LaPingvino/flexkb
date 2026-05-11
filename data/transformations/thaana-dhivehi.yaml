@@ -1,0 +1,58 @@
+name: Thaana (Dhivehi, Maldivian — RTL)
+script: thaana
+description: |
+  Native Maldivian (Dhivehi) keyboard arrangement. Thaana is a right-to-
+  left script U0780-U07BF, unique to the Maldives. Positional layout
+  from xkb's mv/basic.
+keys:
+  TLDE: { levels: [grave, asciitilde] }
+  AE01: { levels: ["1", exclam] }
+  AE02: { levels: ["2", at] }
+  AE03: { levels: ["3", numbersign] }
+  AE04: { levels: ["4", dollar] }
+  AE05: { levels: ["5", percent] }
+  AE06: { levels: ["6", asciicircum] }
+  AE07: { levels: ["7", ampersand] }
+  AE08: { levels: ["8", asterisk] }
+  AE09: { levels: ["9", parenleft] }
+  AE10: { levels: ["0", parenright] }
+  AE11: { levels: [minus, underscore] }
+  AE12: { levels: [equal, plus] }
+
+  AD01: { levels: [U07B0, U07A4] }
+  AD02: { levels: [U0787, U07A2] }
+  AD03: { levels: [U07AC, U07AD] }
+  AD04: { levels: [U0783, U079C] }
+  AD05: { levels: [U078C, U0793] }
+  AD06: { levels: [U0794, U07A0] }
+  AD07: { levels: [U07AA, U07AB] }
+  AD08: { levels: [U07A8, U07A9] }
+  AD09: { levels: [U07AE, U07AF] }
+  AD10: { levels: [U0795, division] }
+  AD11: { levels: [bracketleft, braceleft] }
+  AD12: { levels: [bracketright, braceright] }
+
+  AC01: { levels: [U07A6, U07A7] }
+  AC02: { levels: [U0790, U0781] }
+  AC03: { levels: [U078B, U0791] }
+  AC04: { levels: [U078A, Ufdf2] }
+  AC05: { levels: [U078E, U07A3] }
+  AC06: { levels: [U0780, U0799] }
+  AC07: { levels: [U0796, U079B] }
+  AC08: { levels: [U0786, U079A] }
+  AC09: { levels: [U078D, U0785] }
+  AC10: { levels: [semicolon, colon] }
+  AC11: { levels: [apostrophe, quotedbl] }
+  BKSL: { levels: [backslash, bar] }
+
+  LSGT: { levels: [bar, brokenbar] }
+  AB01: { levels: [U0792, U07A1] }
+  AB02: { levels: [U0797, U079D] }
+  AB03: { levels: [U0784, U07A5] }
+  AB04: { levels: [U0789, U0798] }
+  AB05: { levels: [U0782, U0788] }
+  AB06: { levels: [U078F, U079E] }
+  AB07: { levels: [U0785, U079F] }
+  AB08: { levels: [comma, less] }
+  AB09: { levels: [period, greater] }
+  AB10: { levels: [slash, question] }

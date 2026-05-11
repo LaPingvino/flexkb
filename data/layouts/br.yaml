@@ -1,0 +1,20 @@
+file: br
+variants:
+  - name: basic
+    description: Brazilian Portuguese (traditional, ç on AC10)
+    physical: iso
+    transformation: qwerty
+    additions: [portuguese-traditional]
+    default: true
+
+  - name: dvorak
+    description: Brazilian Portuguese (Dvorak, ç on AltGr+c)
+    physical: iso
+    transformation: dvorak
+    additions: [portuguese]
+
+  - name: colemak
+    description: Brazilian Portuguese (Colemak)
+    physical: iso
+    transformation: colemak
+    additions: [portuguese]

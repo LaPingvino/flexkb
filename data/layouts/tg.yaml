@@ -1,0 +1,8 @@
+file: tg
+variants:
+  - name: basic
+    description: Togolese French AZERTY + Ewe/Kabiyè extras
+    physical: iso
+    transformation: azerty
+    additions: [french-accents, african-latin-extras]
+    default: true

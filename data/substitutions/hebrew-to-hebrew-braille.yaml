@@ -1,0 +1,32 @@
+name: Hebrew → Hebrew Braille (Grade 1)
+description: |
+  Maps Hebrew letters to Hebrew Braille cells (Unicode Braille block).
+  Chain after latin-hebrew-phonetic to output Hebrew Braille from Latin.
+map:
+  hebrew_aleph:    U2801
+  hebrew_bet:      U2803
+  hebrew_gimel:    U2807
+  hebrew_dalet:    U2819
+  hebrew_he:       U2811
+  hebrew_waw:      U2832
+  hebrew_zain:     U2835
+  hebrew_chet:     U2813
+  hebrew_tet:      U280F
+  hebrew_yod:      U280A
+  hebrew_kaph:     U2805
+  hebrew_lamed:    U280D
+  hebrew_mem:      U281D
+  hebrew_nun:      U2815
+  hebrew_samech:   U281A
+  hebrew_ayin:     U2837
+  hebrew_pe:       U280E
+  hebrew_zade:     U282D
+  hebrew_qoph:     U281F
+  hebrew_resh:     U2817
+  hebrew_shin:     U281E
+  hebrew_taw:      U2825
+  hebrew_finalkaph: U2805
+  hebrew_finalmem:  U281D
+  hebrew_finalnun:  U2815
+  hebrew_finalpe:   U280E
+  hebrew_finalzade: U282D

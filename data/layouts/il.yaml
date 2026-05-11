@@ -23,3 +23,10 @@ variants:
     physical: iso
     transformation: colemak
     substitutions: [latin-hebrew-phonetic]
+
+  # Hebrew Braille output (Latin phonetic → Hebrew → Braille)
+  - name: braille-output
+    description: Hebrew Braille glyph output (from Latin phonetic)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-hebrew-phonetic, hebrew-to-hebrew-braille]

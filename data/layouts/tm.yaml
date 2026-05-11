@@ -1,0 +1,13 @@
+file: tm
+variants:
+  - name: basic
+    description: Turkmen (Latin, with Turkish-style i/İ pairing)
+    physical: iso
+    transformation: qwerty
+    additions: [turkish-i-pair]
+    default: true
+
+  - name: cyrillic
+    description: Turkmen (legacy Cyrillic, ЙЦУКЕН base)
+    physical: iso
+    transformation: ycuken

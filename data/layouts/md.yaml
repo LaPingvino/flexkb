@@ -1,0 +1,13 @@
+file: md
+variants:
+  - name: basic
+    description: Moldovan (Romanian Latin)
+    physical: iso
+    transformation: qwerty
+    additions: [romanian]
+    default: true
+
+  - name: cyrillic
+    description: Moldovan (legacy Cyrillic)
+    physical: iso
+    transformation: ycuken

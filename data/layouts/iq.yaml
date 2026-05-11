@@ -1,0 +1,19 @@
+file: iq
+variants:
+  - name: basic
+    description: Iraqi Arabic
+    physical: iso
+    transformation: arabic-101
+    default: true
+
+  - name: ku
+    description: Iraqi Kurdish (Arabic-Sorani + Kurdish extras)
+    physical: iso
+    transformation: arabic-101
+    additions: [persian-extras, kurdish-extras]
+
+  - name: phonetic
+    description: Iraqi Arabic (phonetic on QWERTY)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-arabic-phonetic]

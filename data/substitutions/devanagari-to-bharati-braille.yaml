@@ -1,0 +1,40 @@
+name: Devanagari → Bharati Braille (Grade 1)
+description: |
+  Maps Devanagari letters to Bharati Braille cells. Bharati Braille is
+  the unified Indian Braille standard, designed to work across all
+  Indic scripts. Chain after latin-devanagari-phonetic (or apply to
+  Hindi InScript output) to produce Hindi Braille glyphs.
+map:
+  U0905: U2801   # अ → ⠁
+  U0906: U2818   # आ → ⠘
+  U0907: U2809   # इ → ⠉
+  U0908: U280A   # ई → ⠊
+  U0909: U2825   # उ → ⠥
+  U090A: U2828   # ऊ → ⠨
+  U090F: U2811   # ए → ⠑
+  U0910: U2813   # ऐ → ⠓
+  U0913: U2815   # ओ → ⠕
+  U0914: U2817   # औ → ⠗
+  U0915: U2805   # क → ⠅
+  U0916: U282D   # ख → ⠭
+  U0917: U281B   # ग → ⠛
+  U0918: U2823   # घ → ⠣
+  U091A: U2809   # च → (overload)
+  U091C: U281A   # ज → ⠚
+  U091F: U281E   # ट → ⠞
+  U0921: U2819   # ड → ⠙
+  U0923: U282E   # ण → ⠮
+  U0924: U280F   # त → ⠏
+  U0926: U2819   # द → ⠙
+  U0928: U281D   # न → ⠝
+  U092A: U2807   # प → ⠇
+  U092C: U2803   # ब → ⠃
+  U092E: U280D   # म → ⠍
+  U092F: U283D   # य → ⠽
+  U0930: U2817   # र → ⠗
+  U0932: U2807   # ल → ⠇
+  U0935: U2837   # व → ⠷
+  U0936: U2826   # श → ⠦
+  U0938: U280E   # स → ⠎
+  U0939: U2813   # ह → ⠓
+  U094D: U2802   # ् (virama) → ⠂

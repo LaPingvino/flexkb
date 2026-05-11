@@ -1,0 +1,7 @@
+file: mv
+variants:
+  - name: basic
+    description: Maldivian (Dhivehi / Thaana, RTL)
+    physical: iso
+    transformation: thaana-dhivehi
+    default: true

@@ -1,0 +1,14 @@
+file: bw
+variants:
+  - name: basic
+    description: Tswana (Botswana, Latin + Sotho-style tone diacritics)
+    physical: iso
+    transformation: qwerty
+    additions: [intl, sotho-tone]
+    default: true
+
+  - name: dvorak
+    description: Tswana (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [sotho-tone]

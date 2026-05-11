@@ -1,0 +1,8 @@
+file: tz
+variants:
+  - name: basic
+    description: Tanzanian Swahili (QWERTY + intl)
+    physical: iso
+    transformation: qwerty
+    additions: [intl]
+    default: true

@@ -1,0 +1,14 @@
+name: Kurdish letters (on Arabic base — Sorani Kurdish)
+description: |
+  Sorani Kurdish (Arabic script) adds letters: ێ (yeh with small v above,
+  U06CE), ۆ (oe, U06C6), ڕ (rreh, U0695), ڵ (lam with small v, U06B5),
+  ڤ (veh, U06A4), ێ. Letter-following on the Arabic cognates.
+scripts: [arabic]
+letter_overlays:
+  Arabic_yeh:  { levels: ["", "", U06CE, U06CE] }
+  Arabic_waw:  { levels: ["", "", U06C6, U06C6] }
+  Arabic_ra:   { levels: ["", "", U0695, U0695] }
+  Arabic_lam:  { levels: ["", "", U06B5, U06B5] }
+  Arabic_feh:  { levels: ["", "", U06A4, U06A4] }
+includes:
+  - level3(ralt_switch)

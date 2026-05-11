@@ -1,0 +1,20 @@
+file: gh
+variants:
+  - name: basic
+    description: Ghanaian English (QWERTY + intl)
+    physical: iso
+    transformation: qwerty
+    additions: [intl]
+    default: true
+
+  - name: akan
+    description: Akan / Twi (QWERTY + African Latin extras)
+    physical: iso
+    transformation: qwerty
+    additions: [intl, african-latin-extras]
+
+  - name: dvorak
+    description: Ghanaian (Dvorak + African extras)
+    physical: iso
+    transformation: dvorak
+    additions: [african-latin-extras]

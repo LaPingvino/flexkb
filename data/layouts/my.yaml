@@ -1,0 +1,13 @@
+file: my
+variants:
+  - name: basic
+    description: Malaysian
+    physical: iso
+    transformation: qwerty
+    default: true
+
+  - name: phonetic
+    description: Jawi (Malay in Arabic script, phonetic)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-arabic-phonetic]

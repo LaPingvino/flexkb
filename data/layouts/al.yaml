@@ -1,0 +1,14 @@
+file: al
+variants:
+  - name: basic
+    description: Albanian
+    physical: iso
+    transformation: qwerty
+    additions: [intl]
+    default: true
+
+  - name: dvorak
+    description: Albanian (Dvorak)
+    physical: iso
+    transformation: dvorak
+    additions: [intl]
