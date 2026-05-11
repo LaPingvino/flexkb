@@ -234,3 +234,23 @@ pick the option set the same way they pick a transformation.
 ### Compose tables, key types, group switching
 See the README for the unhandled long-tail of xkb features. Each is
 non-trivial; none essential for the core thesis.
+
+### GUI / web preview tool
+A `flexkb serve` subcommand could host a local web UI:
+- Picker for layout-file × variant
+- Live key-by-key render of the composed layout, color-coded by
+  source (transformation / addition / substitution / fallback /
+  priority-claim)
+- "Edit this" button creates a copy in `~/.config/flexkb/data/` for
+  the user to tweak; results re-render live
+- "Apply to current session" button shells out to `flexkb activate`
+
+The data model is already well-suited (composed layouts are
+deterministic, fast to recompute). Mostly a frontend lift; Go can
+serve a single-page app with embedded HTML/JS.
+
+### Cross-script substitution chains
+The Cyrillic→Glagolitic and Greek→Coptic substitutions demonstrate the
+chain mechanism handling cross-script pivots, not just Latin→X. More
+opportunities: Latin → Hebrew → Syriac, Cyrillic dialect chains stacked
+with regional-Cyrillic variants. Mostly data work.
