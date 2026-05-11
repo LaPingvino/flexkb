@@ -12,6 +12,10 @@ const ROWS = [
 // Shared state
 let layouts = [];
 let modules = { physicals: [], transformations: [], additions: [], substitutions: [] };
+// Latest compose response per render target — used by the per-key
+// popover so a click on a key can show the full level breakdown
+// without re-fetching.
+const lastCompose = new WeakMap();
 
 // === Tab switching ===
 document.querySelectorAll("nav.tabs button").forEach(btn => {
@@ -112,6 +116,7 @@ bEditBtn.addEventListener("click", async () => {
   renderChips(cSubChips, composeSubs, modules.substitutions, composeSubs);
   // Switch to Compose tab.
   switchTab("compose");
+  updateComposeControls();
   composeLivePreview();
 });
 
@@ -229,11 +234,15 @@ let composeSubs = [];
 let modulesLoaded = false;
 
 async function ensureComposeReady() {
-  if (modulesLoaded) return;
+  if (modulesLoaded) {
+    updateComposeControls();
+    return;
+  }
   const res = await fetch("/api/modules");
   modules = await res.json();
   modulesLoaded = true;
   populateModuleDropdowns();
+  updateComposeControls();
   composeLivePreview();
 }
 
@@ -473,6 +482,20 @@ function updateComposeControls() {
   const lf = layouts.find(l => l.file === file);
   const present = lf && lf.sourceKind === "user" && lf.variants.some(v => v.name === name);
   cDeleteBtn.classList.toggle("hidden", !present);
+  // Save-target hint: where does the YAML land, and is there a
+  // system layer being overridden?
+  const hint = document.getElementById("cSaveHint");
+  if (!file) {
+    hint.innerHTML = "";
+    return;
+  }
+  let msg = `Save writes to <code>~/.config/flexkb/data/layouts/${escapeHTML(file)}.yaml</code>`;
+  if (lf && lf.sourceKind !== "user") {
+    msg += ` — this will <em>shadow</em> the ${lf.sourceKind} version at <code>${escapeHTML(lf.sourcePath)}</code>`;
+  } else if (lf && lf.sourceKind === "user") {
+    msg += ` — merging into existing user file (${lf.variants.length} variant${lf.variants.length === 1 ? "" : "s"})`;
+  }
+  hint.innerHTML = msg;
 }
 cFile.addEventListener("input", updateComposeControls);
 cName.addEventListener("input", updateComposeControls);
@@ -611,6 +634,7 @@ function renderInto(targets, data) {
   }
 
   kb.innerHTML = "";
+  lastCompose.set(kb, data);
   const presentKeys = new Set(data.keys || []);
   for (const row of ROWS) {
     const rowEl = document.createElement("div");
@@ -626,6 +650,7 @@ function renderInto(targets, data) {
 function renderKey(code, levels) {
   const el = document.createElement("div");
   el.className = "key";
+  el.dataset.code = code;
   const codeEl = document.createElement("span");
   codeEl.className = "code";
   codeEl.textContent = code;
@@ -638,8 +663,105 @@ function renderKey(code, levels) {
     c.title = lvl.value ? `level ${i+1} (${lvl.source || "—"}): ${lvl.value}` : `level ${i+1} (empty)`;
     el.appendChild(c);
   }
+  el.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const kbContainer = el.closest("section.tab")?.querySelector(".keyboard");
+    const data = kbContainer ? lastCompose.get(kbContainer) : null;
+    openKeyPopover(el, code, levels, data);
+  });
   return el;
 }
+
+// === Per-key provenance popover ===
+const keyPopover = document.getElementById("keyPopover");
+
+function openKeyPopover(anchorEl, code, levels, data) {
+  if (!data) return;
+  keyPopover.innerHTML = "";
+  const h = document.createElement("h4");
+  h.textContent = code;
+  keyPopover.appendChild(h);
+  for (let i = 0; i < 4; i++) {
+    const lvl = levels[i] || { value: "", source: "" };
+    const row = document.createElement("div");
+    row.className = "lvl";
+    const num = document.createElement("span");
+    num.className = "num";
+    num.textContent = `L${i+1}`;
+    row.appendChild(num);
+    const body = document.createElement("div");
+    body.className = "body";
+    if (!lvl.value) {
+      const p = document.createElement("span");
+      p.style.color = "#586069";
+      p.textContent = "(empty — pass-through)";
+      body.appendChild(p);
+    } else {
+      const g = document.createElement("span");
+      g.className = "glyph";
+      g.textContent = displayValue(lvl.value);
+      body.appendChild(g);
+      const t = document.createElement("span");
+      t.className = "token";
+      t.textContent = lvl.value;
+      body.appendChild(t);
+      if (lvl.source) {
+        const s = document.createElement("div");
+        s.className = "src src-" + lvl.source;
+        s.textContent = sourceLabel(lvl.source);
+        body.appendChild(s);
+      }
+    }
+    row.appendChild(body);
+    keyPopover.appendChild(row);
+  }
+  // Recipe footer — show which additions/substitutions are in play.
+  const recipe = document.createElement("div");
+  recipe.className = "recipe";
+  const bits = [];
+  if (data.transformation) bits.push(`transformation: <span class="dim">${escapeHTML(data.transformation)}</span>`);
+  if (data.additions && data.additions.length) bits.push(`additions: <span class="dim">[${data.additions.map(escapeHTML).join(", ")}]</span>`);
+  if (data.substitutions && data.substitutions.length) bits.push(`substitutions: <span class="dim">[${data.substitutions.map(escapeHTML).join(", ")}]</span>`);
+  recipe.innerHTML = bits.join("<br>");
+  keyPopover.appendChild(recipe);
+
+  // Position the popover near the clicked key, clamping to viewport.
+  const rect = anchorEl.getBoundingClientRect();
+  const scrollY = window.scrollY || document.documentElement.scrollTop;
+  const scrollX = window.scrollX || document.documentElement.scrollLeft;
+  keyPopover.classList.remove("hidden");
+  // Render to measure.
+  const ph = keyPopover.offsetHeight;
+  const pw = keyPopover.offsetWidth;
+  let top = rect.bottom + scrollY + 4;
+  let left = rect.left + scrollX;
+  // If it would overflow bottom, place above the key instead.
+  if (rect.bottom + ph + 12 > window.innerHeight) {
+    top = rect.top + scrollY - ph - 4;
+  }
+  if (left + pw + 12 > window.innerWidth + scrollX) {
+    left = window.innerWidth + scrollX - pw - 12;
+  }
+  keyPopover.style.top = top + "px";
+  keyPopover.style.left = left + "px";
+}
+
+function closeKeyPopover() { keyPopover.classList.add("hidden"); }
+
+function sourceLabel(s) {
+  return { transformation: "transformation",
+           position: "positional overlay",
+           letter: "letter overlay",
+           substitution: "substitution" }[s] || s;
+}
+
+document.addEventListener("click", (e) => {
+  if (keyPopover.classList.contains("hidden")) return;
+  if (!keyPopover.contains(e.target)) closeKeyPopover();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !keyPopover.classList.contains("hidden")) closeKeyPopover();
+});
 
 function displayValue(v) {
   if (!v) return "";
