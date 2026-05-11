@@ -234,6 +234,20 @@ body.theme-light .coverage .chip { background: var(--bg-panel); border-color: va
   font-family: inherit;
 }
 .override-stats button:hover { background: var(--letter-bg); }
+.overlays-preview {
+  margin: 0.6rem 0;
+  padding: 0.5rem 0.7rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  max-height: 200px;
+  overflow: auto;
+}
+.overlays-preview .row { display: block; padding: 0.1rem 0; }
+.overlays-preview .empty { color: var(--fg-dim); font-style: italic; }
 .src-empty          { color: #586069; }
 
 .keyboard { display: flex; flex-direction: column; gap: 4px; margin-bottom: 1rem; }

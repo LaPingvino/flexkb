@@ -139,6 +139,9 @@ func startServer(rootFn func() model.DataRoot, addr string) (string, <-chan erro
 		handleCoverage(w, r, rootFn())
 	})
 	mux.HandleFunc("/api/unicode", handleUnicodeSearch)
+	mux.HandleFunc("/api/save-addition", func(w http.ResponseWriter, r *http.Request) {
+		handleSaveAddition(w, r)
+	})
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return "", nil, err
@@ -1215,6 +1218,90 @@ func handleOpenSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	resp.Error = "no candidate command succeeded"
 	writeJSON(w, resp)
+}
+
+// apiSaveAdditionRequest is the POST body for /api/save-addition.
+// Mirrors the relevant fields of model.Addition for direct YAML
+// emit; categories + filler stay optional so the simplest "save
+// these N cell overrides as a new addition" flow doesn't need extra
+// metadata.
+type apiSaveAdditionRequest struct {
+	Name           string                          `json:"name"`            // slug → filename
+	DisplayName    string                          `json:"displayName"`     // YAML name field
+	Description    string                          `json:"description"`
+	Categories     []string                        `json:"categories"`
+	Filler         bool                            `json:"filler"`
+	Scripts        []string                        `json:"scripts"`
+	Overlays       map[string]model.KeySymbols     `json:"overlays"`
+	LetterOverlays map[string]model.LetterOverlay  `json:"letterOverlays"`
+}
+
+func handleSaveAddition(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "POST required", http.StatusMethodNotAllowed)
+		return
+	}
+	var req apiSaveAdditionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "bad JSON: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	if req.Name == "" {
+		http.Error(w, "name required (will become the addition slug + file basename)", http.StatusBadRequest)
+		return
+	}
+	if !validFileName(req.Name) {
+		http.Error(w, "invalid name (a-z, 0-9, -, _, . only)", http.StatusBadRequest)
+		return
+	}
+	if len(req.Overlays) == 0 && len(req.LetterOverlays) == 0 {
+		http.Error(w, "addition is empty (need overlays or letterOverlays)", http.StatusBadRequest)
+		return
+	}
+	displayName := req.DisplayName
+	if displayName == "" {
+		displayName = req.Name
+	}
+	add := model.Addition{
+		Name:           displayName,
+		Description:    req.Description,
+		Categories:     req.Categories,
+		Filler:         req.Filler,
+		Scripts:        req.Scripts,
+		Overlays:       req.Overlays,
+		LetterOverlays: req.LetterOverlays,
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	xdg := os.Getenv("XDG_CONFIG_HOME")
+	if xdg == "" {
+		xdg = filepath.Join(home, ".config")
+	}
+	dir := filepath.Join(xdg, "flexkb", "data", "additions")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	path := filepath.Join(dir, req.Name+".yaml")
+	buf, err := yaml.Marshal(add)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, buf, 0o644); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		os.Remove(tmp)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	writeJSON(w, map[string]string{"path": path, "slug": req.Name})
 }
 
 // handleFile — GET returns the raw YAML for a layout file (any layer);

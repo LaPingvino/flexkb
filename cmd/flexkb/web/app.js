@@ -1039,11 +1039,155 @@ function updateOverrideStats() {
     return;
   }
   cOverrideStats.classList.remove("hidden");
-  cOverrideStats.innerHTML = `<strong>${n}</strong> custom cell${n === 1 ? "" : "s"} <button id="cClearOverrides" title="Clear all custom cell assignments">clear</button>`;
+  cOverrideStats.innerHTML = `<strong>${n}</strong> custom cell${n === 1 ? "" : "s"} <button id="cSaveAddition" title="Save these as a reusable addition you can stack on any layout">Save as addition…</button> <button id="cClearOverrides" title="Clear all custom cell assignments">clear</button>`;
   document.getElementById("cClearOverrides").addEventListener("click", () => {
     composeOverrides.clear();
     composeLivePreview();
   });
+  document.getElementById("cSaveAddition").addEventListener("click", openSaveAdditionModal);
+}
+
+// === Save-as-addition modal ===
+const saveAdditionOverlay = document.getElementById("saveAdditionOverlay");
+const saName = document.getElementById("saName");
+const saDisplay = document.getElementById("saDisplay");
+const saDesc = document.getElementById("saDesc");
+const saCats = document.getElementById("saCats");
+const saFiller = document.getElementById("saFiller");
+const saPreview = document.getElementById("saPreview");
+const saStatus = document.getElementById("saStatus");
+const saSave = document.getElementById("saSave");
+document.getElementById("saveAdditionClose").addEventListener("click", closeSaveAdditionModal);
+saveAdditionOverlay.addEventListener("click", (e) => {
+  if (e.target === saveAdditionOverlay) closeSaveAdditionModal();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !saveAdditionOverlay.classList.contains("hidden")) closeSaveAdditionModal();
+});
+
+function openSaveAdditionModal() {
+  saveAdditionOverlay.classList.remove("hidden");
+  saName.value = "";
+  saDisplay.value = "";
+  saDesc.value = "";
+  saCats.value = "";
+  saFiller.checked = false;
+  saStatus.textContent = "";
+  saStatus.className = "status";
+  // Build the preview from composeOverrides — group by key, sort.
+  const byKey = new Map();
+  for (const [coord, glyph] of composeOverrides.entries()) {
+    const [key, levelStr] = coord.split(":");
+    const lvl = parseInt(levelStr, 10);
+    if (!byKey.has(key)) byKey.set(key, []);
+    byKey.get(key).push({ lvl, glyph });
+  }
+  saPreview.innerHTML = "";
+  if (byKey.size === 0) {
+    saPreview.innerHTML = '<div class="empty">no overrides to save</div>';
+  } else {
+    const keys = [...byKey.keys()].sort();
+    for (const k of keys) {
+      const slots = byKey.get(k).sort((a, b) => a.lvl - b.lvl);
+      // Build a "L1=♠ L3=♣" style summary.
+      const parts = slots.map(s => `L${s.lvl + 1}=${s.glyph}`).join("  ");
+      const row = document.createElement("div");
+      row.className = "row";
+      row.textContent = `${k}: ${parts}`;
+      saPreview.appendChild(row);
+    }
+  }
+  saName.focus();
+}
+
+function closeSaveAdditionModal() { saveAdditionOverlay.classList.add("hidden"); }
+
+saSave.addEventListener("click", async () => {
+  const name = saName.value.trim().toLowerCase();
+  if (!name) {
+    saStatus.textContent = "slug required";
+    saStatus.className = "status err";
+    return;
+  }
+  if (!/^[a-z0-9_.-]+$/.test(name)) {
+    saStatus.textContent = "slug must be a-z 0-9 _-.";
+    saStatus.className = "status err";
+    return;
+  }
+  // Build overlays: { KEY: { levels: [glyph_at_L1, glyph_at_L2, …] } }.
+  // Missing levels filled with "" so the addition merges cleanly.
+  const byKey = new Map();
+  for (const [coord, glyph] of composeOverrides.entries()) {
+    const [key, levelStr] = coord.split(":");
+    const lvl = parseInt(levelStr, 10);
+    if (!byKey.has(key)) byKey.set(key, []);
+    const arr = byKey.get(key);
+    while (arr.length < lvl + 1) arr.push("");
+    arr[lvl] = toXKBToken(glyph);
+  }
+  const overlays = {};
+  for (const [k, arr] of byKey.entries()) {
+    overlays[k] = { levels: arr };
+  }
+  const body = {
+    name,
+    displayName: saDisplay.value.trim() || name,
+    description: saDesc.value.trim(),
+    categories: saCats.value.split(",").map(s => s.trim()).filter(Boolean),
+    filler: saFiller.checked,
+    scripts: ["any"],
+    overlays,
+    letterOverlays: {},
+  };
+  saStatus.textContent = "saving…";
+  saStatus.className = "status";
+  try {
+    const res = await fetch("/api/save-addition", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      saStatus.textContent = "save failed: " + await res.text();
+      saStatus.className = "status err";
+      return;
+    }
+    const data = await res.json();
+    saStatus.textContent = `saved to ${data.path}`;
+    saStatus.className = "status ok";
+    // Refresh module list, add the new addition to the current
+    // recipe, and clear the in-flight overrides (they're now baked
+    // into the addition).
+    const modRes = await fetch("/api/modules");
+    modules = await modRes.json();
+    populateModuleDropdowns();
+    if (!composeAdditions.includes(data.slug)) {
+      composeAdditions.push(data.slug);
+      renderChips(cAddChips, composeAdditions, modules.additions, composeAdditions);
+    }
+    composeOverrides.clear();
+    composeLivePreview();
+    setTimeout(closeSaveAdditionModal, 800);
+  } catch (e) {
+    saStatus.textContent = "save failed: " + e.message;
+    saStatus.className = "status err";
+  }
+});
+
+// toXKBToken converts a JS string of one Unicode character to the
+// xkb keysym form (U<hex>) so saved YAML matches the project's
+// convention. ASCII letters / digits / single-byte punctuation
+// pass through unchanged.
+function toXKBToken(glyph) {
+  if (!glyph) return "";
+  const cp = glyph.codePointAt(0);
+  if (cp < 0x80) {
+    // ASCII letters/digits/symbols — keep as-is; xkb accepts them.
+    if ((cp >= 0x30 && cp <= 0x39) || (cp >= 0x41 && cp <= 0x5A) || (cp >= 0x61 && cp <= 0x7A)) {
+      return glyph;
+    }
+  }
+  return "U" + cp.toString(16).toUpperCase().padStart(4, "0");
 }
 
 function updateFillStats(data) {

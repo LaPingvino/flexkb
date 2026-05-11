@@ -165,6 +165,45 @@
 
     <div class="key-popover hidden" id="keyPopover"></div>
 
+    <div class="inspect-overlay hidden" id="saveAdditionOverlay">
+      <div class="inspect-panel">
+        <button class="inspect-close" id="saveAdditionClose">×</button>
+        <h3>Save overrides as addition</h3>
+        <p class="inspect-meta">Promote your custom cell assignments into a reusable addition YAML at <code>~/.config/flexkb/data/additions/</code>. Once saved, you can stack it onto any layout the same way as the built-in additions.</p>
+        <div class="row">
+          <label>
+            <span>Slug <em>(filename — lowercase, a-z 0-9 _-.)</em></span>
+            <input id="saName" type="text" placeholder="my-symbols" autocomplete="off">
+          </label>
+          <label>
+            <span>Display name</span>
+            <input id="saDisplay" type="text" placeholder="My custom symbols" autocomplete="off">
+          </label>
+        </div>
+        <div class="row">
+          <label class="full">
+            <span>Description</span>
+            <input id="saDesc" type="text" placeholder="What this addition does" autocomplete="off">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            <span>Categories <em>(comma-separated, used by autofill smart-pick)</em></span>
+            <input id="saCats" type="text" placeholder="my-custom, symbols" autocomplete="off">
+          </label>
+          <label class="inline-check" title="Marks this addition as a filler — empty-only-merge, never overrides existing content. Use this for sets of optional fills.">
+            <input type="checkbox" id="saFiller">
+            <span>filler</span>
+          </label>
+        </div>
+        <div class="overlays-preview" id="saPreview"></div>
+        <div class="row actions">
+          <button id="saSave" class="primary">Save</button>
+          <span class="status" id="saStatus"></span>
+        </div>
+      </div>
+    </div>
+
     <div class="inspect-overlay hidden" id="unicodeOverlay">
       <div class="inspect-panel">
         <button class="inspect-close" id="unicodeClose">×</button>
