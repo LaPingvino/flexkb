@@ -22,6 +22,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -30,6 +31,7 @@ import (
 	"github.com/lapingvino/flexkb/internal/compose"
 	"github.com/lapingvino/flexkb/internal/coverage"
 	"github.com/lapingvino/flexkb/internal/model"
+	flexunicode "github.com/lapingvino/flexkb/internal/unicode"
 	"github.com/lapingvino/flexkb/internal/xkbwriter"
 )
 
@@ -136,6 +138,7 @@ func startServer(rootFn func() model.DataRoot, addr string) (string, <-chan erro
 	mux.HandleFunc("/api/coverage", func(w http.ResponseWriter, r *http.Request) {
 		handleCoverage(w, r, rootFn())
 	})
+	mux.HandleFunc("/api/unicode", handleUnicodeSearch)
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return "", nil, err
@@ -980,6 +983,18 @@ func handleAutofillCategories(w http.ResponseWriter, _ *http.Request, root model
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	writeJSON(w, out)
+}
+
+func handleUnicodeSearch(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query().Get("q")
+	limit := 50
+	if l := r.URL.Query().Get("limit"); l != "" {
+		if n, err := strconv.Atoi(l); err == nil && n > 0 && n <= 500 {
+			limit = n
+		}
+	}
+	results := flexunicode.Search(q, limit)
+	writeJSON(w, results)
 }
 
 // apiCoverage carries the coverage analysis for one variant.

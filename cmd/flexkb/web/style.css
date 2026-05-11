@@ -475,6 +475,59 @@ body.theme-light .coverage .chip { background: var(--bg-panel); border-color: va
   margin: 0.4rem 0 0;
 }
 
+#unicodeSearch {
+  display: block;
+  width: 100%;
+  background: var(--bg-input);
+  color: var(--fg);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  padding: 0.5rem 0.7rem;
+  font-size: 1rem;
+  font-family: inherit;
+  margin-bottom: 0.6rem;
+}
+.unicode-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: 4px;
+  max-height: 400px;
+  overflow: auto;
+}
+.unicode-results .glyph-cell {
+  background: var(--bg-input);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  padding: 0.45rem 0.2rem;
+  text-align: center;
+  font-family: ui-monospace, "JetBrains Mono", Menlo, monospace;
+  font-size: 1.6rem;
+  cursor: pointer;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  position: relative;
+}
+.unicode-results .glyph-cell:hover {
+  background: var(--bg-panel);
+  border-color: var(--accent);
+}
+.unicode-results .glyph-cell .hex {
+  position: absolute;
+  bottom: 1px;
+  right: 3px;
+  font-size: 0.55rem;
+  color: var(--fg-faint);
+}
+.unicode-results .empty {
+  grid-column: 1 / -1;
+  color: var(--fg-dim);
+  text-align: center;
+  padding: 1rem;
+}
+
 .yaml-editor {
   width: 100%;
   min-height: 360px;

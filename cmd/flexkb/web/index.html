@@ -12,6 +12,7 @@
     <p class="tag">keyboard layout composer</p>
     <div class="header-right">
       <span class="active-chip hidden" id="activeChip"></span>
+      <button class="theme-toggle" id="unicodeOpenBtn" title="Open Unicode picker">𝓊</button>
       <button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme">☾</button>
     </div>
     <nav class="tabs">
@@ -161,6 +162,19 @@
     </section>
 
     <div class="key-popover hidden" id="keyPopover"></div>
+
+    <div class="inspect-overlay hidden" id="unicodeOverlay">
+      <div class="inspect-panel">
+        <button class="inspect-close" id="unicodeClose">×</button>
+        <h3>Unicode picker</h3>
+        <p class="inspect-meta">Search by character, codepoint (U+1F600), or name (BLACK STAR).</p>
+        <input id="unicodeSearch" type="search" placeholder="search 40k codepoints…" autocomplete="off" autofocus>
+        <div class="unicode-results" id="unicodeResults"></div>
+        <div class="row">
+          <span class="status" id="unicodeStatus"></span>
+        </div>
+      </div>
+    </div>
 
     <div class="inspect-overlay hidden" id="yamlOverlay">
       <div class="inspect-panel">

@@ -34,6 +34,89 @@ try {
   if (saved) applyTheme(saved);
 } catch (e) {}
 
+// === Unicode picker ===
+const unicodeOverlay = document.getElementById("unicodeOverlay");
+const unicodeSearchInput = document.getElementById("unicodeSearch");
+const unicodeResults = document.getElementById("unicodeResults");
+const unicodeStatus = document.getElementById("unicodeStatus");
+document.getElementById("unicodeOpenBtn").addEventListener("click", () => openUnicodePicker());
+document.getElementById("unicodeClose").addEventListener("click", closeUnicodePicker);
+unicodeOverlay.addEventListener("click", (e) => {
+  if (e.target === unicodeOverlay) closeUnicodePicker();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !unicodeOverlay.classList.contains("hidden")) closeUnicodePicker();
+});
+
+let unicodeSearchTimer = null;
+unicodeSearchInput.addEventListener("input", () => {
+  clearTimeout(unicodeSearchTimer);
+  unicodeSearchTimer = setTimeout(runUnicodeSearch, 80);
+});
+
+async function openUnicodePicker() {
+  unicodeOverlay.classList.remove("hidden");
+  unicodeSearchInput.value = "";
+  unicodeStatus.textContent = "";
+  unicodeStatus.className = "status";
+  await runUnicodeSearch();
+  unicodeSearchInput.focus();
+}
+
+function closeUnicodePicker() { unicodeOverlay.classList.add("hidden"); }
+
+async function runUnicodeSearch() {
+  const q = unicodeSearchInput.value;
+  const res = await fetch(`/api/unicode?q=${encodeURIComponent(q)}&limit=200`);
+  if (!res.ok) {
+    unicodeResults.innerHTML = `<div class="empty">error: ${res.status}</div>`;
+    return;
+  }
+  const chars = await res.json();
+  unicodeResults.innerHTML = "";
+  if (!chars || chars.length === 0) {
+    unicodeResults.innerHTML = '<div class="empty">no matches</div>';
+    return;
+  }
+  for (const c of chars) {
+    const cell = document.createElement("div");
+    cell.className = "glyph-cell";
+    cell.textContent = c.glyph;
+    cell.title = `U+${c.hex} ${c.name}\n${c.block} · ${c.category}\nClick to copy glyph + xkb token`;
+    const hex = document.createElement("span");
+    hex.className = "hex";
+    hex.textContent = c.hex;
+    cell.appendChild(hex);
+    cell.addEventListener("click", () => copyUnicodeChar(c));
+    unicodeResults.appendChild(cell);
+  }
+}
+
+async function copyUnicodeChar(c) {
+  const token = `U${c.hex.padStart(4, "0")}`;
+  try {
+    await navigator.clipboard.writeText(c.glyph);
+    unicodeStatus.textContent = `copied ${c.glyph} to clipboard · xkb token: ${token}`;
+    unicodeStatus.className = "status ok";
+    // Push to recent-used list (last 24, persisted in localStorage).
+    rememberRecentUnicode(c);
+  } catch (e) {
+    unicodeStatus.textContent = `copy failed: ${e.message}. Token: ${token}`;
+    unicodeStatus.className = "status err";
+  }
+}
+
+function rememberRecentUnicode(c) {
+  try {
+    const key = "flexkb.unicode.recent";
+    let recent = JSON.parse(localStorage.getItem(key) || "[]");
+    recent = recent.filter(r => r.hex !== c.hex);
+    recent.unshift({ hex: c.hex, glyph: c.glyph, name: c.name });
+    if (recent.length > 24) recent = recent.slice(0, 24);
+    localStorage.setItem(key, JSON.stringify(recent));
+  } catch (e) {}
+}
+
 // === Tab switching ===
 document.querySelectorAll("nav.tabs button").forEach(btn => {
   btn.addEventListener("click", () => switchTab(btn.dataset.tab));
