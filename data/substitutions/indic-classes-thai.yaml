@@ -1,0 +1,107 @@
+name: Indic class tokens → Thai codepoints
+description: |
+  Thai resolution for the InScript template. Thai descended from a
+  Brahmic script (via Khmer / Pallava) so consonant categories carry
+  over even though the modern Thai keyboard (Kedmanee) uses a different
+  layout. This variant exposes Thai through InScript positions, which
+  is useful for InScript-trained typists who need to enter Thai.
+
+  Native Thai users should prefer the Kedmanee transformation
+  (th/basic) which matches Thai-labelled hardware.
+
+  Notes:
+  - Thai has TWO "kha" letters (high/low tone class); we use the more
+    common one (ข, U0E02) for indic_c_kha and ฃ (U0E03) for indic_c_chha
+    so both are accessible.
+  - Thai doesn't use virama-style clustering — its analogue is the
+    pinthu (U0E3A), which we map to indic_virama.
+map:
+  indic_v_a:           U0E2D   # อ (alef carrier)
+  indic_v_aa:          U0E32   # า
+  indic_v_i:           U0E34   # ิ
+  indic_v_ii:          U0E35   # ี
+  indic_v_u:           U0E38   # ุ
+  indic_v_uu:          U0E39   # ู
+  indic_v_e:           U0E40   # เ
+  indic_v_e_short:     U0E40
+  indic_v_ai:          U0E44   # ไ
+  indic_v_o:           U0E42   # โ
+  indic_v_o_short:     U0E42
+  indic_v_au:          U0E40   # composed
+  indic_v_r:           U0E24   # ฤ
+  indic_v_l:           U0E26   # ฦ
+  indic_v_candra_e:    U0E40
+  indic_v_candra_e_alt: U0E40
+  indic_v_o_candra:    U0E42
+
+  indic_m_aa:          U0E32
+  indic_m_i:           U0E34
+  indic_m_ii:          U0E35
+  indic_m_u:           U0E38
+  indic_m_uu:          U0E39
+  indic_m_r:           U0E24
+  indic_m_e:           U0E40
+  indic_m_e_short:     U0E40
+  indic_m_ai:          U0E44
+  indic_m_o:           U0E42
+  indic_m_o_short:     U0E42
+  indic_m_au:          U0E40
+  indic_m_o_candra:    U0E42
+  indic_m_o_candra_alt: U0E42
+
+  indic_virama:        U0E3A   # ฺ pinthu
+  indic_anusvara:      U0E4D   # ํ nikhahit
+  indic_visarga:       U0E2F   # ฯ paiyannoi
+  indic_candrabindu:   U0E4D
+  indic_avagraha:      U0E2D
+  indic_nukta:         U0E2D
+
+  indic_c_ka:          U0E01   # ก
+  indic_c_kha:         U0E02   # ข
+  indic_c_ga:          U0E04   # ค
+  indic_c_gha:         U0E06   # ฆ
+  indic_c_nga:         U0E07   # ง
+  indic_c_cha:         U0E08   # จ
+  indic_c_chha:        U0E09   # ฉ
+  indic_c_ja:          U0E0A   # ช
+  indic_c_jha:         U0E0C   # ฌ
+  indic_c_nya:         U0E0D   # ญ
+  indic_c_tta:         U0E0F   # ฏ
+  indic_c_ttha:        U0E10   # ฐ
+  indic_c_dda:         U0E11   # ฑ
+  indic_c_ddha:        U0E12   # ฒ
+  indic_c_nna:         U0E13   # ณ
+  indic_c_nna_alt:     U0E13
+  indic_c_ta:          U0E15   # ต
+  indic_c_tha:         U0E16   # ถ
+  indic_c_da:          U0E17   # ท
+  indic_c_dha:         U0E18   # ธ
+  indic_c_na:          U0E19   # น
+  indic_c_pa:          U0E1B   # ป
+  indic_c_pha:         U0E1C   # ผ
+  indic_c_ba:          U0E1A   # บ
+  indic_c_bha:         U0E20   # ภ
+  indic_c_ma:          U0E21   # ม
+  indic_c_ya:          U0E22   # ย
+  indic_c_yya:         U0E22
+  indic_c_ra:          U0E23   # ร
+  indic_c_rra:         U0E23
+  indic_c_la:          U0E25   # ล
+  indic_c_lla:         U0E2C   # ฬ
+  indic_c_lla_alt:     U0E2C
+  indic_c_va:          U0E27   # ว
+  indic_c_sha:         U0E28   # ศ
+  indic_c_ssa:         U0E29   # ษ
+  indic_c_sa:          U0E2A   # ส
+  indic_c_ha:          U0E2B   # ห
+
+  indic_digit_0:       U0E50
+  indic_digit_1:       U0E51
+  indic_digit_2:       U0E52
+  indic_digit_3:       U0E53
+  indic_digit_4:       U0E54
+  indic_digit_5:       U0E55
+  indic_digit_6:       U0E56
+  indic_digit_7:       U0E57
+  indic_digit_8:       U0E58
+  indic_digit_9:       U0E59

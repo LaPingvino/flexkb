@@ -1,0 +1,96 @@
+name: Indic class tokens → Khmer codepoints
+description: |
+  Khmer resolution for the InScript template. Khmer is Brahmic-family
+  (descended from Pallava) and has rich consonant + vowel categories
+  that map cleanly to InScript classes. Native Khmer users should
+  prefer kh/basic; this variant exists for InScript-trained typists.
+map:
+  indic_v_a:           U17A2   # ឣ
+  indic_v_aa:          U17A6   # ឦ
+  indic_v_i:           U17A3   # ឤ
+  indic_v_ii:          U17A4
+  indic_v_u:           U17A7   # ឧ
+  indic_v_uu:          U17A8
+  indic_v_e:           U17AF   # ឯ
+  indic_v_e_short:     U17AF
+  indic_v_ai:          U17B0
+  indic_v_o:           U17B1   # ឱ
+  indic_v_o_short:     U17B1
+  indic_v_au:          U17B2
+  indic_v_r:           U17A2
+  indic_v_l:           U17A2
+  indic_v_candra_e:    U17AF
+  indic_v_candra_e_alt: U17AF
+  indic_v_o_candra:    U17B1
+
+  indic_m_aa:          U17B6   # ា
+  indic_m_i:           U17B7   # ិ
+  indic_m_ii:          U17B8   # ី
+  indic_m_u:           U17BB   # ុ
+  indic_m_uu:          U17BC   # ូ
+  indic_m_r:           U17B6
+  indic_m_e:           U17C1   # េ
+  indic_m_e_short:     U17C1
+  indic_m_ai:          U17C2   # ែ
+  indic_m_o:           U17C4   # ោ
+  indic_m_o_short:     U17C4
+  indic_m_au:          U17C5
+  indic_m_o_candra:    U17C4
+  indic_m_o_candra_alt: U17C4
+
+  indic_virama:        U17D2   # ្ Khmer coeng (subscript marker)
+  indic_anusvara:      U17C6
+  indic_visarga:       U17C7
+  indic_candrabindu:   U17C6
+  indic_avagraha:      U17A2
+  indic_nukta:         U17A2
+
+  indic_c_ka:          U1780   # ក
+  indic_c_kha:         U1781
+  indic_c_ga:          U1782
+  indic_c_gha:         U1783
+  indic_c_nga:         U1784
+  indic_c_cha:         U1785
+  indic_c_chha:        U1786
+  indic_c_ja:          U1787
+  indic_c_jha:         U1788
+  indic_c_nya:         U1789
+  indic_c_tta:         U178A
+  indic_c_ttha:        U178B
+  indic_c_dda:         U178C
+  indic_c_ddha:        U178D
+  indic_c_nna:         U178E
+  indic_c_nna_alt:     U178E
+  indic_c_ta:          U178F
+  indic_c_tha:         U1790
+  indic_c_da:          U1791
+  indic_c_dha:         U1792
+  indic_c_na:          U1793
+  indic_c_pa:          U1794
+  indic_c_pha:         U1795
+  indic_c_ba:          U1796
+  indic_c_bha:         U1797
+  indic_c_ma:          U1798
+  indic_c_ya:          U1799
+  indic_c_yya:         U1799
+  indic_c_ra:          U179A
+  indic_c_rra:         U179A
+  indic_c_la:          U179B
+  indic_c_lla:         U179B
+  indic_c_lla_alt:     U179B
+  indic_c_va:          U179C
+  indic_c_sha:         U179D
+  indic_c_ssa:         U179E
+  indic_c_sa:          U179F
+  indic_c_ha:          U17A0
+
+  indic_digit_0:       U17E0
+  indic_digit_1:       U17E1
+  indic_digit_2:       U17E2
+  indic_digit_3:       U17E3
+  indic_digit_4:       U17E4
+  indic_digit_5:       U17E5
+  indic_digit_6:       U17E6
+  indic_digit_7:       U17E7
+  indic_digit_8:       U17E8
+  indic_digit_9:       U17E9

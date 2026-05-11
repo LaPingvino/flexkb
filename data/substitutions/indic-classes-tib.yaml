@@ -1,0 +1,108 @@
+name: Indic class tokens → Tibetan codepoints
+description: |
+  Tibetan resolution for the InScript template. Tibetan IS Brahmic-
+  family — same consonant/vowel categories despite different visual
+  forms. This lets a user fluent in InScript (Hindi/Bengali/etc.)
+  switch to Tibetan input without learning the native bt/basic
+  positional layout.
+
+  Caveats:
+  - Tibetan uses subscript-form consonants (U0F90-U0FBF) instead of
+    virama-based clustering. We map indic_virama to U0F84 (Tibetan
+    halanta, the closest analogue).
+  - Some InScript classes don't have direct Tibetan cognates and fall
+    back to the nearest match.
+map:
+  # Independent vowels — Tibetan has fewer than Devanagari
+  indic_v_a:           U0F68   # ཨ (a-chen)
+  indic_v_aa:          U0F71   # ཱ (vowel sign aa)
+  indic_v_i:           U0F72   # ི
+  indic_v_ii:          U0F73   # ཱི
+  indic_v_u:           U0F74   # ུ
+  indic_v_uu:          U0F75   # ཱུ
+  indic_v_e:           U0F7A   # ེ
+  indic_v_e_short:     U0F7A
+  indic_v_ai:          U0F7B   # ཻ
+  indic_v_o:           U0F7C   # ོ
+  indic_v_o_short:     U0F7C
+  indic_v_au:          U0F7D   # ཽ
+  indic_v_r:           U0F76   # ྲྀ
+  indic_v_l:           U0F78   # ླྀ
+  indic_v_candra_e:    U0F7A
+  indic_v_candra_e_alt: U0F7A
+  indic_v_o_candra:    U0F7C
+
+  # Matras (mostly same codepoints as independent vowels in Tibetan)
+  indic_m_aa:          U0F71
+  indic_m_i:           U0F72
+  indic_m_ii:          U0F73
+  indic_m_u:           U0F74
+  indic_m_uu:          U0F75
+  indic_m_r:           U0F76
+  indic_m_e:           U0F7A
+  indic_m_e_short:     U0F7A
+  indic_m_ai:          U0F7B
+  indic_m_o:           U0F7C
+  indic_m_o_short:     U0F7C
+  indic_m_au:          U0F7D
+  indic_m_o_candra:    U0F7C
+  indic_m_o_candra_alt: U0F7C
+
+  indic_virama:        U0F84   # ྄ Tibetan halanta (subscript marker)
+  indic_anusvara:      U0F7E   # ྂ
+  indic_visarga:       U0F7F   # ཿ
+  indic_candrabindu:   U0F83   # ྃ
+  indic_avagraha:      U0F85
+  indic_nukta:         U0F85
+
+  # Consonants — Tibetan ka/kha/ga/nga at U0F40-U0F44
+  indic_c_ka:          U0F40   # ཀ
+  indic_c_kha:         U0F41   # ཁ
+  indic_c_ga:          U0F42   # ག
+  indic_c_gha:         U0F43   # གྷ (rare; Sanskrit-derived)
+  indic_c_nga:         U0F44   # ང
+  indic_c_cha:         U0F45   # ཅ
+  indic_c_chha:        U0F46   # ཆ
+  indic_c_ja:          U0F47   # ཇ
+  indic_c_jha:         U0F4C
+  indic_c_nya:         U0F49   # ཉ
+  indic_c_tta:         U0F4A   # ཊ
+  indic_c_ttha:        U0F4B
+  indic_c_dda:         U0F4C   # ཌ
+  indic_c_ddha:        U0F4D
+  indic_c_nna:         U0F4E   # ཎ
+  indic_c_nna_alt:     U0F4E
+  indic_c_ta:          U0F4F   # ཏ
+  indic_c_tha:         U0F50   # ཐ
+  indic_c_da:          U0F51   # ད
+  indic_c_dha:         U0F52
+  indic_c_na:          U0F53   # ན
+  indic_c_pa:          U0F54   # པ
+  indic_c_pha:         U0F55   # ཕ
+  indic_c_ba:          U0F56   # བ
+  indic_c_bha:         U0F57
+  indic_c_ma:          U0F58   # མ
+  indic_c_ya:          U0F61   # ཡ
+  indic_c_yya:         U0F61
+  indic_c_ra:          U0F62   # ར
+  indic_c_rra:         U0F62
+  indic_c_la:          U0F63   # ལ
+  indic_c_lla:         U0F63
+  indic_c_lla_alt:     U0F63
+  indic_c_va:          U0F5D   # ཝ
+  indic_c_sha:         U0F64   # ཤ
+  indic_c_ssa:         U0F65   # ཥ
+  indic_c_sa:          U0F66   # ས
+  indic_c_ha:          U0F67   # ཧ
+
+  # Digits — Tibetan numerals
+  indic_digit_0:       U0F20   # ༠
+  indic_digit_1:       U0F21
+  indic_digit_2:       U0F22
+  indic_digit_3:       U0F23
+  indic_digit_4:       U0F24
+  indic_digit_5:       U0F25
+  indic_digit_6:       U0F26
+  indic_digit_7:       U0F27
+  indic_digit_8:       U0F28
+  indic_digit_9:       U0F29

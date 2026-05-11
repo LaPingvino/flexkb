@@ -5,3 +5,13 @@ variants:
     physical: iso
     transformation: tibetan-dzongkha
     default: true
+
+  # InScript-compatible alternative: same positional template as the 12
+  # Indic InScript scripts, with Tibetan codepoints. For users coming
+  # from Hindi/Bengali/etc. InScript who'd rather keep their muscle
+  # memory than learn the native bt/basic layout.
+  - name: inscript
+    description: Tibetan (InScript positional, alternative to native)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-tib]

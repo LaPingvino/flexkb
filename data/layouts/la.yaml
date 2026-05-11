@@ -12,3 +12,9 @@ variants:
     physical: iso
     transformation: dvorak
     substitutions: [latin-lao-phonetic]
+
+  - name: inscript
+    description: Lao (InScript positional)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-lao]

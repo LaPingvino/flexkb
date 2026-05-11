@@ -1,0 +1,95 @@
+name: Indic class tokens → Lao codepoints
+description: |
+  Lao resolution for the InScript template. Lao is closely related to
+  Thai with a simplified consonant inventory (28 letters vs Thai's 44).
+  Several InScript consonant classes map to the same Lao letter.
+map:
+  indic_v_a:           U0EAD   # ອ
+  indic_v_aa:          U0EB2   # າ
+  indic_v_i:           U0EB4   # ິ
+  indic_v_ii:          U0EB5   # ີ
+  indic_v_u:           U0EB8   # ຸ
+  indic_v_uu:          U0EB9   # ູ
+  indic_v_e:           U0EC0   # ເ
+  indic_v_e_short:     U0EC0
+  indic_v_ai:          U0EC4   # ໄ
+  indic_v_o:           U0EC2   # ໂ
+  indic_v_o_short:     U0EC2
+  indic_v_au:          U0EC0
+  indic_v_r:           U0EAD
+  indic_v_l:           U0EAD
+  indic_v_candra_e:    U0EC0
+  indic_v_candra_e_alt: U0EC0
+  indic_v_o_candra:    U0EC2
+
+  indic_m_aa:          U0EB2
+  indic_m_i:           U0EB4
+  indic_m_ii:          U0EB5
+  indic_m_u:           U0EB8
+  indic_m_uu:          U0EB9
+  indic_m_r:           U0EAD
+  indic_m_e:           U0EC0
+  indic_m_e_short:     U0EC0
+  indic_m_ai:          U0EC4
+  indic_m_o:           U0EC2
+  indic_m_o_short:     U0EC2
+  indic_m_au:          U0EC0
+  indic_m_o_candra:    U0EC2
+  indic_m_o_candra_alt: U0EC2
+
+  indic_virama:        U0EBA   # phinthu
+  indic_anusvara:      U0ECD   # ໍ
+  indic_visarga:       U0EAF
+  indic_candrabindu:   U0ECD
+  indic_avagraha:      U0EAD
+  indic_nukta:         U0EAD
+
+  indic_c_ka:          U0E81   # ກ
+  indic_c_kha:         U0E82   # ຂ
+  indic_c_ga:          U0E84   # ຄ
+  indic_c_gha:         U0E84
+  indic_c_nga:         U0E87   # ງ
+  indic_c_cha:         U0E88   # ຈ
+  indic_c_chha:        U0E89
+  indic_c_ja:          U0E8A   # ຊ
+  indic_c_jha:         U0E8A
+  indic_c_nya:         U0E8D   # ຍ
+  indic_c_tta:         U0E94   # ດ — Lao no retroflexes; use dental
+  indic_c_ttha:        U0E96
+  indic_c_dda:         U0E94
+  indic_c_ddha:        U0E97
+  indic_c_nna:         U0E99
+  indic_c_nna_alt:     U0E99
+  indic_c_ta:          U0E95   # ຕ
+  indic_c_tha:         U0E96   # ຖ
+  indic_c_da:          U0E94   # ດ
+  indic_c_dha:         U0E97   # ທ
+  indic_c_na:          U0E99   # ນ
+  indic_c_pa:          U0E9B   # ປ
+  indic_c_pha:         U0E9C   # ຜ
+  indic_c_ba:          U0E9A   # ບ
+  indic_c_bha:         U0E9E   # ພ
+  indic_c_ma:          U0EA1   # ມ
+  indic_c_ya:          U0EA2   # ຢ
+  indic_c_yya:         U0EA2
+  indic_c_ra:          U0EA3   # ຣ
+  indic_c_rra:         U0EA3
+  indic_c_la:          U0EA5   # ລ
+  indic_c_lla:         U0EA5
+  indic_c_lla_alt:     U0EA5
+  indic_c_va:          U0EA7   # ວ
+  indic_c_sha:         U0EAA
+  indic_c_ssa:         U0EAA
+  indic_c_sa:          U0EAA   # ສ
+  indic_c_ha:          U0EAB   # ຫ
+
+  indic_digit_0:       U0ED0
+  indic_digit_1:       U0ED1
+  indic_digit_2:       U0ED2
+  indic_digit_3:       U0ED3
+  indic_digit_4:       U0ED4
+  indic_digit_5:       U0ED5
+  indic_digit_6:       U0ED6
+  indic_digit_7:       U0ED7
+  indic_digit_8:       U0ED8
+  indic_digit_9:       U0ED9

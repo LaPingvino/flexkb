@@ -23,3 +23,13 @@ variants:
     physical: iso
     transformation: colemak
     substitutions: [latin-thai-phonetic]
+
+  # InScript-compatible alternative: same positional template as the
+  # Indic scripts. Thai descended from a Brahmic script so the
+  # consonant classes map cleanly, though native Thai users should
+  # prefer Kedmanee.
+  - name: inscript
+    description: Thai (InScript positional, alternative to Kedmanee)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-thai]

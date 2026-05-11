@@ -12,3 +12,9 @@ variants:
     physical: iso
     transformation: dvorak
     substitutions: [latin-khmer-phonetic]
+
+  - name: inscript
+    description: Khmer (InScript positional)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-khm]
