@@ -1,0 +1,18 @@
+name: Portuguese traditional (ç on AC10, dedicated key)
+description: |
+  Strict traditional Portuguese keyboard. ç has a dedicated physical key
+  at the AC10 position (right of L), as on Portuguese typewriters and
+  the standard PT keyboard layout. Only makes sense on QWERTY/QWERTZ
+  bases where the underlying letter at AC10 is one the user is willing
+  to displace (semicolon on QWERTY, ö on German QWERTZ, etc.).
+
+  Pair this addition with `transformation: qwerty` for the classic
+  Portuguese keyboard you see in shops in Lisbon. On Dvorak/Colemak,
+  use the regular `portuguese` addition (letter-following ç) instead.
+overlays:
+  AC10: { levels: [ccedilla, Ccedilla] }
+  AC11: { levels: [dead_tilde, dead_circumflex] }
+  AD11: { levels: [dead_acute, dead_grave] }
+  AD03: { levels: ["", "", EuroSign] }
+includes:
+  - level3(ralt_switch)

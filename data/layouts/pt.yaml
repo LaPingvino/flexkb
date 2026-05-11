@@ -1,20 +1,38 @@
 file: pt
 variants:
+  # Traditional PT keyboard: QWERTY + dedicated ç key on AC10. This is
+  # what you'd get buying a Portuguese-labelled keyboard.
   - name: basic
-    description: Portuguese
+    description: Portuguese (traditional, ç on AC10)
     physical: iso
     transformation: qwerty
-    additions: [portuguese]
+    additions: [portuguese-traditional]
     default: true
 
+  # Modern Portuguese on alternative bases: ç follows the c letter,
+  # dead keys sit on the apostrophe / right-bracket position. Works
+  # cleanly on Dvorak/Colemak/Workman because the addition is
+  # transformation-aware.
   - name: dvorak
-    description: Portuguese (Dvorak)
+    description: Portuguese (Dvorak base, ç on AltGr+c)
     physical: iso
     transformation: dvorak
     additions: [portuguese]
 
   - name: colemak
-    description: Portuguese (Colemak)
+    description: Portuguese (Colemak base, ç on AltGr+c)
     physical: iso
     transformation: colemak
+    additions: [portuguese]
+
+  - name: workman
+    description: Portuguese (Workman base, ç on AltGr+c)
+    physical: iso
+    transformation: workman
+    additions: [portuguese]
+
+  - name: bepo
+    description: Portuguese (BÉPO base)
+    physical: iso
+    transformation: bepo
     additions: [portuguese]

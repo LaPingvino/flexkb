@@ -1,10 +1,39 @@
-name: Portuguese accents and ç
+name: Portuguese accents and ç (transformation-aware)
 description: |
-  Portuguese accents: ç on AC10, dead_tilde + dead_acute, EuroSign on E.
+  Portuguese needs ç plus dead keys for acute, grave, tilde, circumflex,
+  diaeresis. The traditional Portuguese keyboard places ç on a dedicated
+  key at the AC10 position and the dead keys on AC11/AD11. That's
+  position-based and only makes sense on QWERTY/QWERTZ — on Dvorak or
+  Colemak the AC10 position holds 's' or 'r', so a position-based ç
+  overlay would mangle the underlying base.
+
+  Two complementary overlays:
+
+  Letter-following — works for any Latin transformation:
+    AltGr+c → ç  (or Shift+AltGr → Ç)
+    AltGr+a/e/i/o/u → á/é/í/ó/ú       (precomposed acute, the common ones)
+    AltGr+e → € shares the slot, level 4 used for the acute form.
+
+  Position-based — only on AC11/AD11 (apostrophe / right-bracket in QWERTY,
+  minus / slash in Dvorak): these keys carry the dead-key accents.
+  Apostrophe/quote → dead_acute / dead_grave is the standard Portuguese
+  convention; we let it apply by position because the user expects "the
+  key to the right of L" to be where the accent dead key lives.
+
+  For users wanting strict traditional Portuguese keyboard (ç on AC10,
+  dedicated layout), use the `portuguese-traditional` addition instead.
+letter_overlays:
+  c: { levels: ["", "", ccedilla, Ccedilla] }
+  a: { levels: ["", "", aacute, Aacute] }
+  e: { levels: ["", "", EuroSign, Eacute] }
+  i: { levels: ["", "", iacute, Iacute] }
+  o: { levels: ["", "", oacute, Oacute] }
+  u: { levels: ["", "", uacute, Uacute] }
+  # Tilde'd forms — Portuguese uses ã, õ heavily
+  n: { levels: ["", "", atilde, Atilde] }
+  m: { levels: ["", "", otilde, Otilde] }
 overlays:
-  AC10: { levels: [ccedilla, Ccedilla] }
-  AC11: { levels: [dead_tilde, dead_circumflex] }
-  AD11: { levels: [dead_acute, dead_grave] }
-  AD03: { levels: ["", "", EuroSign] }
+  AC11: { levels: [apostrophe, quotedbl, dead_acute, dead_grave] }
+  AD11: { levels: [bracketleft, braceleft, dead_tilde, dead_circumflex] }
 includes:
   - level3(ralt_switch)
