@@ -1,0 +1,36 @@
+file: np
+variants:
+  # Nepal uses Devanagari. Most modern Nepali Linux setups use either
+  # InScript or a phonetic Latin overlay; the traditional Nepali
+  # keyboard (xkb's np/basic) has minor consonant + vowel position
+  # differences from Hindi InScript but uses the same script.
+  #
+  # We ship InScript Devanagari as the default — same positional
+  # template as in/basic but country-coded as np. Users wanting strict
+  # traditional Nepali keyboard positioning would write their own
+  # transformation in ~/.config/flexkb/data/ — that's exactly the user-
+  # customisation path the rest of flexkb assumes.
+  - name: basic
+    description: Nepali (Devanagari InScript)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-deva]
+    default: true
+
+  - name: phonetic
+    description: Nepali (Devanagari phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-devanagari-phonetic]
+
+  - name: phonetic-dvorak
+    description: Nepali (Devanagari phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-devanagari-phonetic]
+
+  - name: phonetic-colemak
+    description: Nepali (Devanagari phonetic, Colemak base)
+    physical: iso
+    transformation: colemak
+    substitutions: [latin-devanagari-phonetic]

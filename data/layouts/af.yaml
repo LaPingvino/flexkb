@@ -1,0 +1,26 @@
+file: af
+variants:
+  # Dari (Persian-Afghan) is the default — Persian extras on Arabic base.
+  - name: basic
+    description: Dari (Persian, Arabic-101 base)
+    physical: iso
+    transformation: arabic-101
+    additions: [persian-extras]
+    default: true
+
+  # Pashto: stacks Persian extras (for پ چ ژ گ) PLUS Pashto-specific
+  # retroflex/Pashto letters.
+  - name: ps
+    description: Pashto (Arabic-101 + Persian + Pashto extras)
+    physical: iso
+    transformation: arabic-101
+    additions: [persian-extras, pashto-extras]
+
+  # Uzbek-on-Arabic (legacy; modern Uzbek is Latin or Cyrillic) — share
+  # the same persian-extras since the convention historically followed
+  # Persian-script typing.
+  - name: uz
+    description: Uzbek (Arabic-101 base, Persian extras — legacy)
+    physical: iso
+    transformation: arabic-101
+    additions: [persian-extras]

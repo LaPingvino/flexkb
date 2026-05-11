@@ -1,0 +1,20 @@
+name: Pashto extras on Arabic base
+description: |
+  Pashto adds 7 retroflex / Pashto-specific letters to the Arabic
+  alphabet: ټ (tteh), ډ (ddal), ړ (rreh), ږ (reh with dot), ښ (hah three
+  dots above), ګ (Pashto gaf), ڼ (Pashto noon).
+
+  Letter-following on the underlying Arabic cognate letters. Stack with
+  arabic-101 transformation + persian-extras (for پ چ ژ گ) + pashto-extras
+  to get full Pashto typing on the standard Arabic positional base.
+scripts: [arabic]
+letter_overlays:
+  Arabic_teh:   { levels: ["", "", U067D, U067D] }   # ث variant of teh → ټ
+  Arabic_dal:   { levels: ["", "", U0689, U0689] }   # ډ Pashto ddal
+  Arabic_ra:    { levels: ["", "", U0693, U0693] }   # ړ Pashto rreh
+  Arabic_zain:  { levels: ["", "", U0696, U0696] }   # ږ Pashto zha
+  Arabic_seen:  { levels: ["", "", U069A, U069A] }   # ښ Pashto sheen
+  Arabic_kaf:   { levels: ["", "", U06AB, U06AB] }   # ګ Pashto gaf
+  Arabic_noon:  { levels: ["", "", U06BC, U06BC] }   # ڼ Pashto noon
+includes:
+  - level3(ralt_switch)
