@@ -81,7 +81,7 @@ Usage:
   flexkb list [--data DIR]
   flexkb paths
   flexkb activate <layout-file> <variant>
-  flexkb serve [--data DIR] [--addr host:port]
+  flexkb serve [--data DIR] [--addr host:port] [--open]
 
 Commands:
   compose   Emit one variant to stdout (debug / preview).
@@ -109,6 +109,8 @@ Commands:
             preview UI. Pick a layout/variant in the browser, see the
             composed key grid color-coded by source dimension
             (transformation/positional overlay/letter overlay/sub).
+            --open launches xdg-open on the URL — used by the
+            installed /usr/share/applications/flexkb.desktop launcher.
 
 --data DIR overrides discovery and uses only DIR. Without it, flexkb walks
 the user/system/dev paths in order — see "flexkb paths" for the resolved

@@ -76,6 +76,11 @@ package() {
     install -d "$pkgdir/usr/share"
     ln -sf X11/xkb "$pkgdir/usr/share/xkeyboard-config-2"
 
+    # Settings/control-panel launcher for the GUI preview. Uses the
+    # standard freedesktop "preferences-desktop-keyboard" icon so it
+    # picks up the user's icon theme without us shipping a custom one.
+    install -Dm644 packaging/flexkb.desktop "$pkgdir/usr/share/applications/flexkb.desktop"
+
     install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
     install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
 }

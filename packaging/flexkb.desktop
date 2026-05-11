@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Keyboard Layout (flexkb)
+GenericName=Keyboard Layout Preview
+Comment=Browse and preview composed XKB keyboard layouts
+Exec=flexkb serve --open
+Icon=preferences-desktop-keyboard
+Terminal=false
+StartupNotify=false
+Categories=Settings;HardwareSettings;DesktopSettings;
+Keywords=keyboard;layout;xkb;input;flexkb;

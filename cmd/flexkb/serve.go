@@ -11,8 +11,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"net"
 	"net/http"
+	"os"
+	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/lapingvino/flexkb/internal/compose"
 	"github.com/lapingvino/flexkb/internal/model"
@@ -24,6 +28,7 @@ var webFS embed.FS
 func runServe(args []string) {
 	paths, rest := dataPaths(args)
 	addr := "localhost:7878"
+	openBrowser := false
 	for i := 0; i < len(rest); i++ {
 		a := rest[i]
 		switch {
@@ -32,6 +37,8 @@ func runServe(args []string) {
 			i++
 		case strings.HasPrefix(a, "--addr="):
 			addr = strings.TrimPrefix(a, "--addr=")
+		case a == "--open":
+			openBrowser = true
 		}
 	}
 	root := makeRoot(paths)
@@ -48,9 +55,26 @@ func runServe(args []string) {
 		handleCompose(w, r, root)
 	})
 
-	fmt.Printf("flexkb serve listening on http://%s\n", addr)
+	// Pre-bind so we can print the resolved URL (helpful when addr is :0
+	// or just a port) and launch the browser only after the listener is up.
+	ln, err := net.Listen("tcp", addr)
+	check(err)
+	url := "http://" + ln.Addr().String()
+	fmt.Printf("flexkb serve listening on %s\n", url)
 	fmt.Printf("data search path: %v\n", paths)
-	check(http.ListenAndServe(addr, mux))
+
+	if openBrowser {
+		go func() {
+			// Brief pause so the http.Serve goroutine has the accept
+			// loop running before xdg-open hands the URL to a browser.
+			time.Sleep(150 * time.Millisecond)
+			if err := exec.Command("xdg-open", url).Start(); err != nil {
+				fmt.Fprintf(os.Stderr, "warn: xdg-open %s failed: %v\n", url, err)
+			}
+		}()
+	}
+
+	check(http.Serve(ln, mux))
 }
 
 // apiVariant is the JSON shape we ship for the picker UI.
