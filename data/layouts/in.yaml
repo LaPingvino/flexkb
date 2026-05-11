@@ -63,6 +63,28 @@ variants:
     transformation: inscript
     substitutions: [indic-classes-ori]
 
+  # The remaining 3 InScript-supported scripts (per BIS IS 13194).
+  # Sinhala fits the template directly; Assamese is Bengali + 2 extras
+  # via chained substitution; Sindhi-Devanagari is Devanagari + nukta
+  # extras the same way.
+  - name: sin
+    description: Sinhala (InScript)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-sin]
+
+  - name: asm
+    description: Assamese (InScript, Bengali script + Assamese ra/wa)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-ben, bengali-to-assamese]
+
+  - name: snd
+    description: Sindhi (Devanagari InScript + nukta consonants)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-deva, deva-to-sindhi]
+
   # Phonetic variants — Latin transliteration over QWERTY. A different
   # mental model from InScript (typists who don't know InScript can use
   # these). These can be customised further per user — drop a file in

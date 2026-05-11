@@ -1,0 +1,96 @@
+name: Indic class tokens → Sinhala codepoints
+description: |
+  Sinhala (used in Sri Lanka) resolution for the InScript template.
+  Sinhala is part of the Brahmic family — same positional template
+  applies. The BIS IS 13194 InScript spec lists Sinhalese explicitly
+  as one of the supported scripts.
+map:
+  indic_v_a:           U0D85
+  indic_v_aa:          U0D86
+  indic_v_i:           U0D89
+  indic_v_ii:          U0D8A
+  indic_v_u:           U0D8B
+  indic_v_uu:          U0D8C
+  indic_v_r:           U0D8D
+  indic_v_l:           U0D91
+  indic_v_e:           U0D91
+  indic_v_e_short:     U0D91
+  indic_v_ai:          U0D93
+  indic_v_o:           U0D94
+  indic_v_o_short:     U0D94
+  indic_v_au:          U0D96
+  indic_v_candra_e:    U0D91
+  indic_v_candra_e_alt: U0DD9
+  indic_v_o_candra:    U0D94
+
+  indic_m_aa:          U0DCF
+  indic_m_i:           U0DD2
+  indic_m_ii:          U0DD3
+  indic_m_u:           U0DD4
+  indic_m_uu:          U0DD6
+  indic_m_r:           U0DD8
+  indic_m_e:           U0DD9
+  indic_m_e_short:     U0DD9
+  indic_m_ai:          U0DDB
+  indic_m_o:           U0DDC
+  indic_m_o_short:     U0DDC
+  indic_m_au:          U0DDE
+  indic_m_o_candra:    U0DDC
+  indic_m_o_candra_alt: U0DDC
+
+  indic_virama:        U0DCA
+  indic_anusvara:      U0D82
+  indic_visarga:       U0D83
+  indic_candrabindu:   U0D82
+  indic_avagraha:      U0D85
+  indic_nukta:         U0D85
+
+  indic_c_ka:          U0D9A
+  indic_c_kha:         U0D9B
+  indic_c_ga:          U0D9C
+  indic_c_gha:         U0D9D
+  indic_c_nga:         U0D9E
+  indic_c_cha:         U0DA0
+  indic_c_chha:        U0DA1
+  indic_c_ja:          U0DA2
+  indic_c_jha:         U0DA3
+  indic_c_nya:         U0DA4
+  indic_c_tta:         U0DA7
+  indic_c_ttha:        U0DA8
+  indic_c_dda:         U0DA9
+  indic_c_ddha:        U0DAA
+  indic_c_nna:         U0DAB
+  indic_c_nna_alt:     U0DAB
+  indic_c_ta:          U0DAD
+  indic_c_tha:         U0DAE
+  indic_c_da:          U0DAF
+  indic_c_dha:         U0DB0
+  indic_c_na:          U0DB1
+  indic_c_pa:          U0DB4
+  indic_c_pha:         U0DB5
+  indic_c_ba:          U0DB6
+  indic_c_bha:         U0DB7
+  indic_c_ma:          U0DB8
+  indic_c_ya:          U0DBA
+  indic_c_yya:         U0DBA
+  indic_c_ra:          U0DBB
+  indic_c_rra:         U0DBB
+  indic_c_la:          U0DBD
+  indic_c_lla:         U0DC5
+  indic_c_lla_alt:     U0DC5
+  indic_c_va:          U0DC0
+  indic_c_sha:         U0DC1
+  indic_c_ssa:         U0DC2
+  indic_c_sa:          U0DC3
+  indic_c_ha:          U0DC4
+
+  indic_digit_0:       U0966   # Sinhala uses Devanagari numerals in modern usage
+  indic_digit_1:       U0967
+  indic_digit_2:       U0968
+  indic_digit_3:       U0969
+  indic_digit_4:       U096A
+  indic_digit_5:       U096B
+  indic_digit_6:       U096C
+  indic_digit_7:       U096D
+  indic_digit_8:       U096E
+  indic_digit_9:       U096F

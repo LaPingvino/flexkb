@@ -1,0 +1,13 @@
+name: Bengali → Assamese (override substitution)
+description: |
+  Assamese is written with the Bengali script + two letters distinct
+  from Bengali: ৰ (Assamese ra, U09F0) replaces র (Bengali ra, U09B0),
+  and ৱ (Assamese wa, U09F1) replaces Bengali ব (U09AC) in the wa role.
+
+  Chained AFTER indic-classes-ben in a layout spec: first the InScript
+  template's class tokens get resolved to Bengali codepoints, then this
+  substitution swaps Bengali ra/wa for the Assamese forms. A clean
+  demonstration of substitution chaining for dialect-style variants.
+map:
+  U09B0: U09F0    # র → ৰ
+  U09AC: U09F1    # ব → ৱ in some positions; Assamese still uses ব too

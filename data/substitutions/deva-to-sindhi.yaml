@@ -1,0 +1,23 @@
+name: Devanagari → Sindhi-Devanagari (nukta consonants)
+description: |
+  Sindhi when written in Devanagari uses several nukta-modified
+  consonants representing sounds borrowed from Perso-Arabic that don't
+  exist in native Sanskrit/Hindi: क़ (qa U0958), ख़ (khha U0959),
+  ग़ (ghha U095A), ज़ (za U095B), ड़ (dddha U095C), ढ़ (rha U095D),
+  फ़ (fa U095E), य़ (yya U095F).
+
+  Chained after indic-classes-deva: replaces the base consonants with
+  their nukta forms. Same trick as bengali-to-assamese — a small
+  dialect-style override on top of the canonical script substitution.
+
+  Sindhi can also be written in Perso-Arabic script (sd_PK locale);
+  that's handled separately via the Urdu/Arabic infrastructure.
+map:
+  U0915: U0958    # क → क़ (qa)
+  U0916: U0959    # ख → ख़ (khha)
+  U0917: U095A    # ग → ग़ (ghha)
+  U091C: U095B    # ज → ज़ (za)
+  U0921: U095C    # ड → ड़ (dddha)
+  U0922: U095D    # ढ → ढ़ (rha)
+  U092B: U095E    # फ → फ़ (fa)
+  U092F: U095F    # य → य़ (yya)
