@@ -1,11 +1,77 @@
 file: in
 variants:
+  # InScript is India's standard keyboard layout (Government-of-India
+  # standard since 1986). Same physical positions across every Indic
+  # script; per-script codepoint tables resolve the shared template to
+  # actual glyphs. ONE transformation file + N codepoint substitutions
+  # rather than N hand-written InScript files.
+  #
+  # InScript variants come FIRST because they're the standard; phonetic
+  # variants are listed below as personal-preference alternatives.
+  - name: basic
+    description: Hindi (Devanagari InScript) — India's standard layout
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-deva]
+    default: true
+
+  - name: ben
+    description: Bengali (InScript)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-ben]
+
+  - name: tam
+    description: Tamil (InScript)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-tam]
+
+  - name: tel
+    description: Telugu (InScript)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-tel]
+
+  - name: kan
+    description: Kannada (InScript)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-kan]
+
+  - name: mal
+    description: Malayalam (InScript)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-mal]
+
+  - name: guj
+    description: Gujarati (InScript)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-guj]
+
+  - name: guru
+    description: Punjabi / Gurmukhi (InScript)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-gur]
+
+  - name: ori
+    description: Oriya / Odia (InScript)
+    physical: iso
+    transformation: inscript
+    substitutions: [indic-classes-ori]
+
+  # Phonetic variants — Latin transliteration over QWERTY. A different
+  # mental model from InScript (typists who don't know InScript can use
+  # these). These can be customised further per user — drop a file in
+  # ~/.config/flexkb/data/substitutions/ to override.
   - name: hindi-phonetic
-    description: Hindi (Devanagari phonetic, QWERTY base)
+    description: Hindi (Devanagari phonetic, QWERTY base — alternate to InScript)
     physical: iso
     transformation: qwerty
     substitutions: [latin-devanagari-phonetic]
-    default: true
 
   - name: hindi-phonetic-dvorak
     description: Hindi (Devanagari phonetic, Dvorak base)
@@ -19,10 +85,8 @@ variants:
     transformation: colemak
     substitutions: [latin-devanagari-phonetic]
 
-  # India is a multi-script country; one layout file per script feels
-  # wrong, so all Indian scripts share `in` with named variants.
   - name: tamil-phonetic
-    description: Tamil (phonetic, QWERTY base)
+    description: Tamil (phonetic, QWERTY base — alternate to InScript)
     physical: iso
     transformation: qwerty
     substitutions: [latin-tamil-phonetic]
@@ -62,18 +126,3 @@ variants:
     physical: iso
     transformation: qwerty
     substitutions: [latin-oriya-phonetic]
-
-  # InScript — India's positional layout. Same physical positions across
-  # every Indic script; per-script codepoint tables resolve the shared
-  # template to actual glyphs. One transformation file, N substitutions.
-  - name: inscript-hindi
-    description: Hindi (Devanagari InScript)
-    physical: iso
-    transformation: inscript
-    substitutions: [indic-classes-deva]
-
-  - name: inscript-bengali
-    description: Bengali (InScript, same key positions as Devanagari)
-    physical: iso
-    transformation: inscript
-    substitutions: [indic-classes-ben]

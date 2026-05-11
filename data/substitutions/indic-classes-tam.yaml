@@ -1,0 +1,97 @@
+name: Indic class tokens → Tamil codepoints
+description: |
+  Tamil resolution for the InScript template. Tamil has fewer letters
+  than Devanagari (no voicing distinctions, no aspirates) — multiple
+  class tokens collapse to the same Tamil letter.
+map:
+  indic_v_a:           U0B85   # அ
+  indic_v_aa:          U0B86   # ஆ
+  indic_v_i:           U0B87   # இ
+  indic_v_ii:          U0B88   # ஈ
+  indic_v_u:           U0B89   # உ
+  indic_v_uu:          U0B8A   # ஊ
+  indic_v_e:           U0B8F   # ஏ
+  indic_v_e_short:     U0B8E   # எ
+  indic_v_ai:          U0B90   # ஐ
+  indic_v_o:           U0B93   # ஓ
+  indic_v_o_short:     U0B92   # ஒ
+  indic_v_au:          U0B94   # ஔ
+  indic_v_r:           U0B85
+  indic_v_l:           U0B85
+  indic_v_candra_e:    U0B8F
+  indic_v_candra_e_alt: U0BC7
+  indic_v_o_candra:    U0B93
+
+  indic_m_aa:          U0BBE   # ா
+  indic_m_i:           U0BBF   # ி
+  indic_m_ii:          U0BC0   # ீ
+  indic_m_u:           U0BC1   # ு
+  indic_m_uu:          U0BC2   # ூ
+  indic_m_e:           U0BC7   # ே
+  indic_m_e_short:     U0BC6   # ெ
+  indic_m_ai:          U0BC8   # ை
+  indic_m_o:           U0BCB   # ோ
+  indic_m_o_short:     U0BCA   # ொ
+  indic_m_au:          U0BCC   # ௌ
+  indic_m_o_candra:    U0BCB
+  indic_m_o_candra_alt: U0BCB
+  indic_m_r:           U0BBE
+
+  indic_virama:        U0BCD   # ்
+  indic_anusvara:      U0B82
+  indic_visarga:       U0B83
+  indic_candrabindu:   U0B82
+  indic_avagraha:      U0B85
+  indic_nukta:         U0B85
+
+  # Tamil has no voicing or aspiration in its consonants — k/kh/g/gh
+  # all collapse to one letter (க), same for the rest.
+  indic_c_ka:          U0B95   # க
+  indic_c_kha:         U0B95
+  indic_c_ga:          U0B95
+  indic_c_gha:         U0B95
+  indic_c_nga:         U0B99   # ங
+  indic_c_cha:         U0B9A   # ச
+  indic_c_chha:        U0B9A
+  indic_c_ja:          U0B9C   # ஜ
+  indic_c_jha:         U0B9C
+  indic_c_nya:         U0B9E   # ஞ
+  indic_c_tta:         U0B9F   # ட
+  indic_c_ttha:        U0B9F
+  indic_c_dda:         U0B9F
+  indic_c_ddha:        U0B9F
+  indic_c_nna:         U0BA3   # ண
+  indic_c_nna_alt:     U0BA9   # ன
+  indic_c_ta:          U0BA4   # த
+  indic_c_tha:         U0BA4
+  indic_c_da:          U0BA4
+  indic_c_dha:         U0BA4
+  indic_c_na:          U0BA8   # ந
+  indic_c_pa:          U0BAA   # ப
+  indic_c_pha:         U0BAA
+  indic_c_ba:          U0BAA
+  indic_c_bha:         U0BAA
+  indic_c_ma:          U0BAE   # ம
+  indic_c_ya:          U0BAF   # ய
+  indic_c_yya:         U0BAF
+  indic_c_ra:          U0BB0   # ர
+  indic_c_rra:         U0BB1   # ற
+  indic_c_la:          U0BB2   # ல
+  indic_c_lla:         U0BB3   # ள
+  indic_c_lla_alt:     U0BB4   # ழ
+  indic_c_va:          U0BB5   # வ
+  indic_c_sha:         U0BB6   # ஶ
+  indic_c_ssa:         U0BB7   # ஷ
+  indic_c_sa:          U0BB8   # ஸ
+  indic_c_ha:          U0BB9   # ஹ
+
+  indic_digit_0:       U0BE6
+  indic_digit_1:       U0BE7
+  indic_digit_2:       U0BE8
+  indic_digit_3:       U0BE9
+  indic_digit_4:       U0BEA
+  indic_digit_5:       U0BEB
+  indic_digit_6:       U0BEC
+  indic_digit_7:       U0BED
+  indic_digit_8:       U0BEE
+  indic_digit_9:       U0BEF

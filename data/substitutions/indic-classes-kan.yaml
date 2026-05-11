@@ -1,0 +1,93 @@
+name: Indic class tokens → Kannada codepoints
+description: |
+  Kannada resolution. Sister script to Telugu, same structure.
+map:
+  indic_v_a:           U0C85
+  indic_v_aa:          U0C86
+  indic_v_i:           U0C87
+  indic_v_ii:          U0C88
+  indic_v_u:           U0C89
+  indic_v_uu:          U0C8A
+  indic_v_r:           U0C8B
+  indic_v_l:           U0C8C
+  indic_v_e:           U0C8F
+  indic_v_e_short:     U0C8E
+  indic_v_ai:          U0C90
+  indic_v_o:           U0C93
+  indic_v_o_short:     U0C92
+  indic_v_au:          U0C94
+  indic_v_candra_e:    U0C8F
+  indic_v_candra_e_alt: U0CC6
+  indic_v_o_candra:    U0C93
+
+  indic_m_aa:          U0CBE
+  indic_m_i:           U0CBF
+  indic_m_ii:          U0CC0
+  indic_m_u:           U0CC1
+  indic_m_uu:          U0CC2
+  indic_m_r:           U0CC3
+  indic_m_e:           U0CC7
+  indic_m_e_short:     U0CC6
+  indic_m_ai:          U0CC8
+  indic_m_o:           U0CCB
+  indic_m_o_short:     U0CCA
+  indic_m_au:          U0CCC
+  indic_m_o_candra:    U0CCB
+  indic_m_o_candra_alt: U0CCB
+
+  indic_virama:        U0CCD
+  indic_anusvara:      U0C82
+  indic_visarga:       U0C83
+  indic_candrabindu:   U0C81
+  indic_avagraha:      U0CBD
+  indic_nukta:         U0C85
+
+  indic_c_ka:          U0C95
+  indic_c_kha:         U0C96
+  indic_c_ga:          U0C97
+  indic_c_gha:         U0C98
+  indic_c_nga:         U0C99
+  indic_c_cha:         U0C9A
+  indic_c_chha:        U0C9B
+  indic_c_ja:          U0C9C
+  indic_c_jha:         U0C9D
+  indic_c_nya:         U0C9E
+  indic_c_tta:         U0C9F
+  indic_c_ttha:        U0CA0
+  indic_c_dda:         U0CA1
+  indic_c_ddha:        U0CA2
+  indic_c_nna:         U0CA3
+  indic_c_nna_alt:     U0CA3
+  indic_c_ta:          U0CA4
+  indic_c_tha:         U0CA5
+  indic_c_da:          U0CA6
+  indic_c_dha:         U0CA7
+  indic_c_na:          U0CA8
+  indic_c_pa:          U0CAA
+  indic_c_pha:         U0CAB
+  indic_c_ba:          U0CAC
+  indic_c_bha:         U0CAD
+  indic_c_ma:          U0CAE
+  indic_c_ya:          U0CAF
+  indic_c_yya:         U0CAF
+  indic_c_ra:          U0CB0
+  indic_c_rra:         U0CB1
+  indic_c_la:          U0CB2
+  indic_c_lla:         U0CB3
+  indic_c_lla_alt:     U0CB3
+  indic_c_va:          U0CB5
+  indic_c_sha:         U0CB6
+  indic_c_ssa:         U0CB7
+  indic_c_sa:          U0CB8
+  indic_c_ha:          U0CB9
+
+  indic_digit_0:       U0CE6
+  indic_digit_1:       U0CE7
+  indic_digit_2:       U0CE8
+  indic_digit_3:       U0CE9
+  indic_digit_4:       U0CEA
+  indic_digit_5:       U0CEB
+  indic_digit_6:       U0CEC
+  indic_digit_7:       U0CED
+  indic_digit_8:       U0CEE
+  indic_digit_9:       U0CEF

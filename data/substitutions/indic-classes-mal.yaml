@@ -1,0 +1,93 @@
+name: Indic class tokens → Malayalam codepoints
+description: |
+  Malayalam resolution. Brahmic consonants with full voicing + aspiration.
+map:
+  indic_v_a:           U0D05
+  indic_v_aa:          U0D06
+  indic_v_i:           U0D07
+  indic_v_ii:          U0D08
+  indic_v_u:           U0D09
+  indic_v_uu:          U0D0A
+  indic_v_r:           U0D0B
+  indic_v_l:           U0D0C
+  indic_v_e:           U0D0F
+  indic_v_e_short:     U0D0E
+  indic_v_ai:          U0D10
+  indic_v_o:           U0D13
+  indic_v_o_short:     U0D12
+  indic_v_au:          U0D14
+  indic_v_candra_e:    U0D0F
+  indic_v_candra_e_alt: U0D46
+  indic_v_o_candra:    U0D13
+
+  indic_m_aa:          U0D3E
+  indic_m_i:           U0D3F
+  indic_m_ii:          U0D40
+  indic_m_u:           U0D41
+  indic_m_uu:          U0D42
+  indic_m_r:           U0D43
+  indic_m_e:           U0D47
+  indic_m_e_short:     U0D46
+  indic_m_ai:          U0D48
+  indic_m_o:           U0D4B
+  indic_m_o_short:     U0D4A
+  indic_m_au:          U0D4C
+  indic_m_o_candra:    U0D4B
+  indic_m_o_candra_alt: U0D4B
+
+  indic_virama:        U0D4D
+  indic_anusvara:      U0D02
+  indic_visarga:       U0D03
+  indic_candrabindu:   U0D02
+  indic_avagraha:      U0D05
+  indic_nukta:         U0D05
+
+  indic_c_ka:          U0D15
+  indic_c_kha:         U0D16
+  indic_c_ga:          U0D17
+  indic_c_gha:         U0D18
+  indic_c_nga:         U0D19
+  indic_c_cha:         U0D1A
+  indic_c_chha:        U0D1B
+  indic_c_ja:          U0D1C
+  indic_c_jha:         U0D1D
+  indic_c_nya:         U0D1E
+  indic_c_tta:         U0D1F
+  indic_c_ttha:        U0D20
+  indic_c_dda:         U0D21
+  indic_c_ddha:        U0D22
+  indic_c_nna:         U0D23
+  indic_c_nna_alt:     U0D23
+  indic_c_ta:          U0D24
+  indic_c_tha:         U0D25
+  indic_c_da:          U0D26
+  indic_c_dha:         U0D27
+  indic_c_na:          U0D28
+  indic_c_pa:          U0D2A
+  indic_c_pha:         U0D2B
+  indic_c_ba:          U0D2C
+  indic_c_bha:         U0D2D
+  indic_c_ma:          U0D2E
+  indic_c_ya:          U0D2F
+  indic_c_yya:         U0D2F
+  indic_c_ra:          U0D30
+  indic_c_rra:         U0D31
+  indic_c_la:          U0D32
+  indic_c_lla:         U0D33
+  indic_c_lla_alt:     U0D34
+  indic_c_va:          U0D35
+  indic_c_sha:         U0D36
+  indic_c_ssa:         U0D37
+  indic_c_sa:          U0D38
+  indic_c_ha:          U0D39
+
+  indic_digit_0:       U0D66
+  indic_digit_1:       U0D67
+  indic_digit_2:       U0D68
+  indic_digit_3:       U0D69
+  indic_digit_4:       U0D6A
+  indic_digit_5:       U0D6B
+  indic_digit_6:       U0D6C
+  indic_digit_7:       U0D6D
+  indic_digit_8:       U0D6E
+  indic_digit_9:       U0D6F
