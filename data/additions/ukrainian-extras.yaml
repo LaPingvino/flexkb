@@ -1,0 +1,21 @@
+name: Ukrainian extras (on Russian Cyrillic base)
+description: |
+  Ukrainian-specific Cyrillic letters added on top of a Russian ЙЦУКЕН
+  keyboard: і (Ukrainian_i), ї (Ukrainian_yi), є (Ukrainian_ie), ґ
+  (Ukrainian_ghe_with_upturn). Letter-following so they track whichever
+  key holds the corresponding Russian Cyrillic letter.
+
+  Pattern: AltGr+и → і, AltGr+е → є, AltGr+ы → ї (visual cognate),
+  AltGr+г → ґ. Lets a Russian-keyboard user type the occasional
+  Ukrainian word without switching layouts.
+letter_overlays:
+  Cyrillic_i:    { levels: ["", "", Ukrainian_i, Ukrainian_I] }
+  Cyrillic_I:    { levels: ["", "", Ukrainian_i, Ukrainian_I] }
+  Cyrillic_ie:   { levels: ["", "", Ukrainian_ie, Ukrainian_IE] }
+  Cyrillic_IE:   { levels: ["", "", Ukrainian_ie, Ukrainian_IE] }
+  Cyrillic_yeru: { levels: ["", "", Ukrainian_yi, Ukrainian_YI] }
+  Cyrillic_YERU: { levels: ["", "", Ukrainian_yi, Ukrainian_YI] }
+  Cyrillic_ghe:  { levels: ["", "", Ukrainian_ghe_with_upturn, Ukrainian_GHE_WITH_UPTURN] }
+  Cyrillic_GHE:  { levels: ["", "", Ukrainian_ghe_with_upturn, Ukrainian_GHE_WITH_UPTURN] }
+includes:
+  - level3(ralt_switch)

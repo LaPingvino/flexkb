@@ -37,3 +37,30 @@ variants:
     description: English (Norman)
     physical: ansi
     transformation: norman
+
+  # Modular dvorak-intl — same `intl` addition as us(intl) but on Dvorak
+  # base. Letter-following overlays mean the accented forms track each
+  # letter's Dvorak position automatically.
+  - name: dvorak-intl
+    description: English (Dvorak, intl., with dead keys)
+    physical: ansi
+    transformation: dvorak
+    additions: [intl]
+
+  - name: colemak-intl
+    description: English (Colemak, intl., with dead keys)
+    physical: ansi
+    transformation: colemak
+    additions: [intl]
+
+  - name: workman-intl
+    description: English (Workman, intl., with dead keys)
+    physical: ansi
+    transformation: workman
+    additions: [intl]
+
+  - name: norman-intl
+    description: English (Norman, intl., with dead keys)
+    physical: ansi
+    transformation: norman
+    additions: [intl]

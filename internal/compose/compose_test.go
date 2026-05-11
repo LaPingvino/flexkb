@@ -87,3 +87,118 @@ func TestAdditionTrimsTrailingEmpties(t *testing.T) {
 		t.Errorf("trailing empties should be trimmed: got %v", got)
 	}
 }
+
+// TestLetterOverlayFollowsLetterAcrossTransformations: a letter overlay
+// defined for 'q' should land at whichever physical key 'q' occupies under
+// the active transformation. This is the property that makes one `intl`
+// addition work for QWERTY (q on AD01) and Dvorak (q on AB02) etc.
+func TestLetterOverlayFollowsLetterAcrossTransformations(t *testing.T) {
+	phys := model.Physical{Name: "p", Keys: []string{"AD01", "AB02"}}
+	// QWERTY-style: q on AD01.
+	qwerty := model.Transformation{Name: "qw", Keys: map[string]model.KeySymbols{
+		"AD01": {Levels: []string{"q", "Q"}},
+		"AB02": {Levels: []string{"x", "X"}},
+	}}
+	// Dvorak-style: q on AB02.
+	dvorak := model.Transformation{Name: "dv", Keys: map[string]model.KeySymbols{
+		"AD01": {Levels: []string{"apostrophe", "quotedbl"}},
+		"AB02": {Levels: []string{"q", "Q"}},
+	}}
+	intl := model.Addition{Name: "intl", LetterOverlays: map[string]model.KeySymbols{
+		"q": {Levels: []string{"", "", "adiaeresis", "Adiaeresis"}},
+	}}
+
+	r1 := ComposeFromParts(model.LayoutSpec{Name: "qwerty"}, phys, qwerty, []model.Addition{intl})
+	if r1.Layout.Symbols["AD01"].Levels[2] != "adiaeresis" {
+		t.Errorf("QWERTY: expected adiaeresis at AD01 level 3, got %v", r1.Layout.Symbols["AD01"].Levels)
+	}
+	if len(r1.Layout.Symbols["AB02"].Levels) > 2 && r1.Layout.Symbols["AB02"].Levels[2] != "" {
+		t.Errorf("QWERTY: AB02 (x) should not gain umlaut, got %v", r1.Layout.Symbols["AB02"].Levels)
+	}
+
+	r2 := ComposeFromPartsWithSubs(model.LayoutSpec{Name: "dvorak"}, phys, dvorak, []model.Addition{intl}, nil)
+	if r2.Layout.Symbols["AB02"].Levels[2] != "adiaeresis" {
+		t.Errorf("Dvorak: expected adiaeresis at AB02 level 3, got %v", r2.Layout.Symbols["AB02"].Levels)
+	}
+	if r2.Layout.Symbols["AD01"].Levels[0] != "apostrophe" {
+		t.Errorf("Dvorak: AD01 should keep apostrophe, got %v", r2.Layout.Symbols["AD01"].Levels)
+	}
+}
+
+// TestSubstitutionTransformsAfterAdditions: substitutions run as a final
+// pass and only affect single-token Latin letters. Multi-char symbols
+// (dead_*, accent names) pass through unchanged.
+func TestSubstitutionTransformsAfterAdditions(t *testing.T) {
+	phys := model.Physical{Name: "p", Keys: []string{"AC01", "AC02", "TLDE"}}
+	trans := model.Transformation{Name: "qw", Keys: map[string]model.KeySymbols{
+		"AC01": {Levels: []string{"a", "A"}},
+		"AC02": {Levels: []string{"s", "S"}},
+		"TLDE": {Levels: []string{"grave", "asciitilde"}},
+	}}
+	// Addition adds a dead key — multi-token name.
+	add := model.Addition{Name: "deadkey-tilde", Overlays: map[string]model.KeySymbols{
+		"TLDE": {Levels: []string{"dead_grave", "dead_tilde"}},
+	}}
+	// Substitution replaces 'a'/'A'/'s'/'S' but leaves dead_grave alone.
+	sub := model.Substitution{Name: "to-cyrillic", Map: map[string]string{
+		"a": "Cyrillic_a", "A": "Cyrillic_A",
+		"s": "Cyrillic_es", "S": "Cyrillic_ES",
+	}}
+
+	r := ComposeFromPartsWithSubs(
+		model.LayoutSpec{Name: "test"},
+		phys, trans,
+		[]model.Addition{add},
+		[]model.Substitution{sub},
+	)
+	if r.Layout.Symbols["AC01"].Levels[0] != "Cyrillic_a" {
+		t.Errorf("AC01: %v", r.Layout.Symbols["AC01"].Levels)
+	}
+	if r.Layout.Symbols["TLDE"].Levels[0] != "dead_grave" {
+		t.Errorf("TLDE dead_grave should pass through substitution: %v", r.Layout.Symbols["TLDE"].Levels)
+	}
+}
+
+// TestSubstitutionChainHotfixPreempts: a narrow override placed before the
+// broad substitution wins because each substitution sees the previous'
+// output. By the time the broad substitution runs, the targeted symbol has
+// already been replaced and no longer matches the broad map.
+func TestSubstitutionChainHotfixPreempts(t *testing.T) {
+	phys := model.Physical{Name: "p", Keys: []string{"AC01", "AD02"}}
+	trans := model.Transformation{Name: "qw", Keys: map[string]model.KeySymbols{
+		"AC01": {Levels: []string{"a", "A"}},
+		"AD02": {Levels: []string{"w", "W"}},
+	}}
+	hotfix := model.Substitution{Name: "w-as-zhe", Map: map[string]string{
+		"w": "Cyrillic_zhe", "W": "Cyrillic_ZHE",
+	}}
+	broad := model.Substitution{Name: "phonetic", Map: map[string]string{
+		"a": "Cyrillic_a", "A": "Cyrillic_A",
+		"w": "Cyrillic_ve", "W": "Cyrillic_VE",
+	}}
+
+	// Hotfix listed FIRST in chain wins.
+	r := ComposeFromPartsWithSubs(model.LayoutSpec{Name: "t"}, phys, trans, nil,
+		[]model.Substitution{hotfix, broad})
+	if r.Layout.Symbols["AD02"].Levels[0] != "Cyrillic_zhe" {
+		t.Errorf("hotfix should win for AD02, got %v", r.Layout.Symbols["AD02"].Levels)
+	}
+	if r.Layout.Symbols["AC01"].Levels[0] != "Cyrillic_a" {
+		t.Errorf("broad should still apply to AC01, got %v", r.Layout.Symbols["AC01"].Levels)
+	}
+}
+
+// TestSubstitutionInverse: Substitution.Inverse swaps source/target.
+func TestSubstitutionInverse(t *testing.T) {
+	s := model.Substitution{Name: "fwd", Map: map[string]string{
+		"a": "Cyrillic_a",
+		"b": "Cyrillic_be",
+	}}
+	inv := s.Inverse()
+	if inv.Map["Cyrillic_a"] != "a" {
+		t.Errorf("inverse should map Cyrillic_a -> a, got %v", inv.Map)
+	}
+	if inv.Map["Cyrillic_be"] != "b" {
+		t.Errorf("inverse should map Cyrillic_be -> b, got %v", inv.Map)
+	}
+}

@@ -87,17 +87,33 @@ func (s Substitution) Inverse() Substitution {
 }
 
 // Addition overlays extra symbol levels (AltGr characters, dead keys) on top
-// of an already-transformed layout. Examples: us-intl dead keys, Polish
-// AltGr-ą/ę/ć/etc, German umlauts on AC10/AC11/AD11.
+// of an already-transformed layout. Two overlay styles are supported:
 //
-// An overlay can specify any subset of levels. Empty-string levels are
-// pass-through — they don't overwrite the underlying value. To extend a
-// 2-level base to 4 levels, set levels 2 and 3 only.
+//   - Overlays (position-based): map specific XKB key codes to level lists.
+//     Right when the user expects a glyph on a specific physical key — German
+//     umlauts on the AC10/AC11/AD11 positions, Polish layout on AltGr+'a'-
+//     position, etc.
+//
+//   - LetterOverlays (letter-following): map letter symbols to level lists
+//     that should appear on whichever key currently holds that letter at
+//     level 1. This is what xkb's us(intl), us(dvorak-intl), workman-intl,
+//     etc. all do — accented forms of 'q' go wherever 'q' happens to live,
+//     regardless of the underlying Latin transformation. ONE letter-overlay
+//     definition replaces N hand-written transformation-specific variants.
+//
+// Empty-string levels are pass-through (don't overwrite). Overlays apply
+// before LetterOverlays so position-specific patches take precedence.
 type Addition struct {
 	Name        string                `yaml:"name"`
 	Description string                `yaml:"description,omitempty"`
 	// Overlays maps an XKB key code to the per-level override list.
 	Overlays map[string]KeySymbols `yaml:"overlays,omitempty"`
+	// LetterOverlays maps a level-1 symbol token (e.g. "a", "q") to per-
+	// level overrides applied to whichever physical key holds that letter
+	// at level 1 after the transformation. Lookup is case-insensitive at
+	// the key but case-sensitive in the values, so you can express
+	// distinct shifted forms.
+	LetterOverlays map[string]KeySymbols `yaml:"letter_overlays,omitempty"`
 	// Includes are raw xkb `include "..."` lines appended to the symbols
 	// block — e.g. `level3(ralt_switch)` to enable AltGr.
 	Includes []string `yaml:"includes,omitempty"`

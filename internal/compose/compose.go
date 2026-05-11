@@ -15,6 +15,7 @@ package compose
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/lapingvino/flexkb/internal/model"
 )
@@ -106,7 +107,7 @@ func ComposeFromPartsWithSubs(spec model.LayoutSpec, phys model.Physical, trans 
 		out.Symbols[k] = model.KeySymbols{Levels: append([]string(nil), sym.Levels...)}
 	}
 
-	// Stage 2: apply additions in order.
+	// Stage 2: apply position-based addition overlays in order.
 	for _, a := range adds {
 		for k, overlay := range a.Overlays {
 			if !keyAllowed[k] {
@@ -120,6 +121,36 @@ func ComposeFromPartsWithSubs(spec model.LayoutSpec, phys model.Physical, trans 
 			out.Symbols[k] = model.KeySymbols{Levels: merged}
 		}
 		out.Includes = append(out.Includes, a.Includes...)
+	}
+
+	// Stage 2b: apply letter-following overlays. For each (letter -> overlay)
+	// in each addition, find every key whose post-transformation level 1
+	// matches the letter (case-insensitive) and merge the overlay there.
+	// Pre-build a level-1 → keys index so this is O(keys + overlays) per
+	// addition instead of O(keys * overlays).
+	for _, a := range adds {
+		if len(a.LetterOverlays) == 0 {
+			continue
+		}
+		byLetter := map[string][]string{}
+		for _, k := range out.Keys {
+			sym, ok := out.Symbols[k]
+			if !ok || len(sym.Levels) == 0 {
+				continue
+			}
+			byLetter[strings.ToLower(sym.Levels[0])] = append(byLetter[strings.ToLower(sym.Levels[0])], k)
+		}
+		for letter, overlay := range a.LetterOverlays {
+			keys := byLetter[strings.ToLower(letter)]
+			if len(keys) == 0 {
+				continue
+			}
+			for _, k := range keys {
+				cur := out.Symbols[k]
+				merged := mergeLevels(cur.Levels, overlay.Levels)
+				out.Symbols[k] = model.KeySymbols{Levels: merged}
+			}
+		}
 	}
 
 	// Stage 3: apply substitutions as a final character-level pass. Each

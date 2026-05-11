@@ -1,0 +1,10 @@
+name: Belarusian extras (on Russian Cyrillic base)
+description: |
+  Belarusian-specific letter: ў (short-u, Byelorussian_shortu). Placed
+  at AltGr of the underlying у key — same key wherever ЙЦУКЕН puts it
+  or wherever Russian phonetic puts Cyrillic_u.
+letter_overlays:
+  Cyrillic_u: { levels: ["", "", Byelorussian_shortu, Byelorussian_SHORTU] }
+  Cyrillic_U: { levels: ["", "", Byelorussian_shortu, Byelorussian_SHORTU] }
+includes:
+  - level3(ralt_switch)

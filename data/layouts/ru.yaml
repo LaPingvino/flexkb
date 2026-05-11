@@ -69,3 +69,23 @@ variants:
     physical: iso
     transformation: ycuken
     substitutions: [~latin-cyrillic-phonetic]
+
+  # Russian + Ukrainian — AltGr unlocks і/ї/є/ґ on the underlying Cyrillic
+  # cognate keys without leaving the Russian layout.
+  - name: with-ukrainian
+    description: Russian + Ukrainian extras
+    physical: iso
+    transformation: ycuken
+    additions: [ukrainian-extras]
+
+  - name: with-belarusian
+    description: Russian + Belarusian ў
+    physical: iso
+    transformation: ycuken
+    additions: [belarusian-extras]
+
+  - name: with-ukrainian-belarusian
+    description: Russian + Ukrainian + Belarusian
+    physical: iso
+    transformation: ycuken
+    additions: [ukrainian-extras, belarusian-extras]
