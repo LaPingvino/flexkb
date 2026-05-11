@@ -1,21 +1,46 @@
-name: Vietnamese tone marks (Telex-style)
+name: Vietnamese letters + tone dead keys at Telex positions
 description: |
-  Vietnamese has six tones marked by diacritics: ngang (level), huyền
-  (à grave), sắc (á acute), hỏi (ả hook), ngã (ã tilde), nặng (ạ
-  belowdot). This addition places the dead keys for each tone on AltGr
-  level over the home row. Real Vietnamese typing needs an IME for the
-  full Telex / VNI input methods; this is a starting overlay.
-overlays:
-  # F-row dead keys for tone marks
-  AC04: { levels: ["", "", dead_grave] }       # f → tone huyền (`)
-  AC05: { levels: ["", "", dead_acute] }       # g → tone sắc (´)
-  AC06: { levels: ["", "", dead_hook] }        # h → tone hỏi (̉)
-  AC07: { levels: ["", "", dead_tilde] }       # j → tone ngã (˜)
-  AC08: { levels: ["", "", dead_belowdot] }    # k → tone nặng (̣)
+  Vietnamese, fully accessible without an IME. Two halves:
+
+  **Vietnamese-specific letters** — directly on AltGr (no horn-then-vowel
+  stacking needed):
+    AltGr+a → ă      AltGr+Shift+a → Â (a-circumflex)
+    AltGr+e → ê      AltGr+o → ô
+    AltGr+u → ư      AltGr+w → ơ
+    AltGr+d → đ
+
+  **Tone-mark dead keys** at Telex-muscle-memory positions:
+    AltGr+f → dead_grave     (huyền  ` — type AltGr+f, then a → à)
+    AltGr+s → dead_acute     (sắc    ´)
+    AltGr+r → dead_hook      (hỏi    ̉ )
+    AltGr+x → dead_tilde     (ngã    ˜)
+    AltGr+j → dead_belowdot  (nặng   ̣ )
+
+  So typing "phở" is: p → h → AltGr+w (ơ) → AltGr+r (dead_hook) → o
+  ...wait, that's still stacked. Better path: AltGr+w gives ơ, then
+  AltGr+r dead_hook composes with the ơ → ở. Three keystrokes for ở.
+
+  Alternative for the most common case: pair with the `intl` addition
+  and you also get tone marks at TLDE / AltGr+' etc. Or use ibus-unikey /
+  fcitx5-unikey for full Telex/VNI input on top of this base.
+
+  No stacking-of-dead-keys needed for the LETTERS themselves; only for
+  combining tone+vowel, which Vietnamese fundamentally requires (every
+  toned vowel = base vowel + tone mark, that's how Vietnamese is built).
 letter_overlays:
-  a: { levels: ["", "", abreve, Abreve] }
-  d: { levels: ["", "", dstroke, Dstroke] }
+  a: { levels: ["", "", abreve, acircumflex] }
   e: { levels: ["", "", ecircumflex, Ecircumflex] }
   o: { levels: ["", "", ocircumflex, Ocircumflex] }
+  d: { levels: ["", "", dstroke, Dstroke] }
+  u: { levels: ["", "", uhorn, Uhorn] }
+  w: { levels: ["", "", ohorn, Ohorn] }
+  # Tone-mark dead keys on Telex letter positions — AltGr modifier so
+  # the underlying Latin letter still works at levels 1+2 for normal
+  # typing. Compose with a vowel after pressing.
+  f: { levels: ["", "", dead_grave] }
+  s: { levels: ["", "", dead_acute] }
+  r: { levels: ["", "", dead_hook] }
+  x: { levels: ["", "", dead_tilde] }
+  j: { levels: ["", "", dead_belowdot] }
 includes:
   - level3(ralt_switch)

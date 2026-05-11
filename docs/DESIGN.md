@@ -198,3 +198,39 @@ files just add. `flexkb paths` shows the resolved chain.
   on dead overlays, addition-clobbers-base, etc.
 - `tests/coverage_test.go`: reports per-variant key diffs against the
   system xkb tree as a quality bar.
+
+## Future opportunities (not yet implemented)
+
+### Indic script generalization
+The seven Indic substitutions we ship (Devanagari, Bengali, Tamil,
+Telugu, Kannada, Malayalam, Gujarati, Gurmukhi, Oriya) all share the
+Brahmic phonological structure: same consonant series by point of
+articulation (velars k-kh-g-gh-ṅ, palatals c-ch-j-jh-ñ, etc.), same
+vowel inventory (a, ā, i, ī, u, ū, e, ai, o, au), same virama (◌्),
+same matra patterns. Each script is the same logical mapping with
+different Unicode codepoint ranges.
+
+A future "Indic phonetic template + per-script codepoint table" model
+would collapse seven 60-line substitution files into one template plus
+seven ~30-line codepoint tables. The same pattern could apply to Slavic
+Cyrillic dialects (Bulgarian, Ukrainian, etc.) once the base phonetic
+substitution mechanism is widely-shared. Worth exploring once the
+broader xkb-replacement story is more battle-tested.
+
+### Vietnamese without dead-key stacking
+The current vietnamese-tone addition makes ư/ơ/ă/â/ê/ô/đ directly
+accessible on AltGr (no horn-then-vowel composition needed) AND places
+tone-mark dead keys on Telex-muscle-memory positions (AltGr+f for
+huyền, AltGr+s for sắc, etc.). A toned vowel is still inherently
+"base vowel + tone mark" — that's how Vietnamese works — but every
+non-toned Vietnamese letter is one keystroke.
+
+### Options modularization
+xkb's runtime "options" (Caps→Ctrl, AltGr placement choice, compose-key
+location, kill-X-server keybind) are currently pure passthrough.
+Modelling them as their own module type would let users compose-and-
+pick the option set the same way they pick a transformation.
+
+### Compose tables, key types, group switching
+See the README for the unhandled long-tail of xkb features. Each is
+non-trivial; none essential for the core thesis.

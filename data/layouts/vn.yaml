@@ -1,14 +1,30 @@
 file: vn
 variants:
+  # All Vietnamese letters AND tone-mark dead keys directly accessible on
+  # Telex-positioned AltGr. No IME required; no horn-then-vowel stacking
+  # for the letters themselves.
   - name: basic
-    description: Vietnamese
+    description: Vietnamese (Telex-positioned dead keys + direct letters)
     physical: iso
     transformation: qwerty
     additions: [vietnamese-tone]
     default: true
 
   - name: dvorak
-    description: Vietnamese (Dvorak)
+    description: Vietnamese (Dvorak base, Telex-positioned dead keys + direct letters)
     physical: iso
     transformation: dvorak
     additions: [vietnamese-tone]
+
+  - name: intl
+    description: Vietnamese stacked on intl (additional dead keys from intl)
+    physical: iso
+    transformation: qwerty
+    additions: [intl, vietnamese-tone]
+
+  # Bare layout for use with an IME (ibus-unikey, fcitx5-unikey). The IME
+  # handles Telex/VNI composition; flexkb just provides the base keyboard.
+  - name: ime-base
+    description: Vietnamese (bare QWERTY, intended for use with an IME)
+    physical: iso
+    transformation: qwerty
