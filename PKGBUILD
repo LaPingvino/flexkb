@@ -38,10 +38,12 @@ optdepends=('chromium: enables `flexkb gui --engine=lorca` (chromeless app windo
 # (libxkbcommon, xorg-server, gnome-control-center, etc.).
 provides=("xkeyboard-config=${_xkbcver}")
 conflicts=('xkeyboard-config')
-# Build deps: go for the binary, gcc/pkgconf for CGO+webkit headers.
-# Crucially NOT xkeyboard-config — we fetch a pinned tarball below
-# instead of reading the live system.
-makedepends=('go' 'gcc' 'pkgconf')
+# Build deps: go for the binary, gcc/pkgconf for CGO+webkit headers,
+# meson/ninja/python/libxslt to build xkeyboard-config from its tarball
+# (the .part files in rules/ need assembly into rules/evdev,
+# rules/evdev.lst, rules/evdev.xml etc. — that's xkeyboard-config's own
+# meson build, not just file copy).
+makedepends=('go' 'gcc' 'pkgconf' 'meson' 'ninja' 'python' 'libxslt' 'gettext' 'xkbcomp')
 # Pin the upstream xkeyboard-config we mirror anything-not-yet-
 # modularised from. Tarball lives in $srcdir/xkeyboard-config-X.Y/
 # after extraction.
@@ -52,6 +54,26 @@ sha256sums=('SKIP')
 install=flexkb.install
 
 build() {
+    # Step 1 — build xkeyboard-config from its tarball so the .part
+    # source files in rules/ are assembled into the actual rules/evdev,
+    # rules/evdev.lst, rules/evdev.xml etc. that xkbcommon expects.
+    # Without this step we'd ship the source tree and xkbcommon would
+    # fail to load any keymap.
+    cd "$srcdir/xkeyboard-config-${_xkbcver}"
+    arch-meson . _build
+    meson compile -C _build
+    DESTDIR="$srcdir/xkbc-install" meson install -C _build
+    # Assembled upstream xkb tree:
+    _xkbc_tree="$srcdir/xkbc-install/usr/share/X11/xkb"
+    if [[ ! -f "$_xkbc_tree/rules/evdev" ]]; then
+        # Some xkeyboard-config versions install under
+        # /usr/share/xkeyboard-config-2 instead. Find it either way.
+        _xkbc_tree="$srcdir/xkbc-install/usr/share/xkeyboard-config-2"
+    fi
+    [[ -f "$_xkbc_tree/rules/evdev" ]] || \
+        { echo "fatal: xkeyboard-config build didn't produce rules/evdev"; exit 1; }
+
+    # Step 2 — build the flexkb binary.
     cd "$startdir"
     # CGO_ENABLED=1 is required by the webview engine (webkit2gtk-4.1).
     # The lorca engine has no link-time deps (just runs a system chromium
@@ -62,13 +84,14 @@ build() {
     go build -tags 'webview lorca' \
         -ldflags "-s -w -X main.version=$pkgver" -o flexkb ./cmd/flexkb
 
-    # Run our build pipeline: generate modular xkb files into pkg-staging/,
-    # then copy everything else verbatim from the *pinned* upstream
-    # xkeyboard-config tarball. Reading from $srcdir/xkeyboard-config-X.Y
-    # rather than the live system avoids the self-amputation loop
-    # described at the top of this file.
+    # Step 3 — run our build pipeline against the freshly-assembled
+    # upstream tree. Generates modular xkb files into pkg-staging/,
+    # copies everything else verbatim from the assembled tarball.
     rm -rf "$srcdir/staging"
-    ./flexkb build --xkb "$srcdir/xkeyboard-config-${_xkbcver}" "$srcdir/staging"
+    ./flexkb build --xkb "$_xkbc_tree" "$srcdir/staging"
+    # Stash the path for check() — exported via a file because
+    # makepkg runs build() and check() in fresh subshells.
+    echo "$_xkbc_tree" > "$srcdir/.xkbc_tree_path"
 }
 
 check() {
@@ -80,8 +103,10 @@ check() {
     # The drop-in promise: the built tree must be a strict superset of the
     # upstream xkeyboard-config tree we replace. Anything missing fails the
     # package build, so a regression in the generator can't silently ship.
-    # Reference is the pinned tarball, not the live system.
-    ./flexkb dropin-check "$srcdir/staging" "$srcdir/xkeyboard-config-${_xkbcver}"
+    # Reference is the assembled upstream tree from build().
+    local _xkbc_tree
+    _xkbc_tree="$(cat "$srcdir/.xkbc_tree_path")"
+    ./flexkb dropin-check "$srcdir/staging" "$_xkbc_tree"
 }
 
 package() {
