@@ -34,9 +34,3 @@ variants:
     transformation: qwerty
     additions: [bopomofo-pinyin-letter-overlay]
 
-  # Older simple substitution kept for back-compat (decorative output).
-  - name: bopomofo
-    description: Bopomofo (simple Latin→Zhuyin substitution, decorative only)
-    physical: iso
-    transformation: qwerty
-    substitutions: [latin-to-bopomofo]

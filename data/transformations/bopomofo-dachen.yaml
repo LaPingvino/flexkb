@@ -6,10 +6,11 @@ description: |
   Bopomofo symbol; pair with an IME like ibus-chewing for Mandarin
   syllable+tone composition.
 
-  This is the proper positional form of Bopomofo input — distinct from
-  the naive `latin-to-bopomofo` substitution (which is decorative only).
-  Mandarin tone marks (˙ˊˇˋ) are on the number row at AE03/AE04/AE06/
-  AE07 (positions 3,4,6,7 = light/2nd/3rd/4th tone).
+  Alternative: bopomofo-pinyin-letter-overlay addition gives Pinyin-
+  phonetic Bopomofo where each Latin letter key carries up to 4
+  related Bopomofo symbols. Mandarin tone marks (˙ˊˇˋ) are on the
+  number row at AE03/AE04/AE06/AE07 (positions 3,4,6,7 = light/2nd/3rd/
+  4th tone) of this Da-Chen transformation.
 keys:
   TLDE: { levels: [grave, asciitilde] }
   AE01: { levels: [U3105, exclam] }     # ㄅ
