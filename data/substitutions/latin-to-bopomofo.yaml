@@ -1,16 +1,19 @@
-name: Latin → Bopomofo (Mandarin phonetic / Zhuyin)
+name: Latin → Bopomofo (naive phonetic — decorative output only)
 description: |
-  Maps each Latin letter to its Bopomofo (Zhuyin / 注音符號) cognate.
-  Bopomofo (U3100-U312F) is Taiwan's phonetic input system for Mandarin.
-  Each symbol = one Mandarin sound (consonant or vowel).
+  CAVEAT: This is a naive single-letter cognate mapping, NOT the standard
+  Taiwanese Da-Chen Bopomofo keyboard layout (which is positional, not
+  phonetic) and NOT Pinyin input (which works at syllable level —
+  "wo" → ㄨㄛ doesn't match w→ㄨ + o→ㄛ at the keyboard level).
 
-  Single-letter approximation — Bopomofo's multi-letter combos like
-  zh/ch/sh can't be expressed by per-letter substitution. For full
-  Bopomofo input (with multi-char composition + tone marks), an IME
-  like ibus-chewing or fcitx5-chewing is the practical path.
+  Real Bopomofo input wants either:
+  - A positional bopomofo-dachen.yaml transformation (TODO — would
+    follow the same pattern as Kedmanee for Thai), or
+  - An IME like ibus-chewing / fcitx5-chewing for Pinyin→Bopomofo
+    syllable composition with tone marks.
 
-  Compose on QWERTY for the standard Bopomofo positions on a typical
-  Taiwanese keyboard layout.
+  This substitution is useful only for "decorative phonetic output" —
+  showing rough Bopomofo-like glyphs for Latin text. Not a real input
+  method.
 map:
   b: U3105   # ㄅ
   B: U3105
