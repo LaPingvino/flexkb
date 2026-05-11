@@ -43,7 +43,7 @@ conflicts=('xkeyboard-config')
 # (the .part files in rules/ need assembly into rules/evdev,
 # rules/evdev.lst, rules/evdev.xml etc. — that's xkeyboard-config's own
 # meson build, not just file copy).
-makedepends=('go' 'gcc' 'pkgconf' 'meson' 'ninja' 'python' 'libxslt' 'gettext' 'xkbcomp')
+makedepends=('go' 'gcc' 'pkgconf' 'meson' 'ninja' 'python' 'libxslt' 'gettext' 'xorg-xkbcomp')
 # Pin the upstream xkeyboard-config we mirror anything-not-yet-
 # modularised from. Tarball lives in $srcdir/xkeyboard-config-X.Y/
 # after extraction.
