@@ -1,0 +1,58 @@
+name: Latin → Armenian (phonetic)
+description: |
+  Phonetic Armenian substitution. Each Latin letter maps to its closest
+  Armenian cognate. Apply over any Latin transformation to type Armenian
+  via AltGr+sound. Convention follows the Armenian phonetic xkb variant.
+map:
+  a: Armenian_AYB
+  A: Armenian_ayb
+  b: Armenian_BEN
+  B: Armenian_ben
+  c: Armenian_CA
+  C: Armenian_ca
+  d: Armenian_DA
+  D: Armenian_da
+  e: Armenian_YECH
+  E: Armenian_yech
+  f: Armenian_FEH
+  F: Armenian_feh
+  g: Armenian_GIM
+  G: Armenian_gim
+  h: Armenian_HO
+  H: Armenian_ho
+  i: Armenian_INI
+  I: Armenian_ini
+  j: Armenian_JE
+  J: Armenian_je
+  k: Armenian_KEN
+  K: Armenian_ken
+  l: Armenian_LYUN
+  L: Armenian_lyun
+  m: Armenian_MEN
+  M: Armenian_men
+  n: Armenian_NU
+  N: Armenian_nu
+  o: Armenian_VO
+  O: Armenian_vo
+  p: Armenian_PE
+  P: Armenian_pe
+  q: Armenian_KE
+  Q: Armenian_ke
+  r: Armenian_RA
+  R: Armenian_ra
+  s: Armenian_SE
+  S: Armenian_se
+  t: Armenian_TO
+  T: Armenian_to
+  u: Armenian_VEW
+  U: Armenian_vew
+  v: Armenian_VEV
+  V: Armenian_vev
+  w: Armenian_VEV
+  W: Armenian_vev
+  x: Armenian_XEH
+  X: Armenian_xeh
+  y: Armenian_HI
+  Y: Armenian_hi
+  z: Armenian_ZA
+  Z: Armenian_za

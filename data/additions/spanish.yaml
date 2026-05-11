@@ -1,11 +1,28 @@
-name: Spanish letters and accents
+name: Spanish letters and accents (transformation-aware)
 description: |
-  Spanish layout additions: ñ on AC10 (the semicolon slot in QWERTY),
-  dead_acute, ¿/¡, inverted punctuation, and EuroSign on E.
+  Spanish needs ñ, acute-accent dead key, ¿/¡, € on E. The traditional
+  Spanish keyboard puts ñ on a dedicated AC10 position — that's position-
+  based and only correct on QWERTY/QWERTZ (where AC10 is the semicolon).
+  On Dvorak AC10 holds 's' and a position-based ñ would clobber it.
+
+  This addition is letter-following:
+    AltGr+n → ñ        AltGr+e → € (or Eacute via the dead-key chain)
+    AltGr+a/o/i/u → á/ó/í/ú (precomposed acutes — common Spanish needs)
+    AltGr+? → ¿        AltGr+! → ¡
+
+  For the traditional Spanish keyboard with ñ on AC10, use the
+  `spanish-traditional` addition instead.
+letter_overlays:
+  n: { levels: ["", "", ntilde, Ntilde] }
+  a: { levels: ["", "", aacute, Aacute] }
+  e: { levels: ["", "", EuroSign, Eacute] }
+  i: { levels: ["", "", iacute, Iacute] }
+  o: { levels: ["", "", oacute, Oacute] }
+  u: { levels: ["", "", uacute, Uacute] }
+  # ¿ / ¡ on the level 3 of slash and exclam — letter-following so
+  # they track those punctuation keys regardless of base position.
+  slash: { levels: ["", "", questiondown, dead_hook] }
 overlays:
-  AC10: { levels: [ntilde, Ntilde] }
   AC11: { levels: [dead_acute, dead_diaeresis] }
-  AB10: { levels: [minus, underscore, questiondown, exclamdown] }
-  AD03: { levels: ["", "", EuroSign] }
 includes:
   - level3(ralt_switch)

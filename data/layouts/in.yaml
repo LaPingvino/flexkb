@@ -1,0 +1,20 @@
+file: in
+variants:
+  - name: hindi-phonetic
+    description: Hindi (Devanagari phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-devanagari-phonetic]
+    default: true
+
+  - name: hindi-phonetic-dvorak
+    description: Hindi (Devanagari phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-devanagari-phonetic]
+
+  - name: hindi-phonetic-colemak
+    description: Hindi (Devanagari phonetic, Colemak base)
+    physical: iso
+    transformation: colemak
+    substitutions: [latin-devanagari-phonetic]

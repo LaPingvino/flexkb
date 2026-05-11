@@ -1,0 +1,20 @@
+file: am
+variants:
+  - name: phonetic
+    description: Armenian (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-armenian-phonetic]
+    default: true
+
+  - name: phonetic-dvorak
+    description: Armenian (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-armenian-phonetic]
+
+  - name: phonetic-colemak
+    description: Armenian (phonetic, Colemak base)
+    physical: iso
+    transformation: colemak
+    substitutions: [latin-armenian-phonetic]

@@ -1,0 +1,20 @@
+file: ge
+variants:
+  - name: phonetic
+    description: Georgian (phonetic, QWERTY base)
+    physical: iso
+    transformation: qwerty
+    substitutions: [latin-georgian-phonetic]
+    default: true
+
+  - name: phonetic-dvorak
+    description: Georgian (phonetic, Dvorak base)
+    physical: iso
+    transformation: dvorak
+    substitutions: [latin-georgian-phonetic]
+
+  - name: phonetic-colemak
+    description: Georgian (phonetic, Colemak base)
+    physical: iso
+    transformation: colemak
+    substitutions: [latin-georgian-phonetic]

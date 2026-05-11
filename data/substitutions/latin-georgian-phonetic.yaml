@@ -1,0 +1,58 @@
+name: Latin → Georgian (phonetic)
+description: |
+  Phonetic Georgian substitution mapping Latin letters to their Mkhedruli
+  cognates. Georgian has no upper/lowercase distinction in modern usage,
+  so the same letter is used for both levels of the underlying Latin.
+map:
+  a: Georgian_an
+  A: Georgian_an
+  b: Georgian_ban
+  B: Georgian_ban
+  c: Georgian_chin
+  C: Georgian_chin
+  d: Georgian_don
+  D: Georgian_don
+  e: Georgian_en
+  E: Georgian_en
+  f: Georgian_phar
+  F: Georgian_phar
+  g: Georgian_gan
+  G: Georgian_gan
+  h: Georgian_he
+  H: Georgian_he
+  i: Georgian_in
+  I: Georgian_in
+  j: Georgian_jhan
+  J: Georgian_jhan
+  k: Georgian_kan
+  K: Georgian_kan
+  l: Georgian_las
+  L: Georgian_las
+  m: Georgian_man
+  M: Georgian_man
+  n: Georgian_nar
+  N: Georgian_nar
+  o: Georgian_on
+  O: Georgian_on
+  p: Georgian_par
+  P: Georgian_par
+  q: Georgian_qar
+  Q: Georgian_qar
+  r: Georgian_rae
+  R: Georgian_rae
+  s: Georgian_san
+  S: Georgian_san
+  t: Georgian_tan
+  T: Georgian_tan
+  u: Georgian_un
+  U: Georgian_un
+  v: Georgian_vin
+  V: Georgian_vin
+  w: Georgian_vin
+  W: Georgian_vin
+  x: Georgian_xan
+  X: Georgian_xan
+  y: Georgian_we
+  Y: Georgian_we
+  z: Georgian_zen
+  Z: Georgian_zen

@@ -1,20 +1,29 @@
 file: es
 variants:
+  # Traditional ES keyboard: QWERTY + dedicated ñ key on AC10. This is
+  # what you'd get buying a Spanish-labelled keyboard.
   - name: basic
-    description: Spanish
+    description: Spanish (traditional, ñ on AC10)
     physical: iso
     transformation: qwerty
-    additions: [spanish]
+    additions: [spanish-traditional]
     default: true
 
+  # Modern Spanish on alternative bases: ñ follows the n letter (AltGr+n).
   - name: dvorak
-    description: Spanish (Dvorak)
+    description: Spanish (Dvorak base, ñ on AltGr+n)
     physical: iso
     transformation: dvorak
     additions: [spanish]
 
   - name: colemak
-    description: Spanish (Colemak)
+    description: Spanish (Colemak base, ñ on AltGr+n)
     physical: iso
     transformation: colemak
+    additions: [spanish]
+
+  - name: workman
+    description: Spanish (Workman base, ñ on AltGr+n)
+    physical: iso
+    transformation: workman
     additions: [spanish]

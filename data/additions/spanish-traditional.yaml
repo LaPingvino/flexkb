@@ -1,0 +1,17 @@
+name: Spanish traditional (ñ on AC10)
+description: |
+  Strict traditional Spanish keyboard. ñ has a dedicated physical key at
+  AC10 (right of L), matching what's printed on Spanish-labelled
+  hardware. Only makes sense on QWERTY/QWERTZ base — on Dvorak AC10
+  holds 's' and you'd lose it. Pair with `transformation: qwerty`
+  for the classic Spanish keyboard.
+
+  On alternative bases, use the modern letter-following `spanish` addition
+  instead — ñ on AltGr+n, etc.
+overlays:
+  AC10: { levels: [ntilde, Ntilde] }
+  AC11: { levels: [dead_acute, dead_diaeresis] }
+  AB10: { levels: [minus, underscore, questiondown, exclamdown] }
+  AD03: { levels: ["", "", EuroSign] }
+includes:
+  - level3(ralt_switch)

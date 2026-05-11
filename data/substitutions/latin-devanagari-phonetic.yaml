@@ -1,0 +1,68 @@
+name: Latin → Devanagari (phonetic / transliteration)
+description: |
+  Phonetic transliteration substitution for Devanagari (used by Hindi,
+  Sanskrit, Marathi, Nepali). Each Latin letter maps to its closest
+  Devanagari consonant or vowel. The mapping follows ITRANS-style
+  conventions:
+
+    k → क   g → ग   c → च   j → ज   t → त   d → द
+    n → न   p → प   b → ब   m → म   y → य   r → र
+    l → ल   v → व   s → स   h → ह
+    a → अ   i → इ   u → उ   e → ए   o → ओ
+
+  Devanagari syllabic composition (combining consonants with vowel
+  matras) needs an IME on top — flexkb only provides the basic glyph
+  positions. For real Hindi typing, pair this with an IME like ibus-m17n.
+map:
+  a: U0905   # अ
+  A: U0906   # आ
+  b: U092C   # ब
+  B: U092D   # भ
+  c: U091A   # च
+  C: U091B   # छ
+  d: U0926   # द
+  D: U0927   # ध
+  e: U090F   # ए
+  E: U0910   # ऐ
+  f: U092B   # फ
+  F: U092B   # फ
+  g: U0917   # ग
+  G: U0918   # घ
+  h: U0939   # ह
+  H: U0939   # ह
+  i: U0907   # इ
+  I: U0908   # ई
+  j: U091C   # ज
+  J: U091D   # झ
+  k: U0915   # क
+  K: U0916   # ख
+  l: U0932   # ल
+  L: U0933   # ळ
+  m: U092E   # म
+  M: U092E   # म
+  n: U0928   # न
+  N: U0923   # ण
+  o: U0913   # ओ
+  O: U0914   # औ
+  p: U092A   # प
+  P: U092A   # प
+  q: U0915   # क (k fallback)
+  Q: U0915
+  r: U0930   # र
+  R: U0931   # ऱ
+  s: U0938   # स
+  S: U0936   # श
+  t: U0924   # त
+  T: U0925   # थ
+  u: U0909   # उ
+  U: U090A   # ऊ
+  v: U0935   # व
+  V: U0935   # व
+  w: U0935   # व
+  W: U0935   # व
+  x: U0915U094D U0937   # क्ष conjunct (won't really render; placeholder)
+  X: U0915U094D U0937
+  y: U092F   # य
+  Y: U092F   # य
+  z: U091C   # ज (z → j)
+  Z: U091C
