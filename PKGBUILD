@@ -17,7 +17,7 @@
 
 pkgname=flexkb
 pkgver=0.1.0
-pkgrel=3
+pkgrel=4
 _xkbcver=2.47
 pkgdesc="Modular XKB layout generator and drop-in xkeyboard-config replacement"
 # CGO is enabled to link the webview engine, so the package is no

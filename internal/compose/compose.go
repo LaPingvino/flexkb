@@ -389,12 +389,15 @@ func ComposeFromPartsFull(spec model.LayoutSpec, phys model.Physical, trans mode
 				if prev, ok := claimedRank[k]; ok && rank < prev {
 					continue
 				}
-				// Letter overlays stay in force mode — their whole
-				// purpose is to override level-1 with the letter-
-				// following replacement (regional indicators replacing
-				// letters, accent forms etc.). Mode is a positional-
-				// overlay concept.
-				writeLevels(k, e.overlay.Levels, "letter", e.addName, "")
+				// Letter overlays respect per-entry Mode too. Default
+				// is force (regional indicators replacing letters,
+				// emoji-flags etc.). Punctuation-anchored overlays
+				// (intl's apostrophe/minus/comma/period/...) should
+				// set mode: nudge so they don't destroy the digit
+				// row when the anchor letter happens to live on AZERTY
+				// AE04/AE06/etc. — base content at L1/L2 survives,
+				// overlay slides up to L3/L4.
+				writeLevels(k, e.overlay.Levels, "letter", e.addName, e.overlay.Mode)
 				if rank > claimedRank[k] {
 					claimedRank[k] = rank
 				}
@@ -608,6 +611,15 @@ func mergeLevelsNudge(a, b []string) ([]string, []int) {
 		}
 		if out[i] == "" {
 			out[i] = ov
+			landed[i] = i
+			continue
+		}
+		// Same value already there — no-op, no nudge needed. This
+		// keeps overlays that redundantly restate the base's L1/L2
+		// (e.g. intl's `minus` letter_overlay levels[0]=minus on
+		// QWERTY AE11 where base L1 is already minus) from sliding
+		// the L3/L4 decorations off the end and dropping them.
+		if out[i] == ov {
 			landed[i] = i
 			continue
 		}

@@ -7,18 +7,21 @@ description: |
   the correct intl variant on QWERTY (us-intl), Dvorak (us-dvorak-intl),
   Colemak, Workman, Norman — one addition, every base.
 
-# Position-based level 3/4 decorations. Levels 1 and 2 are pass-through
-# (empty strings) so the underlying transformation's keys aren't
-# clobbered — important on bases like AZERTY that put digits on L2,
-# Dvorak that puts brackets on AE11/AE12, etc.
-#
-# Dead-key keysyms (dead_grave/dead_tilde/dead_circumflex) used to live
-# on TLDE L1/L2 and AE06 L2 — which assumed a QWERTY base with grave/
-# tilde at TLDE and caret at AE06 L2. On AZERTY that overwrote the
-# real content (TLDE = ²/~, AE06 L2 = "6"). They're now on L3/L4 so
-# dead keys remain accessible via AltGr, regardless of base.
+# nudge merge mode is the spine of intl's cross-base behaviour. Every
+# overlay below uses nudge semantics: if the base transformation
+# already occupies a slot, the overlay slides up to the first empty
+# level rather than clobbering. On QWERTY (where TLDE L1/L2 are grave/
+# asciitilde and AC11 L1/L2 are apostrophe/quotedbl) you get the
+# traditional us-intl layout. On AZERTY (where AE06 L2 is the digit
+# "6" and AE04 L1 is apostrophe) the digit row and punctuation are
+# preserved and the dead keys arrive at AltGr instead. One addition,
+# every Latin base, no clobber.
+mode: nudge
 overlays:
-  TLDE: { levels: ["", "", dead_grave, dead_tilde] }
+  # Classic us-intl dead-key positions. On QWERTY these land at L1/L2
+  # because TLDE/AE-row L1/L2 are mostly non-alphabetic; on AZERTY the
+  # digit row holds L2 so the dead keys slide up to L3/L4 via nudge.
+  TLDE: { levels: [dead_grave, dead_tilde, dead_grave, dead_tilde] }
   AE01: { levels: ["", "", exclamdown, onesuperior] }
   AE02: { levels: ["", "", twosuperior, dead_doubleacute] }
   AE03: { levels: ["", "", threesuperior, dead_macron] }
@@ -63,18 +66,23 @@ letter_overlays:
   # Dvorak (period on AD03). This is how the user's existing "AltGr+period,
   # then i = ı / dead_abovedot on I = İ" muscle memory keeps working
   # across transformations.
-  # Punctuation tokens — letter-following with fallbacks for bases that
-  # don't expose the primary token at level 1 (AZERTY's brackets are
-  # behind AltGr; BÉPO/Turkish use different punctuation positions).
-  # First-match-wins on the fallback chain.
-  apostrophe:   { levels: [dead_acute, dead_diaeresis, apostrophe, quotedbl], fallback: [ugrave, eacute] }
-  semicolon:    { levels: ["", "", paragraph, degree], fallback: [comma, m] }
-  comma:        { levels: [comma, less, ccedilla, Ccedilla], fallback: [semicolon] }
-  period:       { levels: [period, greater, dead_abovedot, dead_caron], fallback: [semicolon, comma] }
-  slash:        { levels: [slash, question, questiondown, dead_hook], fallback: [exclam, colon] }
-  minus:        { levels: [minus, underscore, yen, dead_belowdot], fallback: [parenright, equal] }
-  bracketleft:  { levels: ["", "", guillemotleft, leftdoublequotemark], fallback: [parenleft, dollar] }
-  bracketright: { levels: ["", "", guillemotright, rightdoublequotemark], fallback: [parenright, asterisk] }
+  #
+  # Each entry below uses mode: nudge — the punctuation L1/L2 from the
+  # base transformation is preserved; intl's overlay levels slide up to
+  # the first empty slot. On QWERTY apostrophe (AC11 = [apostrophe,
+  # quotedbl]) you get [apostrophe, quotedbl, dead_acute, dead_diaeresis]
+  # — apostrophe key still types an apostrophe, dead_acute on AltGr.
+  # On AZERTY (AE04 = [apostrophe, "4"]) you get [apostrophe, "4",
+  # dead_acute, dead_diaeresis] — digit row preserved. On both bases
+  # AltGr+' produces dead_acute, AltGr+Shift+' produces dead_diaeresis.
+  apostrophe:   { levels: [dead_acute, dead_diaeresis, apostrophe, quotedbl], fallback: [ugrave, eacute], mode: nudge }
+  semicolon:    { levels: ["", "", paragraph, degree], fallback: [comma, m], mode: nudge }
+  comma:        { levels: [comma, less, ccedilla, Ccedilla], fallback: [semicolon], mode: nudge }
+  period:       { levels: [period, greater, dead_abovedot, dead_caron], fallback: [semicolon, comma], mode: nudge }
+  slash:        { levels: [slash, question, questiondown, dead_hook], fallback: [exclam, colon], mode: nudge }
+  minus:        { levels: [minus, underscore, yen, dead_belowdot], fallback: [parenright, equal], mode: nudge }
+  bracketleft:  { levels: ["", "", guillemotleft, leftdoublequotemark], fallback: [parenleft, dollar], mode: nudge }
+  bracketright: { levels: ["", "", guillemotright, rightdoublequotemark], fallback: [parenright, asterisk], mode: nudge }
 
 includes:
   - level3(ralt_switch)

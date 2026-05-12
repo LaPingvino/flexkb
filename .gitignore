@@ -19,3 +19,9 @@
 
 # Generated XKB tree from convert/build commands
 /generated/
+
+# Arch makepkg build artifacts
+/pkg/
+/src/
+/*.pkg.tar.zst
+/xkeyboard-config-*.tar.*

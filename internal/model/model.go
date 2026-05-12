@@ -31,6 +31,15 @@ type LetterOverlay struct {
 	// low-priority overlays with no primary or fallback match just don't
 	// land anywhere.
 	Priority string `yaml:"priority,omitempty"`
+	// Mode mirrors Addition.Mode but per letter_overlay entry. Same
+	// values: "" / "force" (default — overwrite), "nudge" (overlay
+	// slides up if base already occupies the slot), "claim" (existing
+	// slides up to make room). Use "nudge" for intl-style punctuation
+	// overlays that track tokens like apostrophe/minus across bases —
+	// on AZERTY the apostrophe key is ALSO the 4-digit-when-shifted,
+	// so blindly forcing L1/L2 to dead_acute/dead_diaeresis would
+	// destroy the digit row.
+	Mode string `yaml:"mode,omitempty"`
 }
 
 // PriorityRank maps the Priority string to a sortable int: high → 2,
