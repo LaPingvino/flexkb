@@ -17,7 +17,9 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"unicode"
 
+	"github.com/lapingvino/flexkb/internal/coverage"
 	"github.com/lapingvino/flexkb/internal/model"
 )
 
@@ -106,8 +108,75 @@ func Compose(root model.DataRoot, spec model.LayoutSpec) (Result, error) {
 		ctx := smartContext{Script: trans.Script, AdditionSlugs: addSlugs}
 		fillers = pickFillers(all, spec.Autofill, ctx)
 	}
-	return ComposeFromPartsFull(spec, phys, trans, adds, subs, fillers), nil
+	r := ComposeFromPartsFull(spec, phys, trans, adds, subs, fillers)
+	// Stage 5 (optional): locale-fill. Look up primary locale chars
+	// and try to place missing ones in empty slots. Keeps the test-
+	// only-input ComposeFromParts* signatures untouched; this stage
+	// requires DataRoot for the locales table so it only runs when
+	// the caller went through Compose.
+	if len(spec.LocaleFill) > 0 {
+		applyLocaleFillFromSpec(&r, root, spec)
+	}
+	return r, nil
 }
+
+// applyLocaleFillFromSpec loads the locale table and dispatches per
+// locale (primary first). Each locale's missing characters are placed
+// in turn, so a later locale can't displace an earlier one's wins.
+func applyLocaleFillFromSpec(r *Result, root model.DataRoot, spec model.LayoutSpec) {
+	b, _, err := root.ReadTopLevel("locales.yaml")
+	if err != nil {
+		r.Warnings = append(r.Warnings, "locale-fill: locales.yaml not found: "+err.Error())
+		return
+	}
+	tab, err := coverage.LoadTable(b)
+	if err != nil {
+		r.Warnings = append(r.Warnings, "locale-fill: locales.yaml parse: "+err.Error())
+		return
+	}
+	byCode := map[string]coverage.Locale{}
+	for _, l := range tab.Locales {
+		byCode[l.Code] = l
+	}
+	for _, code := range spec.LocaleFill {
+		loc, ok := byCode[code]
+		if !ok {
+			r.Warnings = append(r.Warnings, "locale-fill: unknown locale "+code)
+			continue
+		}
+		// Use the exact-case produced set so the missing list contains
+		// EVERY rune the user can't type directly — Ç as missing even
+		// when ç is present, since coverage analysis case-folds but a
+		// user typing French needs both forms to actually exist on
+		// the layout.
+		produced := producedExact(r)
+		// Build the missing-character list, preserving the locale's
+		// declared order (a curator can hint priority within the
+		// anchor-quality bucket by listing key chars earlier).
+		var missing []rune
+		seen := map[rune]bool{}
+		for _, ch := range loc.Chars {
+			lower := chToLower(ch)
+			if seen[lower] {
+				continue
+			}
+			seen[lower] = true
+			upper := chToUpper(ch)
+			// Uppercase first (more often the cascade-drop victim;
+			// lowercase usually has the addition-overlay home).
+			if upper != lower && !produced[upper] {
+				missing = append(missing, upper)
+			}
+			if !produced[lower] {
+				missing = append(missing, lower)
+			}
+		}
+		ApplyLocaleFill(r, missing, code)
+	}
+}
+
+func chToLower(r rune) rune { return unicode.ToLower(r) }
+func chToUpper(r rune) rune { return unicode.ToUpper(r) }
 
 // pickFillers selects fillers whose Categories overlap with the
 // requested set. Two special category tokens:

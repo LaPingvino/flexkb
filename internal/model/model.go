@@ -274,6 +274,19 @@ type LayoutSpec struct {
 	// applied with empty-only-merge semantics, in tag order. A literal
 	// "*" enables all categories. Empty list disables autofill.
 	Autofill []string `yaml:"autofill,omitempty,flow"`
+	// LocaleFill runs one final pass after autofill: look up the
+	// layout file's primary locale(s) in data/locales.yaml, compute
+	// which required characters are still missing from the composed
+	// symbol table, and try to place each missing character in an
+	// empty slot — anchored to a related letter where possible
+	// (Ccedilla near 'c' or near comma, Ntilde near 'n', …). Useful
+	// when a polite-merging addition like intl drops a character via
+	// nudge cascade on cross-base composition (AZERTY+intl loses Ç
+	// because the comma overlay's L4 cascades off the end). Empty
+	// list / false = disabled. Tag a list of locale codes to override
+	// the layout-file lookup ("locale_fill: [fr]" forces French even
+	// on a non-French layout file).
+	LocaleFill []string `yaml:"locale_fill,omitempty,flow"`
 	// Passthrough marks this variant as "preserve upstream verbatim" —
 	// at build time the flexkb build step reads the corresponding
 	// xkb_symbols block from the source xkb tree and embeds its raw text

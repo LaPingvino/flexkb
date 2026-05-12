@@ -140,6 +140,56 @@ func runeFold(r rune) rune {
 	return unicode.ToLower(r)
 }
 
+// keysymByRune is the lazy reverse of Keysyms — rune → keysym name.
+// Lazy-built because Keysyms is the source of truth; if anyone updates
+// it, we don't want a parallel table going stale. Both lowercase and
+// uppercase entries are populated where the Keysyms map carries them
+// (so 'ç' → "ccedilla" and 'Ç' → "Ccedilla").
+var keysymByRune map[rune]string
+
+func buildKeysymByRune() {
+	keysymByRune = make(map[rune]string, len(Keysyms))
+	for name, r := range Keysyms {
+		// First write wins. Keysyms has no duplicate-rune entries
+		// today, so this is deterministic.
+		if _, ok := keysymByRune[r]; !ok {
+			keysymByRune[r] = name
+		}
+	}
+}
+
+// EncodeRune returns the xkb keysym name that produces this rune, plus
+// ok=true on success. ASCII letters/digits/common punct return as the
+// single-char token form ("a", "5", "."), matching the Decode path.
+// Other runes consult the curated Keysyms reverse map; characters
+// outside it fall back to the "Uxxxx" hex escape form (uppercase hex,
+// 4 or 6 digits) which xkbcommon also accepts.
+func EncodeRune(r rune) (string, bool) {
+	if r == 0 {
+		return "", false
+	}
+	if r < 0x80 {
+		// ASCII letters/digits map to their single-char keysym
+		// token (xkb accepts these directly).
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
+			return string(r), true
+		}
+	}
+	if keysymByRune == nil {
+		buildKeysymByRune()
+	}
+	if name, ok := keysymByRune[r]; ok {
+		return name, true
+	}
+	// Fallback: explicit Unicode escape. xkbcommon recognises Uxxxx /
+	// Uxxxxxx; uppercase hex is the convention. Keep 4-digit form for
+	// BMP, 6-digit for supplementary planes.
+	if r <= 0xFFFF {
+		return "U" + strings.ToUpper(strings.Repeat("0", 4-len(strconv.FormatInt(int64(r), 16))) + strconv.FormatInt(int64(r), 16)), true
+	}
+	return "U" + strings.ToUpper(strings.Repeat("0", 6-len(strconv.FormatInt(int64(r), 16))) + strconv.FormatInt(int64(r), 16)), true
+}
+
 // CollectChars walks every level of every key in the composed symbols
 // map and returns the set of Unicode characters the layout can produce
 // (case-folded). The result is the input to coverage analysis.

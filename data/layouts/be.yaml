@@ -5,6 +5,13 @@ variants:
     physical: iso
     transformation: azerty
     additions: [french-accents, intl]
+    # The intl addition uses polite nudge merging which preserves the
+    # AZERTY digit row but drops a few letters off the cascade end,
+    # including Ç (Ccedilla). locale_fill recovers it by scanning for
+    # an empty slot — typically on a key already producing ç — and
+    # placing the keysym there. Listed in priority: fr first, so
+    # French-essentials win over Dutch/German when slots compete.
+    locale_fill: [fr, nl, de]
     default: true
 
   - name: nl-intl
@@ -12,9 +19,11 @@ variants:
     physical: iso
     transformation: qwerty
     additions: [intl]
+    locale_fill: [nl, fr]
 
   - name: dvorak
     description: Belgian (Dvorak)
     physical: iso
     transformation: dvorak
     additions: [french-accents]
+    locale_fill: [fr, nl]
