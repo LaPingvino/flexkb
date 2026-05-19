@@ -795,6 +795,25 @@ header { position: relative; }
 .active-chip.hidden { display: none; }
 .active-chip.warn { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn-fg); }
 
+/* Daemon-status badge mirrors active-chip styling but uses
+   muted colour by default (the daemon is informational; users
+   don't need a green-button hit for "daemon running"). Goes
+   yellow if reachable but degraded, red on probe failure. */
+.daemon-chip {
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-dim);
+  cursor: help;
+}
+.daemon-chip.hidden { display: none; }
+.daemon-chip.ok { color: var(--ok-fg); border-color: var(--ok); background: var(--ok-bg); }
+.daemon-chip.warn { color: var(--warn-fg); border-color: var(--warn-border); background: var(--warn-bg); }
+.daemon-chip.off { opacity: 0.55; }
+
 /* The "Active" tag inside a select option / list — added inline. */
 .active-mark {
   background: var(--ok-bg);

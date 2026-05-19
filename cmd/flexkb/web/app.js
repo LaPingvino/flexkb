@@ -1672,8 +1672,43 @@ fileSelect.addEventListener("change", populateVariants);
 variantSelect.addEventListener("change", loadCompose);
 loadLayouts();
 loadActive();
+loadDaemonStatus();
 
 const activeChip = document.getElementById("activeChip");
+const daemonChip = document.getElementById("daemonChip");
+
+// Poll the daemon control socket every 5s. The status badge is
+// informational — if flexkb-imed is running, show what backends
+// it has; if not, show "daemon off". Failures (socket present
+// but unreadable) show as "daemon?" so the user can investigate.
+async function loadDaemonStatus() {
+  try {
+    const res = await fetch("/api/daemon-status");
+    if (!res.ok) {
+      daemonChip.textContent = "daemon ?";
+      daemonChip.className = "daemon-chip warn";
+      return;
+    }
+    const s = await res.json();
+    if (!s.running) {
+      daemonChip.textContent = "daemon off";
+      daemonChip.className = "daemon-chip off";
+      daemonChip.title = "flexkb-imed not running. Start it with `flexkb-imed --wayland=true` or `flexkb-imed --ibus replace`.";
+    } else {
+      const backends = (s.backends && s.backends.length) ? s.backends.join(", ") : "(socket only)";
+      daemonChip.textContent = `daemon: ${backends}`;
+      daemonChip.className = "daemon-chip ok";
+      const stack = s.layout_file ? `${s.layout_file}(${s.variant || "basic"})` : "(stack info unavailable)";
+      daemonChip.title = `flexkb-imed active on ${backends}\nstack: ${stack}` + (s.im ? `\nIM: ${s.im}` : "");
+    }
+  } catch (e) {
+    daemonChip.textContent = "daemon ?";
+    daemonChip.className = "daemon-chip warn";
+  }
+}
+// Refresh status every 5s — cheap (one HTTP roundtrip to localhost)
+// and lets the badge update if the user starts/stops the daemon.
+setInterval(loadDaemonStatus, 5000);
 
 async function loadActive() {
   try {

@@ -30,6 +30,7 @@ import (
 
 	"github.com/lapingvino/flexkb/internal/compose"
 	"github.com/lapingvino/flexkb/internal/coverage"
+	"github.com/lapingvino/flexkb/internal/validate"
 	"github.com/lapingvino/flexkb/internal/model"
 	flexunicode "github.com/lapingvino/flexkb/internal/unicode"
 	"github.com/lapingvino/flexkb/internal/xkbwriter"
@@ -138,6 +139,10 @@ func startServer(rootFn func() model.DataRoot, addr string) (string, <-chan erro
 	mux.HandleFunc("/api/coverage", func(w http.ResponseWriter, r *http.Request) {
 		handleCoverage(w, r, rootFn())
 	})
+	mux.HandleFunc("/api/validate", func(w http.ResponseWriter, r *http.Request) {
+		handleValidate(w, r, rootFn())
+	})
+	mux.HandleFunc("/api/daemon-status", handleDaemonStatus)
 	mux.HandleFunc("/api/unicode", handleUnicodeSearch)
 	mux.HandleFunc("/api/save-addition", func(w http.ResponseWriter, r *http.Request) {
 		handleSaveAddition(w, r)
@@ -1089,6 +1094,116 @@ func handleCoverage(w http.ResponseWriter, r *http.Request, root model.DataRoot)
 		}
 	}
 	writeJSON(w, out)
+}
+
+// handleValidate runs the internal/validate engine against one
+// (layout, variant) and returns a richer report than /api/coverage
+// — the produced character set, per-locale gaps, AND for each
+// missing character a list of OTHER layers in data/ that would
+// supply it. The frontend renders this as actionable hints under
+// the coverage display ("missing Ç — add polish-on-intl or
+// french-accents").
+func handleValidate(w http.ResponseWriter, r *http.Request, root model.DataRoot) {
+	file := r.URL.Query().Get("file")
+	variant := r.URL.Query().Get("variant")
+	if file == "" || variant == "" {
+		http.Error(w, "file and variant query params required", http.StatusBadRequest)
+		return
+	}
+	lf, err := root.LayoutFile(file)
+	if err != nil {
+		http.Error(w, "layout file: "+err.Error(), http.StatusNotFound)
+		return
+	}
+	var spec model.LayoutSpec
+	for _, v := range lf.Variants {
+		if v.Name == variant {
+			spec = v
+			break
+		}
+	}
+	if spec.Name == "" {
+		http.Error(w, "variant not found", http.StatusNotFound)
+		return
+	}
+	reports, err := validate.ValidateVariant(root, lf, spec)
+	if err != nil {
+		http.Error(w, "validate: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	writeJSON(w, reports)
+}
+
+// handleDaemonStatus probes the flexkb-imed control socket if
+// present and returns its status, or {running: false} if no
+// daemon is reachable. Lets the GUI show "daemon: active on
+// wayland-v2 backend" or "daemon: not running" without dragging
+// in a full IPC framework.
+//
+// v1 form: GUI side just announces presence/absence. Future
+// versions will surface preedit + commit history via the same
+// socket; the protocol contract lives in DESIGN-IME.md.
+func handleDaemonStatus(w http.ResponseWriter, r *http.Request) {
+	type status struct {
+		Running    bool   `json:"running"`
+		Socket     string `json:"socket,omitempty"`
+		Backends   []string `json:"backends,omitempty"`
+		LayoutFile string `json:"layout_file,omitempty"`
+		Variant    string `json:"variant,omitempty"`
+		Error      string `json:"error,omitempty"`
+	}
+	socketPath := daemonSocketPath()
+	if socketPath == "" {
+		writeJSON(w, status{Error: "XDG_RUNTIME_DIR unset"})
+		return
+	}
+	if _, err := os.Stat(socketPath); err != nil {
+		writeJSON(w, status{Running: false, Socket: socketPath})
+		return
+	}
+	// Socket present. Probe with a status op — the daemon's
+	// control server answers with the running backends and the
+	// configured stack. Treat a probe failure as "running but
+	// unreachable" so the GUI can flag it for the user.
+	conn, err := net.DialTimeout("unix", socketPath, 500*time.Millisecond)
+	if err != nil {
+		writeJSON(w, status{Running: true, Socket: socketPath, Error: "socket present but not reachable: " + err.Error()})
+		return
+	}
+	defer conn.Close()
+	conn.SetDeadline(time.Now().Add(time.Second))
+	if _, err := conn.Write([]byte(`{"op":"status"}` + "\n")); err != nil {
+		writeJSON(w, status{Running: true, Socket: socketPath, Error: err.Error()})
+		return
+	}
+	var reply struct {
+		Backends   []string `json:"backends"`
+		LayoutFile string   `json:"layout_file"`
+		Variant    string   `json:"variant"`
+		IM         string   `json:"im"`
+	}
+	if err := json.NewDecoder(conn).Decode(&reply); err != nil {
+		writeJSON(w, status{Running: true, Socket: socketPath, Error: "decode: " + err.Error()})
+		return
+	}
+	writeJSON(w, status{
+		Running:    true,
+		Socket:     socketPath,
+		Backends:   reply.Backends,
+		LayoutFile: reply.LayoutFile,
+		Variant:    reply.Variant,
+	})
+}
+
+// daemonSocketPath returns the conventional path to the daemon's
+// control socket. Mirrors flexkb-imed's own path computation so
+// the two binaries don't drift on this constant.
+func daemonSocketPath() string {
+	xdg := os.Getenv("XDG_RUNTIME_DIR")
+	if xdg == "" {
+		return ""
+	}
+	return filepath.Join(xdg, "flexkb-imed.sock")
 }
 
 // detectCompositor returns a short label for the running compositor /

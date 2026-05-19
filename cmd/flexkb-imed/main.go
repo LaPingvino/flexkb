@@ -54,7 +54,18 @@ func main() {
 		return loadSession(log, *layoutFile, *variantName, *imFile)
 	}
 
-	if err := runMulti(log, *enableWayland, *ibusMode, factory); err != nil {
+	// Control socket: lets the GUI (and ad-hoc tooling) probe
+	// the daemon's status. Non-fatal if it fails — the daemon
+	// remains useful for actually processing input.
+	state := newControlState(*layoutFile, *variantName, *imFile)
+	ctrl, err := startControlServer(log, state)
+	if err != nil {
+		log.Warn("control socket disabled", "err", err)
+	} else {
+		defer ctrl.close()
+	}
+
+	if err := runMulti(log, *enableWayland, *ibusMode, factory, state); err != nil {
 		log.Error("daemon exited", "err", err)
 		os.Exit(1)
 	}
@@ -65,7 +76,11 @@ func main() {
 // failing to start one doesn't tear down the others; if
 // EVERY backend fails to start, that's a fatal error reported
 // to the caller.
-func runMulti(log *slog.Logger, enableWayland bool, ibusMode string, factory func() (*imsession.Session, error)) error {
+//
+// state is the shared control-socket state object; backends
+// register themselves as they come up so the GUI sees "wayland,
+// ibus" or "wayland only" etc.
+func runMulti(log *slog.Logger, enableWayland bool, ibusMode string, factory func() (*imsession.Session, error), state *controlState) error {
 	backendErr := make(chan error, 2)
 	started := 0
 
@@ -75,6 +90,7 @@ func runMulti(log *slog.Logger, enableWayland bool, ibusMode string, factory fun
 			log.Error("Wayland: load session", "err", err)
 		} else {
 			go func() { backendErr <- run(log, sess) }()
+			state.addBackend("wayland-v2")
 			started++
 		}
 	}
@@ -89,6 +105,7 @@ func runMulti(log *slog.Logger, enableWayland bool, ibusMode string, factory fun
 				log.Error("ibus: start", "err", err, "mode", ibusMode)
 			} else {
 				log.Info("ibus backend started", "mode", ibusMode)
+				state.addBackend("ibus-" + ibusMode)
 				go func() {
 					// ibus runs as long as the connection lives.
 					// Block here so the goroutine doesn't exit;
