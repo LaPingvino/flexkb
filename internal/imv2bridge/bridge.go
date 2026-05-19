@@ -217,11 +217,16 @@ func (b *Bridge) OnInputMethodCreated(im *wlim.ServerInputMethod) {
 // OnInputMethodDestroyed fires when the downstream IME tears down
 // (explicit destroy request, or connection close, or replaced by
 // a second get_input_method which forces unavailable on the first).
+// Pending commit/preedit state is cleared so a half-buffered batch
+// from the destroyed IME can't leak into the next one's commit
+// cycle — same defensive pattern as NotifyFocusOut.
 func (b *Bridge) OnInputMethodDestroyed(im *wlim.ServerInputMethod) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	if b.currentIM == im {
 		b.currentIM = nil
+		b.pendingCommit = ""
+		b.pendingPreedit = pendingPreedit{}
 	}
 }
 

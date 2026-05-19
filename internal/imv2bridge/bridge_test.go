@@ -529,6 +529,90 @@ func TestBridgeFocusOutClearsPendingState(t *testing.T) {
 	}
 }
 
+// TestBridgeIMReplacementClearsPending — protocol allows a client
+// to call get_input_method twice on the same manager. The second
+// call replaces the first (the first gets `unavailable`). Pending
+// commit state from the destroyed first IME must NOT leak into
+// the second IME's commit cycle.
+func TestBridgeIMReplacementClearsPending(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "v2-replace.sock")
+	em := &fakeEmitter{}
+	b := New(em, nil)
+	if err := b.Listen(path); err != nil {
+		t.Fatal(err)
+	}
+	defer b.Close()
+
+	// First IM, focused, commit_string accumulates but no commit().
+	cli := dialAndBindIM(t, path)
+	defer cli.Close()
+	const imA = 5
+	const ctxPath = dbus.ObjectPath("/test/replace")
+	b.NotifyFocusIn(ctxPath)
+	cli.SetReadDeadline(time.Now().Add(time.Second))
+	wlwire.ReadMessage(cli)
+	wlwire.ReadMessage(cli)
+
+	cs := wlwire.NewEncoder()
+	cs.PutString("orphan")
+	wlwire.WriteMessage(cli, imA, 0 /*commit_string*/, cs.Bytes())
+
+	// Wait for the bridge to absorb the commit_string.
+	time.Sleep(80 * time.Millisecond)
+
+	// Client asks for a second input_method on the same manager;
+	// per protocol the first gets `unavailable` and the bridge
+	// sees OnInputMethodDestroyed on imA, OnInputMethodCreated on imB.
+	const imB = 7
+	gi := wlwire.NewEncoder()
+	gi.PutUint(4 /*seat id from dialAndBindIM*/)
+	gi.PutUint(imB)
+	wlwire.WriteMessage(cli, 3 /*manager id*/, 0 /*get_input_method*/, gi.Bytes())
+
+	// Drain the unavailable event on imA (bridge sends it via sendUnavailable).
+	deadline := time.Now().Add(time.Second)
+	for time.Now().Before(deadline) {
+		h, _, err := wlwire.ReadMessage(cli)
+		if err != nil {
+			break
+		}
+		if h.ObjectID == imA && h.Opcode == 6 /*unavailable*/ {
+			break
+		}
+	}
+
+	// Focus is still active — re-emit activate via NotifyFocusIn
+	// so the new IME knows to start processing. The bridge's
+	// OnInputMethodCreated already invokes sendActivate when
+	// focused != "", so this is implicit; just give it a beat.
+	time.Sleep(80 * time.Millisecond)
+	// Drain activate + done events for imB.
+	cli.SetReadDeadline(time.Now().Add(time.Second))
+	for i := 0; i < 4; i++ {
+		// Best-effort drain — there may be 2-3 events depending
+		// on timing.
+		cli.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
+		if _, _, err := wlwire.ReadMessage(cli); err != nil {
+			break
+		}
+	}
+
+	// imB sends commit() with NO commit_string — should commit
+	// empty, NOT the orphaned "orphan" text from imA.
+	cm := wlwire.NewEncoder()
+	cm.PutUint(1)
+	wlwire.WriteMessage(cli, imB, 3 /*commit*/, cm.Bytes())
+
+	// Give the bridge time to process.
+	time.Sleep(200 * time.Millisecond)
+	em.mu.Lock()
+	defer em.mu.Unlock()
+	if len(em.commits) != 0 {
+		t.Errorf("orphan commit leaked from destroyed IM: %+v", em.commits)
+	}
+}
+
 // TestBridgeCloseRemovesSocketFile — defensive: after Close the
 // socket file must be gone. The daemon's signal-driven shutdown
 // relies on this so a restart can re-bind the same path cleanly.
