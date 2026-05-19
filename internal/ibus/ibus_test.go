@@ -390,6 +390,137 @@ func TestEngineRoutingFallsBackOnNotConsumed(t *testing.T) {
 	}
 }
 
+// fakeV2 is the test substitute for V2Router. RouteCalls captures
+// every key passed in so tests can assert what the tier saw.
+type fakeV2 struct {
+	hasGrab        bool
+	willConsume    bool
+	routeCalls     []fakeV2Key
+	focusInCalls   []dbus.ObjectPath
+	focusOutCalls  []dbus.ObjectPath
+}
+
+type fakeV2Key struct {
+	Path    dbus.ObjectPath
+	Keyval  uint32
+	Keycode uint32
+	State   uint32
+}
+
+func (f *fakeV2) HasActiveGrab() bool { return f.hasGrab }
+func (f *fakeV2) RouteKey(p dbus.ObjectPath, kv, kc, st uint32) (bool, error) {
+	f.routeCalls = append(f.routeCalls, fakeV2Key{p, kv, kc, st})
+	return f.willConsume, nil
+}
+func (f *fakeV2) NotifyFocusIn(p dbus.ObjectPath)  { f.focusInCalls = append(f.focusInCalls, p) }
+func (f *fakeV2) NotifyFocusOut(p dbus.ObjectPath) { f.focusOutCalls = append(f.focusOutCalls, p) }
+
+// TestV2RoutingTakesPriority — when a v2 IME has grabbed and
+// claims the key, both the engine and the in-process Session
+// stay untouched. Models the GNOME-user-with-fcitx5-via-v2 case.
+func TestV2RoutingTakesPriority(t *testing.T) {
+	srv, _, cleanup := withTestServer(t)
+	defer cleanup()
+
+	v2 := &fakeV2{hasGrab: true, willConsume: true}
+	srv.SetV2Router(v2)
+	host := &fakeHost{engine: &fakeEngine{name: "fake", connected: true, willClaim: true}}
+	srv.SetEngineHost(host)
+
+	sess, _ := fakeFactory()()
+	ic := &InputContext{srv: srv, path: "/test/ic", sess: sess, focused: true}
+	_ = ic.SetEngine("fake")
+
+	consumed, _ := ic.ProcessKeyEvent(0x61, 38, 0)
+	if !consumed {
+		t.Error("v2-claimed keystroke should be consumed")
+	}
+	if len(v2.routeCalls) != 1 || v2.routeCalls[0].Path != "/test/ic" {
+		t.Errorf("v2 RouteKey calls: %+v", v2.routeCalls)
+	}
+	if host.engine.calls != 0 {
+		t.Errorf("engine should not have been called (v2 won); got %d", host.engine.calls)
+	}
+}
+
+// TestV2RoutingFallsThroughOnNoGrab — when no v2 IME has
+// grabbed, the engine tier and Session tier still run. The
+// router can be attached even with no clients connected and
+// it must not perturb the existing routing.
+func TestV2RoutingFallsThroughOnNoGrab(t *testing.T) {
+	srv, _, cleanup := withTestServer(t)
+	defer cleanup()
+
+	v2 := &fakeV2{hasGrab: false}
+	srv.SetV2Router(v2)
+	host := &fakeHost{engine: &fakeEngine{name: "fake", connected: true, willClaim: true}}
+	srv.SetEngineHost(host)
+
+	sess, _ := fakeFactory()()
+	ic := &InputContext{srv: srv, path: "/test/ic", sess: sess, focused: true}
+	_ = ic.SetEngine("fake")
+	consumed, _ := ic.ProcessKeyEvent(0x61, 38, 0)
+	if !consumed {
+		t.Error("engine should have claimed the keystroke")
+	}
+	if len(v2.routeCalls) != 0 {
+		t.Errorf("v2 RouteKey should not have been called; got %d", len(v2.routeCalls))
+	}
+	if host.engine.calls != 1 {
+		t.Errorf("engine should have been called; got %d", host.engine.calls)
+	}
+}
+
+// TestV2RoutingDeclineFallsThrough — v2 has the grab but
+// returns consumed=false (e.g. it doesn't recognise the key).
+// The engine tier picks it up next.
+func TestV2RoutingDeclineFallsThrough(t *testing.T) {
+	srv, _, cleanup := withTestServer(t)
+	defer cleanup()
+
+	v2 := &fakeV2{hasGrab: true, willConsume: false}
+	srv.SetV2Router(v2)
+	host := &fakeHost{engine: &fakeEngine{name: "fake", connected: true, willClaim: true}}
+	srv.SetEngineHost(host)
+
+	sess, _ := fakeFactory()()
+	ic := &InputContext{srv: srv, path: "/test/ic", sess: sess, focused: true}
+	_ = ic.SetEngine("fake")
+	consumed, _ := ic.ProcessKeyEvent(0x61, 38, 0)
+	if !consumed {
+		t.Error("engine should have claimed after v2 declined")
+	}
+	if len(v2.routeCalls) != 1 {
+		t.Errorf("v2 RouteKey calls: %d, want 1", len(v2.routeCalls))
+	}
+	if host.engine.calls != 1 {
+		t.Errorf("engine calls: %d, want 1", host.engine.calls)
+	}
+}
+
+// TestV2FocusNotificationsRoute — FocusIn / FocusOut on the input
+// context must reach the v2 router so commit_string responses
+// can be addressed to the right context path.
+func TestV2FocusNotificationsRoute(t *testing.T) {
+	srv, _, cleanup := withTestServer(t)
+	defer cleanup()
+
+	v2 := &fakeV2{}
+	srv.SetV2Router(v2)
+
+	sess, _ := fakeFactory()()
+	ic := &InputContext{srv: srv, path: "/test/ic", sess: sess}
+	_ = ic.FocusIn()
+	_ = ic.FocusOut()
+
+	if len(v2.focusInCalls) != 1 || v2.focusInCalls[0] != "/test/ic" {
+		t.Errorf("focusIn calls: %v", v2.focusInCalls)
+	}
+	if len(v2.focusOutCalls) != 1 || v2.focusOutCalls[0] != "/test/ic" {
+		t.Errorf("focusOut calls: %v", v2.focusOutCalls)
+	}
+}
+
 // TestDestroyReleasesEngineBinding — destroying the input
 // context must invoke ReleaseEngine on the host so engines
 // aren't left thinking dead contexts are still active.

@@ -52,8 +52,29 @@ func (c *InputContext) ProcessKeyEvent(keyval, keycode, state uint32) (bool, *db
 	}
 	c.mu.Unlock()
 
-	// Route through an external engine first if one is bound.
-	// The engine has full authority over the keystroke — if it
+	// Three-tier routing, highest-priority first:
+	//
+	//   1. v2 rebroadcast — a downstream Wayland v2 IME with an
+	//      active keyboard grab gets first refusal. Asynchronous:
+	//      the IME's commit_string lands later on this context via
+	//      the InputContext.Emit* hooks the daemon wires.
+	//   2. EngineHost — a bound ibus engine (libpinyin etc.) is
+	//      consulted next. Engines have full authority over the
+	//      keystroke; consumed=true suppresses local processing.
+	//   3. In-process Session — the static-layer + flexkb-native IM
+	//      path, the fallback that always works.
+	if c.srv.v2 != nil && c.srv.v2.HasActiveGrab() {
+		consumed, err := c.srv.v2.RouteKey(c.path, keyval, keycode, state)
+		if err != nil {
+			c.srv.log.Warn("v2 router failed; falling back",
+				"err", err)
+		} else if consumed {
+			return true, nil
+		}
+	}
+
+	// Route through an external engine if one is bound. The
+	// engine has full authority over the keystroke — if it
 	// consumes, we don't double-process via Session. Engines
 	// like libpinyin do their own keysym → committed-text
 	// translation that doesn't need to go through our resolver.
@@ -99,6 +120,10 @@ func (c *InputContext) ProcessKeyEvent(keyval, keycode, state uint32) (bool, *db
 // per-context state loads, AND notifies the host that this is
 // now the focused context for the engine — signals routed back
 // will reach the right path.
+//
+// The v2 router (if attached) also gets a focus notification so
+// commit_string responses from a downstream v2 IME route back to
+// this context's dbus path.
 func (c *InputContext) FocusIn() *dbus.Error {
 	c.mu.Lock()
 	c.focused = true
@@ -110,6 +135,9 @@ func (c *InputContext) FocusIn() *dbus.Error {
 			_ = eng.FocusIn()
 		}
 		c.srv.host.NotifyFocusIn(engineName, c.path)
+	}
+	if c.srv.v2 != nil {
+		c.srv.v2.NotifyFocusIn(c.path)
 	}
 	return nil
 }
@@ -128,6 +156,9 @@ func (c *InputContext) FocusOut() *dbus.Error {
 			_ = eng.FocusOut()
 		}
 		c.srv.host.NotifyFocusOut(engineName)
+	}
+	if c.srv.v2 != nil {
+		c.srv.v2.NotifyFocusOut(c.path)
 	}
 	c.emitHidePreedit()
 	c.srv.log.Debug("FocusOut", "path", c.path)

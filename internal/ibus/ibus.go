@@ -105,6 +105,39 @@ type Engine interface {
 	Reset() error
 }
 
+// V2Router is the optional Wayland-v2-rebroadcast routing
+// interface. When the daemon was started with the v2 side-socket
+// listener enabled, ProcessKeyEvent consults the router FIRST
+// (ahead of the EngineHost). If a downstream v2 IME has grabbed
+// the keyboard and accepts the keystroke (returns consumed=true),
+// we suppress local processing — the IME drives the commit /
+// preedit asynchronously via the InputContext.Emit* hooks the
+// daemon wires up.
+//
+// The shape is narrow on purpose, matching EngineHost: the v2
+// transport's full surface lives in internal/wlim + internal/wlserver;
+// here we only need "is there an active grab routing for this
+// context, and would it like this key?".
+type V2Router interface {
+	// HasActiveGrab returns true when a downstream v2 IME has
+	// grabbed the keyboard. If false, ProcessKeyEvent skips this
+	// tier and falls through to the EngineHost / Session path.
+	HasActiveGrab() bool
+	// RouteKey forwards a keystroke to the active grab. keyval +
+	// keycode + state use the same conventions as the rest of
+	// ProcessKeyEvent. consumed=true means "the v2 IME will
+	// handle this; do not double-dispatch via local tiers." err
+	// is returned for transport failures (broken socket, etc.) so
+	// the caller can log and fall back rather than dropping the
+	// keystroke entirely.
+	RouteKey(ctxPath dbus.ObjectPath, keyval, keycode, state uint32) (consumed bool, err error)
+	// NotifyFocusIn / NotifyFocusOut bind the focused input context
+	// to the v2 IME so commit_string responses route back to the
+	// right path. Mirror of EngineHost's focus methods.
+	NotifyFocusIn(ctxPath dbus.ObjectPath)
+	NotifyFocusOut(ctxPath dbus.ObjectPath)
+}
+
 // Server is one running ibus-side dbus daemon. Start it once
 // per process; it owns a goroutine for the conn's reader.
 type Server struct {
@@ -113,6 +146,7 @@ type Server struct {
 	factory SessionFactory
 	busName string
 	host    EngineHost // optional — nil means "no external engine routing"
+	v2      V2Router   // optional — nil means "no v2 rebroadcast"
 
 	mu       sync.Mutex
 	contexts map[dbus.ObjectPath]*InputContext
@@ -124,6 +158,15 @@ type Server struct {
 // host available when engines register. nil disables routing.
 func (s *Server) SetEngineHost(h EngineHost) {
 	s.host = h
+}
+
+// SetV2Router attaches a Wayland-v2-rebroadcast router. Call
+// before Start so the first ProcessKeyEvent already routes via
+// the v2 path when a downstream IME has grabbed. Passing nil
+// disables the tier — server then behaves exactly as it did
+// before phase 3.1.
+func (s *Server) SetV2Router(r V2Router) {
+	s.v2 = r
 }
 
 // Conn exposes the underlying dbus connection for callers that

@@ -514,7 +514,21 @@ computed as:
 Each level only overrides what it explicitly sets — partial overrides
 are fine.
 
-## Phase 3.1: Wayland v2 rebroadcast (deferred)
+## Phase 3.1: Wayland v2 rebroadcast (implemented)
+
+Status as of phase-3.1 implementation: the server side is in
+`internal/wlserver/` + `internal/wlim/server.go`; the bridge that
+wires it into ibus routing is `internal/imv2bridge`. Enabled with
+`flexkb-imed --v2-rebroadcast` alongside `--ibus=alongside|replace`.
+The socket lives at `$XDG_RUNTIME_DIR/flexkb-imed-v2.sock`;
+downstream v2 IMEs set `WAYLAND_DISPLAY` to that path before
+launching. Three-tier routing (v2 → ibushost engine → in-process
+Session) lives in `internal/ibus/context.go`'s `ProcessKeyEvent`.
+
+The original design sketch follows for reference; the implementation
+matches it.
+
+### Original sketch
 
 flexkb-imed exposes its OWN `zwp_input_method_manager_v2` global
 on a side socket. Downstream IMEs (v2-native tooling, or

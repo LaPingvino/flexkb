@@ -27,11 +27,13 @@ import (
 	"github.com/lapingvino/flexkb/internal/ibusengines"
 	"github.com/lapingvino/flexkb/internal/ibushost"
 	"github.com/lapingvino/flexkb/internal/imsession"
+	"github.com/lapingvino/flexkb/internal/imv2bridge"
 	"github.com/lapingvino/flexkb/internal/inputmethod"
 	"github.com/lapingvino/flexkb/internal/model"
 	"github.com/lapingvino/flexkb/internal/runtime"
 	"github.com/lapingvino/flexkb/internal/wlclient"
 	"github.com/lapingvino/flexkb/internal/wlim"
+	"github.com/lapingvino/flexkb/internal/wlserver"
 	"github.com/lapingvino/flexkb/internal/wlwire"
 )
 
@@ -45,6 +47,10 @@ func main() {
 		"alongside fails if ibus-daemon already owns the name; replace takes it over.")
 	listEngines := flag.Bool("list-engines", false, "print every ibus engine installed on the system and exit. "+
 		"Useful to see what other IMEs flexkb-imed could host in future versions.")
+	v2Rebroadcast := flag.Bool("v2-rebroadcast", false, "expose a Wayland zwp_input_method_manager_v2 server on $XDG_RUNTIME_DIR/flexkb-imed-v2.sock. "+
+		"Downstream v2 IMEs (e.g. fcitx5) can connect here to plug into flexkb-imed; useful on GNOME where the compositor itself doesn't speak v2. "+
+		"Off by default — only meaningful with --ibus=alongside|replace.")
+	v2SocketPath := flag.String("v2-socket", "", "override the v2 rebroadcast socket path; empty = default $XDG_RUNTIME_DIR/flexkb-imed-v2.sock")
 	dryRun := flag.Bool("dry-run", false, "walk through startup (parse data, connect to compositor / session bus, "+
 		"diagnose missing requirements) but do NOT grab the keyboard or claim org.freedesktop.IBus. "+
 		"Read-only verification — safe to run alongside ibus-daemon and a real IME.")
@@ -92,7 +98,7 @@ func main() {
 		return
 	}
 
-	if err := runMulti(log, *enableWayland, *ibusMode, factory, state); err != nil {
+	if err := runMulti(log, *enableWayland, *ibusMode, *v2Rebroadcast, *v2SocketPath, factory, state); err != nil {
 		log.Error("daemon exited", "err", err)
 		// Explicit cleanup before os.Exit — defers don't fire,
 		// leaves a stale socket otherwise.
@@ -189,9 +195,10 @@ func ibusSessionConnect() (closer interface{ Close() error }, err error) {
 // state is the shared control-socket state object; backends
 // register themselves as they come up so the GUI sees "wayland,
 // ibus" or "wayland only" etc.
-func runMulti(log *slog.Logger, enableWayland bool, ibusMode string, factory func() (*imsession.Session, error), state *controlState) error {
+func runMulti(log *slog.Logger, enableWayland bool, ibusMode string, v2Rebroadcast bool, v2SocketPath string, factory func() (*imsession.Session, error), state *controlState) error {
 	backendErr := make(chan error, 2)
 	started := 0
+	var bridge *imv2bridge.Bridge
 
 	if enableWayland {
 		sess, err := factory()
@@ -222,9 +229,39 @@ func runMulti(log *slog.Logger, enableWayland bool, ibusMode string, factory fun
 			srv.SetEngineHost(host)
 			log.Info("ibus engine host initialised", "catalog_size", host.CatalogSize())
 
+			// v2 rebroadcast: open the side socket and attach
+			// the bridge BEFORE Start so the very first
+			// ProcessKeyEvent already sees the router.
+			if v2Rebroadcast {
+				path := v2SocketPath
+				if path == "" {
+					p, err := wlserver.DefaultSocketPath()
+					if err != nil {
+						log.Warn("v2 rebroadcast: cannot derive socket path; tier disabled", "err", err)
+					} else {
+						path = p
+					}
+				}
+				if path != "" {
+					bridge = imv2bridge.New(srv, log)
+					if err := bridge.Listen(path); err != nil {
+						log.Warn("v2 rebroadcast: listen failed; tier disabled", "err", err, "path", path)
+						bridge = nil
+					} else {
+						srv.SetV2Router(bridge)
+						state.addBackend(fmt.Sprintf("v2-rebroadcast(%s)", path))
+						log.Info("v2 rebroadcast listening", "path", path)
+					}
+				}
+			}
+
 			replace := ibusMode == "replace"
 			if err := srv.Start(replace); err != nil {
 				log.Error("ibus: start", "err", err, "mode", ibusMode)
+				if bridge != nil {
+					_ = bridge.Close()
+					bridge = nil
+				}
 			} else {
 				log.Info("ibus backend started", "mode", ibusMode)
 				state.addBackend("ibus-" + ibusMode)
@@ -238,6 +275,7 @@ func runMulti(log *slog.Logger, enableWayland bool, ibusMode string, factory fun
 			}
 		}
 	}
+	_ = bridge // retained for shutdown via defer below if we wire that path later
 
 	if started == 0 {
 		return fmt.Errorf("no backends started — set --wayland=true or --ibus=alongside|replace")
