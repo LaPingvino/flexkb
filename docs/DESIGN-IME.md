@@ -285,36 +285,79 @@ flexkb validate --missing-only zh zh-pinyin   # only what's MISSING from a stack
 ## Engine — the Wayland IME daemon
 
 A new binary `flexkb-imed` (or `flexkb daemon` subcommand) speaks the
-Wayland `input-method-v2` protocol. It:
+Wayland `input-method-v2` protocol AND grabs raw keyboard events via
+the protocol's keyboard-grab extension. The daemon owns the **entire**
+layer stack — not just the IME tier — so removing the xkb static-data
+dependency stops being a "step 6 packaging concern" and becomes the
+v1 architecture.
 
-1. Reads `data/inputmethods/*.yaml` at startup (and on SIGHUP).
-2. Reads `data/compose/*.yaml` and loads each as a one-state IM.
-3. Loads dictionaries lazily on first use.
-4. Connects to the Wayland display, advertises one IME engine per
-   loaded IM file.
-5. Maintains per-text-input session state: which IM is active, the
-   FSM state, the preedit buffer, the dictionary lookup cursor.
-6. Forwards keystrokes through the matching IM's FSM, emitting
-   `preedit_string` / `commit_string` events back to the compositor.
+```
+                ┌─────────────────────────────────────────┐
+                │  flexkb-imed                            │
+keycode ──grab──▶│  Physical                             │
+                │   ↓ Transformation                      │
+                │   ↓ Additions                           │
+                │   ↓ Substitutions                       │
+                │   ↓ Compose                             │
+                │   ↓ InputMethod                         │
+                │  result string                          │
+                └────────────────┬────────────────────────┘
+                                 │  commit_string / preedit_string
+                                 ▼
+                          Wayland compositor → application
+```
 
-**Mode** — the daemon supports both:
+The daemon's data input is the same `data/*.yaml` tree the static
+build pipeline reads, evaluated at runtime. The compositor sees a
+purely-text input from the daemon for any focused text field where
+the user has flexkb's IM active. libxkbcommon stays in the
+compositor (it still handles compositor shortcuts, login-shell
+input, etc.) but is no longer in the user's text-input path.
 
-- Per-layout coupling: when the active xkb layout changes (signalled
-  by the compositor via the standard layout-change channel), the
-  daemon auto-loads the IMs listed in the matching layout file's
-  `inputmethods:` field. Hindi phonetic active → Devanagari IM loaded
-  with no user action.
-- Manual selection: a global hotkey (default Mod+Space) cycles
-  through loaded IMs. Standard ibus/fcitx5 UX. Used for CJK where
-  one Latin layout serves many target scripts.
+Behaviour, in order of operation:
+
+1. Reads `data/{physical,transformations,additions,substitutions,compose,inputmethods}/*.yaml`
+   at startup (and on SIGHUP).
+2. Loads dictionaries lazily on first use.
+3. Connects to the Wayland display, advertises one IME engine per
+   loaded layout recipe. The "engine" represents a fully composed
+   stack — `us+dvorak+intl` is one engine, `in+hindi-phonetic` is
+   another. The user picks a stack the same way they'd pick an xkb
+   variant today.
+4. Calls `wp_input_method_keyboard_grab_v2` for the active text-input
+   client to receive raw keycodes.
+5. For each keycode + modifier set, runs the active stack's six
+   layers in-process and produces a sequence of events.
+6. Emits `preedit_string` / `commit_string` events back to the
+   compositor.
+
+**Mode** — the daemon supports both axes of IM activation, but
+crucially also takes the lower-layer choice itself:
+
+- **Stack selection**: which layout recipe (Physical × … × IM) is
+  active for the text input. Changed via the GUI tray, a global
+  hotkey (Mod+Shift+Space by convention), or programmatically by a
+  workspace switcher. Replaces the xkb-layout-switch path entirely.
+- **IM toggle (within a stack)**: for stacks that ship multiple IMs
+  (a Latin base with both pinyin and bopomofo, say), Mod+Space
+  cycles. Stacks with one IM have nothing to cycle.
 
 **Process model**: one daemon per user session, started by the
 desktop session (`systemd --user` unit shipped with the package).
 The GUI configurator (`flexkb gui`) talks to the daemon over a
 Unix socket for live state inspection — preedit content, candidate
-list, validation diagnostics. Configurator and daemon are separate
-binaries so the daemon stays tiny and the GUI can be a heavier
-webview.
+list, validation diagnostics, and the in-flight value of every
+intermediate layer (the GUI's "show me the symbol stream between
+Substitution and Compose" debug view becomes trivial because all
+layers are local in-process).
+
+**xkb relationship**: the static `flexkb build` pipeline still
+exists and produces an xkb tree. That tree is for users who DON'T
+run the daemon (X11 sessions, minimal Wayland compositors without
+input-method-v2 support, embedded targets). The two paths share the
+same `data/*.yaml` source so behaviour matches; the daemon is just
+the more capable consumer that picks up the stateful IM tier the
+static path can't express.
 
 **X11**: out of scope for the initial implementation. If demand
 materialises, an `ibus-m17n`-shaped backend can be added later that
@@ -348,14 +391,17 @@ top of stock xkb data:
 
 | Package | Role | Conflicts with |
 |---|---|---|
-| `flexkb` | IME daemon + GUI configurator. Reads `data/compose/`, `data/inputmethods/`, `data/dictionaries/`. Coexists peacefully with anything. | nothing |
-| `flexkb-xkb` | Today's xkb tree — drop-in xkeyboard-config replacement. All `data/physical/transformations/additions/substitutions/layouts/*.yaml` + `flexkb build`. | `xkeyboard-config` |
+| `flexkb` | IME daemon + GUI configurator + ALL `data/*.yaml`. Runs the full layer stack in-process. Coexists peacefully with anything; libxkbcommon stays in the compositor for its own use but is not in the user's text-input path. | nothing |
+| `flexkb-xkb` | Static xkb tree compiled from the same `data/*.yaml`. For users on X11, on Wayland compositors without input-method-v2, or who want xkeyboard-config replaced system-wide. Opt-in. | `xkeyboard-config` |
 | `flexkb-data-cjk` | Dictionaries: CC-CEDICT, JMdict, … Split out for licensing and download size. | nothing |
 
-Default install is `flexkb` alone. Users who want the xkeyboard-config
-replacement opt into `flexkb-xkb`. Users who want CJK dictionaries
-install `flexkb-data-cjk`. Same data layout under `/usr/share/flexkb/data/`
-regardless of which package shipped it.
+Default install is `flexkb` alone — the daemon plus its data. The
+existence of `flexkb-xkb` reflects that the static xkb path is a
+*compatibility shim* for environments where the daemon isn't a fit,
+not the project's reason for being. Same `data/*.yaml` under
+`/usr/share/flexkb/data/` regardless of which package shipped it; the
+daemon and the xkb compiler are two different consumers of one
+source tree.
 
 ## Per-IM defaults and user overrides
 
@@ -423,17 +469,34 @@ are fine.
 
 ## Implementation order
 
-1. Engine — schema parser, FSM evaluator, dictionary loader. Pure Go,
-   no daemon yet. Unit-tested with synthetic IMs.
-2. Validation — extend `tests/matrix_test.go` and add `flexkb validate`.
-3. m17n import pipeline — convert a handful of mim files, exercise
-   the engine on real data.
-4. Wayland daemon — `input-method-v2` protocol binding, session
-   management.
-5. GUI integration — live preedit display, validation panel.
-6. Packaging split — separate `flexkb-xkb` from the base `flexkb`.
+1. **IM engine.** Schema parser, FSM evaluator, dictionary loader.
+   Pure Go, no daemon. Compose-chain adapter proves the unification
+   claim (one-state IM = X-Compose chain). Unit-tested with synthetic
+   IMs and the existing devanagari compose chain.
+2. **Static-layer runtime evaluators.** Today's `internal/compose/`
+   produces xkb files at build time. Add an in-memory evaluator with
+   the same composition rules that takes `(keycode, modifiers)` and
+   returns a symbol — the API the daemon calls per keystroke.
+   Reuses the existing data loaders, no new file format.
+3. **Compositional validation.** Extend `tests/matrix_test.go` and
+   add `flexkb validate`. Walks a stack's produced character set vs.
+   the target locale's required set; reports gaps with actionable
+   suggestions.
+4. **m17n-mim import pipeline.** Convert a handful of mim files,
+   exercise the engine on real-world IM data.
+5. **Wayland daemon.** `input-method-v2` protocol binding plus
+   keyboard-grab. Wires the layer evaluators (step 2) and the IM
+   engine (step 1) into a session loop. Lives as `flexkb daemon` or
+   a separate `flexkb-imed` binary.
+6. **GUI integration.** Live preedit display, validation panel, the
+   "show me every intermediate layer's output" debug view (trivial
+   since all layers are in-process by step 5).
+7. **Packaging split.** `flexkb` (daemon + data + GUI) as the default;
+   `flexkb-xkb` (static-tree compatibility) opt-in;
+   `flexkb-data-cjk` (dictionaries) separate for licensing.
 
 Each step is independently usable: after step 1 you can `flexkb run-im
-<name> <stream>` and see commits; after step 2 you can audit
-combinations; after step 3 you have a real-data test set; after step
-4 you can actually type with it.
+<name> <stream>` and see commits; after step 2 you can exercise the
+full pipeline as a library; after step 3 you can audit combinations;
+after step 5 you can actually type with it; after step 7 you can
+ship.
