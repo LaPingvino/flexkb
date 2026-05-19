@@ -150,6 +150,57 @@ func (s Substitution) Inverse() Substitution {
 	}
 }
 
+// ComposeChain is the fifth modular dimension: post-keypress sequences
+// that produce composed glyphs (Devanagari conjuncts, accented Latin
+// letters not on AltGr levels, currency triples, …) — anything xkb
+// can't express because xkb binds one keypress to one symbol per
+// level. Each ComposeSequence has a structured input/output so the
+// file is self-sufficient: today flexkb emits an X11 Compose file
+// (~/.XCompose) for current systems, but a future native runtime can
+// read this YAML directly without going through xkb or libX11.
+type ComposeChain struct {
+	Name        string `yaml:"name"`
+	Description string `yaml:"description,omitempty"`
+	// Script (optional) tags this chain's primary writing system —
+	// "deva", "latin", "cyrillic" — so future tooling can scope or
+	// filter (e.g. "show all Devanagari conjuncts").
+	Script string `yaml:"script,omitempty"`
+	// Prefix names the trigger keysym that starts every sequence in
+	// this chain. Defaults to "Multi_key" (the standard Compose key)
+	// when omitted; override for chains whose entry point is a dead
+	// key or other specialised keysym.
+	Prefix    string            `yaml:"prefix,omitempty"`
+	Sequences []ComposeSequence `yaml:"sequences"`
+	// Slug is the file basename (set at load time).
+	Slug string `yaml:"-"`
+}
+
+// ComposeSequence is one binding: after the chain's prefix is pressed,
+// typing the Input keysyms in order produces the Output codepoints.
+type ComposeSequence struct {
+	// ID is a stable identifier for this sequence within its chain.
+	// Useful for diff-friendly authoring and for future runtimes that
+	// want to address sequences by name (e.g. for UI hints).
+	ID string `yaml:"id,omitempty"`
+	// Input is the ordered list of keysym names typed AFTER the
+	// chain's prefix. Each entry is an xkb keysym name ("a", "comma",
+	// "dead_acute", "Multi_key", …). Single-character entries also
+	// accept the literal character — both "a" and "A" work.
+	Input []string `yaml:"input,flow"`
+	// Output is the ordered list of Unicode codepoints (U-prefix hex
+	// form, e.g. "U0915") this sequence produces. Multiple codepoints
+	// concatenate into a single composed glyph — the standard way to
+	// represent script clusters (consonant + virama + consonant for
+	// Devanagari conjuncts, base + combining mark for accented Latin,
+	// …). One entry = a precomposed character.
+	Output []string `yaml:"output,flow"`
+	// Category (optional) tags the sequence's semantic class for
+	// future filtering and UI. Conventional values: "conjunct",
+	// "ligature", "accent", "symbol", "currency". Free-form.
+	Category    string `yaml:"category,omitempty"`
+	Description string `yaml:"description,omitempty"`
+}
+
 // Addition overlays extra symbol levels (AltGr characters, dead keys) on top
 // of an already-transformed layout. Two overlay styles are supported:
 //
@@ -267,6 +318,13 @@ type LayoutSpec struct {
 	// listed order, so you can stack e.g. [latin-cyrillic-phonetic,
 	// some-cyrillic-respelling].
 	Substitutions []string `yaml:"substitutions,omitempty"`
+	// Compose lists compose-chain names (data/compose/<name>.yaml) to
+	// activate alongside this variant. They produce composed-glyph
+	// sequences that don't fit a single xkb level (Devanagari
+	// conjuncts, accent triples, …). On current systems the build
+	// emits an X11 Compose file; on a future native runtime the same
+	// YAML serves directly.
+	Compose []string `yaml:"compose,omitempty"`
 	// Autofill enables the "fill empty levels from a pool of filler
 	// additions" pass that runs after all other stages. Values are
 	// category tags ("typography", "math", "arabic-cultural", ...) —

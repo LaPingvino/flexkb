@@ -22,15 +22,18 @@ variants:
     physical: iso
     transformation: qwerty
     substitutions: [latin-devanagari-phonetic]
+    compose: [latin-devanagari-phonetic]
 
   - name: phonetic-dvorak
     description: Nepali (Devanagari phonetic, Dvorak base)
     physical: iso
     transformation: dvorak
     substitutions: [latin-devanagari-phonetic]
+    compose: [latin-devanagari-phonetic]
 
   - name: phonetic-colemak
     description: Nepali (Devanagari phonetic, Colemak base)
     physical: iso
     transformation: colemak
     substitutions: [latin-devanagari-phonetic]
+    compose: [latin-devanagari-phonetic]

@@ -5,14 +5,14 @@ that decomposes keyboard layouts into independent dimensions instead of one
 giant flat file tree:
 
 ```
-   Physical  ×  Transformation  ×  Additions  ×  Substitutions
-   (ANSI,        (QWERTY,           (intl,         (Latin↔Cyrillic
-    ISO,          Dvorak,            polish,        phonetic,
-    JIS, …)       Colemak,           german,        Latin↔Greek,
-                  AZERTY,            esperanto,     Latin↔Hebrew,
-                  BÉPO,              spanish, …)    Latin↔Arabic, …)
-                  Workman,
-                  Norman,
+   Physical  ×  Transformation  ×  Additions  ×  Substitutions  ×  Compose
+   (ANSI,        (QWERTY,           (intl,         (Latin↔Cyrillic    (devanagari
+    ISO,          Dvorak,            polish,        phonetic,          conjuncts,
+    JIS, …)       Colemak,           german,        Latin↔Greek,       latin
+                  AZERTY,            esperanto,     Latin↔Hebrew,      ligatures,
+                  BÉPO,              spanish, …)    Latin↔Arabic, …)   symbol
+                  Workman,                                             triples,
+                  Norman,                                              …)
                   ЙЦУКЕН,
                   Dubeolsik,
                   Kedmanee, …)
@@ -82,6 +82,16 @@ direction. Chain multiple — hotfix narrow overrides FIRST in the chain
 pre-empt a broader map (`hotfix-russian-w-as-zhe` before
 `latin-cyrillic-phonetic`).
 
+### Compose
+Post-keypress sequences that produce composed glyphs xkb can't bind to
+a single level: Devanagari conjuncts (क्ष = क + virama + ष), Latin
+ligatures, currency triples. Each `data/compose/<name>.yaml` declares
+structured `input → [codepoints]` bindings; the build emits an X11
+Compose file (`<out>/Compose.d/<layout>-<variant>`) and `flexkb
+activate` installs the current variant's chain to `~/.XCompose`. The
+YAML is the source of truth — a future native runtime can read it
+directly without going through xkb or libX11.
+
 ## Repo layout
 
 ```
@@ -93,6 +103,8 @@ data/
                    # (intl, polish, esperanto, persian-extras, …)
   substitutions/   # character-level rewrites
                    # (latin-cyrillic-phonetic, latin-greek-phonetic, …)
+  compose/         # post-keypress composed-glyph sequences
+                   # (latin-devanagari-phonetic conjuncts, …)
   layouts/         # recipes binding it all together into named variants
 
 internal/
@@ -114,6 +126,7 @@ tests/             # coverage report, matrix sanity test
 ```sh
 flexkb list                                    # list known modular variants
 flexkb compose us basic                        # print one variant to stdout
+flexkb compose --xcompose in hindi-phonetic    # print variant's X-Compose chain
 flexkb generate ./out                          # write all modular layouts
 flexkb build ./out --xkb /usr/share/X11/xkb    # generate + fallback-copy rest
 flexkb verify us basic                         # diff composed vs system xkb file
@@ -122,6 +135,7 @@ flexkb paths                                   # show data dirs being consulted
 flexkb info --xkb /path us                     # per-layout modular/passthrough report
 flexkb migrate-suggest us dvorak-intl          # heuristic mapping of old name
 flexkb activate pt dvorak                      # generate to ~/.xkb + setxkbmap
+                                               # + ~/.XCompose if compose: set
 ```
 
 ## Per-user customisation

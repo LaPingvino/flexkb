@@ -1,0 +1,44 @@
+# Compose chain — companion to substitutions/latin-devanagari-phonetic.
+#
+# Each entry binds an input key sequence (after a leading prefix key, by
+# default Multi_key) to an output sequence of Unicode codepoints. xkb
+# cannot bind multi-codepoint outputs to a single keypress level, so
+# conjuncts and similar composed Devanagari glyphs live here instead.
+#
+# This file is the source of truth. flexkb emits an X11 Compose file
+# (~/.XCompose) for current systems; a future runtime that handles
+# composition natively can read this YAML directly.
+name: latin-devanagari-phonetic
+description: Devanagari composed sequences that don't fit a single xkb level
+script: deva
+# prefix names the keysym that starts every sequence in this file
+# (almost always Multi_key — the "Compose" key). Override per-file if
+# a chain wants a different trigger.
+prefix: Multi_key
+
+sequences:
+  - id: krish
+    input: [x]
+    output: [U0915, U094D, U0937]
+    category: conjunct
+    description: क + virama (halant) + ष
+  - id: krish-uppercase
+    input: [X]
+    output: [U0915, U094D, U0937]
+    category: conjunct
+    description: same conjunct on shifted x for symmetry
+  - id: jnya
+    input: [j, n]
+    output: [U091C, U094D, U091E]
+    category: conjunct
+    description: ज + virama + ञ (common conjunct)
+  - id: shri
+    input: [s, h]
+    output: [U0936, U094D, U0930, U0940]
+    category: conjunct
+    description: श + virama + र + vowel-sign-ii (honorific prefix)
+  - id: om
+    input: [o, m]
+    output: [U0950]
+    category: symbol
+    description: Devanagari Om sign

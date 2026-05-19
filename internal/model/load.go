@@ -104,6 +104,19 @@ func (r DataRoot) Substitution(name string) (Substitution, error) {
 	return s, nil
 }
 
+// Compose loads a compose chain from data/compose/<name>.yaml.
+func (r DataRoot) Compose(name string) (ComposeChain, error) {
+	var c ComposeChain
+	if err := r.loadOne("compose", name, &c); err != nil {
+		return c, err
+	}
+	c.Slug = name
+	if c.Prefix == "" {
+		c.Prefix = "Multi_key"
+	}
+	return c, nil
+}
+
 func (r DataRoot) LayoutFile(name string) (LayoutFile, error) {
 	var l LayoutFile
 	err := r.loadOne("layouts", name, &l)

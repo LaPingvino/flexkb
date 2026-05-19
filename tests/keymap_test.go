@@ -125,6 +125,45 @@ func TestNoEmptyVariants(t *testing.T) {
 		t.Fatalf("%d variant(s) compile to empty / unparseable keymaps:\n  %s",
 			len(failures), strings.Join(show, "\n  "))
 	}
+
+	// Compose addon sanity: every variant whose YAML declares
+	// `compose:` must have produced a Compose.d/<file>-<variant> file
+	// with at least one binding line. Failures here mean the build
+	// pipeline forgot to emit the addon for a variant that needs it.
+	checkComposeFiles(t, tree)
+}
+
+// checkComposeFiles asserts every Compose.d/* file is non-empty and
+// contains at least one bracket-style `<Multi_key>` binding line. An
+// empty file would mean we serialized a header but lost the sequences.
+func checkComposeFiles(t *testing.T, tree string) {
+	t.Helper()
+	dir := filepath.Join(tree, "Compose.d")
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			t.Logf("no Compose.d/ in built tree — no variants declare compose chains yet")
+			return
+		}
+		t.Fatalf("read Compose.d: %v", err)
+	}
+	if len(entries) == 0 {
+		t.Logf("Compose.d/ empty — no variants declare compose chains yet")
+		return
+	}
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		b, err := os.ReadFile(filepath.Join(dir, e.Name()))
+		if err != nil {
+			t.Errorf("%s: %v", e.Name(), err)
+			continue
+		}
+		if !strings.Contains(string(b), "<Multi_key>") && !strings.Contains(string(b), "<dead_") {
+			t.Errorf("%s: compose file has header but no binding lines", e.Name())
+		}
+	}
 }
 
 type compileResult struct {

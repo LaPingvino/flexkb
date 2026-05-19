@@ -94,18 +94,21 @@ variants:
     physical: iso
     transformation: qwerty
     substitutions: [latin-devanagari-phonetic]
+    compose: [latin-devanagari-phonetic]
 
   - name: hindi-phonetic-dvorak
     description: Hindi (Devanagari phonetic, Dvorak base)
     physical: iso
     transformation: dvorak
     substitutions: [latin-devanagari-phonetic]
+    compose: [latin-devanagari-phonetic]
 
   - name: hindi-phonetic-colemak
     description: Hindi (Devanagari phonetic, Colemak base)
     physical: iso
     transformation: colemak
     substitutions: [latin-devanagari-phonetic]
+    compose: [latin-devanagari-phonetic]
 
   - name: tamil-phonetic
     description: Tamil (phonetic, QWERTY base — alternate to InScript)
