@@ -362,12 +362,16 @@ func (b *Bridge) NotifySurroundingText(ctxPath dbus.ObjectPath, text string, cur
 }
 
 // NotifyFocusOut clears focus and tells the downstream IME the
-// session went away.
+// session went away. Pending commit/preedit state is cleared so a
+// misbehaving IME (or a race against the deactivate event) can't
+// leak text into the next focused context.
 func (b *Bridge) NotifyFocusOut(ctxPath dbus.ObjectPath) {
 	b.mu.Lock()
 	if b.focusedPath == ctxPath {
 		b.focusedPath = ""
 	}
+	b.pendingCommit = ""
+	b.pendingPreedit = pendingPreedit{}
 	im := b.currentIM
 	b.mu.Unlock()
 	if im != nil {

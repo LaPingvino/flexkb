@@ -408,6 +408,80 @@ func TestBridgeNotifySurroundingTextIgnoredWhenUnfocused(t *testing.T) {
 	}
 }
 
+// TestBridgeFocusOutClearsPendingState — defensive: a buggy IME
+// that sends commit_string but not commit(serial), then loses
+// focus, must not have its pending text re-applied to the next
+// focused context. Models a real edge case from spec-misreading
+// IMEs and from race conditions on rapid focus changes.
+func TestBridgeFocusOutClearsPendingState(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "v2-focus-clear.sock")
+	em := &fakeEmitter{}
+	b := New(em, nil)
+	if err := b.Listen(path); err != nil {
+		t.Fatal(err)
+	}
+	defer b.Close()
+
+	cli := dialAndBindIM(t, path)
+	defer cli.Close()
+	const imID = 5
+
+	const ctxA = dbus.ObjectPath("/test/ctxA")
+	const ctxB = dbus.ObjectPath("/test/ctxB")
+	b.NotifyFocusIn(ctxA)
+	cli.SetReadDeadline(time.Now().Add(time.Second))
+	wlwire.ReadMessage(cli)
+	wlwire.ReadMessage(cli)
+
+	// commit_string("orphan") — accumulates but no commit() yet.
+	cs := wlwire.NewEncoder()
+	cs.PutString("orphan")
+	wlwire.WriteMessage(cli, imID, 0, cs.Bytes())
+
+	// Give the bridge a moment to absorb the commit_string.
+	time.Sleep(80 * time.Millisecond)
+
+	// FocusOut on ctxA — should clear pending state.
+	b.NotifyFocusOut(ctxA)
+	// Drain the deactivate + done events.
+	wlwire.ReadMessage(cli)
+	wlwire.ReadMessage(cli)
+
+	// FocusIn ctxB.
+	b.NotifyFocusIn(ctxB)
+	wlwire.ReadMessage(cli)
+	wlwire.ReadMessage(cli)
+
+	// IME commits — should commit FRESH content only, not the
+	// orphan accumulated against ctxA.
+	cs = wlwire.NewEncoder()
+	cs.PutString("fresh")
+	wlwire.WriteMessage(cli, imID, 0, cs.Bytes())
+	cm := wlwire.NewEncoder()
+	cm.PutUint(1)
+	wlwire.WriteMessage(cli, imID, 3, cm.Bytes())
+
+	deadline := time.Now().Add(time.Second)
+	for time.Now().Before(deadline) {
+		em.mu.Lock()
+		n := len(em.commits)
+		em.mu.Unlock()
+		if n > 0 {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	em.mu.Lock()
+	defer em.mu.Unlock()
+	if len(em.commits) != 1 {
+		t.Fatalf("commits: %d, want 1", len(em.commits))
+	}
+	if em.commits[0].Path != ctxB || em.commits[0].Text != "fresh" {
+		t.Errorf("commit leaked across focus change: %+v", em.commits[0])
+	}
+}
+
 // TestBridgeNoGrabFallsThrough — when no downstream IME has
 // grabbed, HasActiveGrab is false and RouteKey returns
 // consumed=false. Models the "v2 enabled but nobody connected"
