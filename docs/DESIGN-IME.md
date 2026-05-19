@@ -514,6 +514,85 @@ computed as:
 Each level only overrides what it explicitly sets — partial overrides
 are fine.
 
+## Phase 3.1: Wayland v2 rebroadcast (deferred)
+
+flexkb-imed exposes its OWN `zwp_input_method_manager_v2` global
+on a side socket. Downstream IMEs (v2-native tooling, or
+hypothetical v2-only engines) connect to that socket and become
+"input methods" within flexkb-imed's protocol view, just as
+flexkb-imed itself is one inside a real wlroots compositor.
+
+Use case that motivates this even on systems where the
+compositor already supports v2 (KDE, wlroots): users on
+Mutter/GNOME who explicitly want v2 semantics rather than ibus.
+GNOME's stance ("ibus handles everything") foreclosed that path
+at the compositor level; flexkb-imed-as-v2-server reopens it
+for users who care.
+
+Architecture once built:
+
+```
+                ┌── ibus client (Mutter / GTK / Qt app)
+                │       │
+                │       │ ProcessKeyEvent over dbus
+                │       ▼
+                │   flexkb-imed (ibus server, 5.2)
+                │       │
+                │       │ if a v2 IME has grabbed,
+                │       │ forward keystroke as a v2
+                │       │ key event over the side socket
+                │       ▼
+                │   v2 IME client (fcitx5 etc.)
+                │       │ commit_string back over v2
+                │       ▼
+                │   flexkb-imed wraps as ibus CommitText
+                │       │
+                │       ▼
+                └─── ibus client receives committed text
+```
+
+Implementation outline (the work, for the next session):
+
+1. **`internal/wlserver/`** — server-side counterpart to
+   `wlclient`. Listen on a Unix socket (separate from the
+   compositor's), accept connections (one per downstream
+   client), per-connection Dispatcher with the server-side
+   object-id range (≥ 0xFF000000 per spec). The wire layer
+   in `wlwire` is symmetric — encode/decode works in either
+   direction unchanged.
+
+2. **wl_display + wl_registry server implementations.** Same
+   protocols, opposite side. Globals get *advertised* (not
+   bound); bind requests get serviced. Sync requests get
+   replied to.
+
+3. **`internal/wlim/server.go`** — server side of
+   `zwp_input_method_manager_v2` and the dependent types
+   (input_method, keyboard_grab). Receive `get_input_method`,
+   create input_method objects; service `grab_keyboard`,
+   route incoming keystrokes (from the ibus-side bridge) as
+   keyboard_grab key events; receive `commit_string` /
+   `set_preedit_string` from the downstream IME and forward
+   to the ibus input context that triggered the keystroke.
+
+4. **Bridge in `internal/ibus.InputContext.ProcessKeyEvent`**
+   — when a v2 client has the grab, route through them FIRST,
+   then to internal/ibushost engines, then to the in-process
+   Session. Three-tier fallback in the same order
+   priority-wise as the current two-tier engine + Session.
+
+5. **Socket configuration.** Side socket at
+   `$XDG_RUNTIME_DIR/flexkb-imed-v2.sock`; downstream IMEs
+   set `WAYLAND_DISPLAY` to that path before connecting. The
+   GUI can offer a "copy WAYLAND_DISPLAY override to
+   clipboard" affordance for users who want to start a v2
+   IME against us.
+
+Estimated effort: ~800 LOC for wlserver foundation,
+~400 LOC for the v2 server-side interfaces, ~200 LOC bridge
+wiring, ~400 LOC tests with socketpair-based downstream-
+client fakes. Two focused sessions feels right.
+
 ## Open questions
 
 1. **Latency budget.** Wayland IM events are synchronous-ish; how
