@@ -6,6 +6,7 @@ import (
 	"github.com/godbus/dbus/v5"
 
 	"github.com/lapingvino/flexkb/internal/imsession"
+	"github.com/lapingvino/flexkb/internal/imtrace"
 )
 
 // InputContext is one per-app input context. Created by
@@ -63,8 +64,14 @@ func (c *InputContext) ProcessKeyEvent(keyval, keycode, state uint32) (bool, *db
 	//      keystroke; consumed=true suppresses local processing.
 	//   3. In-process Session — the static-layer + flexkb-native IM
 	//      path, the fallback that always works.
+	imtrace.Trace(c.srv.log, "ibus.process_key",
+		"stage", "ibus.process_key", "ctx", c.path,
+		"keyval", keyval, "keycode", keycode, "state", state)
 	if c.srv.v2 != nil && c.srv.v2.HasActiveGrab() {
 		consumed, err := c.srv.v2.RouteKey(c.path, keyval, keycode, state)
+		imtrace.Trace(c.srv.log, "ibus.tier.v2",
+			"stage", "ibus.tier.v2", "ctx", c.path,
+			"consumed", consumed, "err", err)
 		if err != nil {
 			c.srv.log.Warn("v2 router failed; falling back",
 				"err", err)
@@ -81,6 +88,10 @@ func (c *InputContext) ProcessKeyEvent(keyval, keycode, state uint32) (bool, *db
 	if c.srv.host != nil {
 		if eng := c.srv.host.EngineFor(c.path); eng != nil && eng.Connected() {
 			consumed, err := eng.ProcessKeyEvent(keyval, keycode, state)
+			imtrace.Trace(c.srv.log, "ibus.tier.engine",
+				"stage", "ibus.tier.engine", "ctx", c.path,
+				"engine", eng.Name(),
+				"consumed", consumed, "err", err)
 			if err != nil {
 				c.srv.log.Warn("engine ProcessKeyEvent failed; falling back to in-process session",
 					"engine", eng.Name(), "err", err)
@@ -101,9 +112,15 @@ func (c *InputContext) ProcessKeyEvent(keyval, keycode, state uint32) (bool, *db
 		switch act := a.(type) {
 		case imsession.CommitText:
 			c.emitCommitText(act.Text)
+			imtrace.Trace(c.srv.log, "ibus.tier.session.commit",
+				"stage", "ibus.tier.session.commit", "ctx", c.path,
+				"text", act.Text)
 			consumed = true
 		case imsession.SetPreedit:
 			c.emitUpdatePreedit(act.Text, uint32(act.CursorEnd))
+			imtrace.Trace(c.srv.log, "ibus.tier.session.preedit",
+				"stage", "ibus.tier.session.preedit", "ctx", c.path,
+				"text", act.Text)
 			consumed = true
 		case imsession.FinishCommit:
 			// ibus has no batch-commit equivalent.
@@ -111,6 +128,9 @@ func (c *InputContext) ProcessKeyEvent(keyval, keycode, state uint32) (bool, *db
 			// false return → client processes the key normally.
 		}
 	}
+	imtrace.Trace(c.srv.log, "ibus.tier.session.done",
+		"stage", "ibus.tier.session.done", "ctx", c.path,
+		"consumed", consumed)
 	return consumed, nil
 }
 

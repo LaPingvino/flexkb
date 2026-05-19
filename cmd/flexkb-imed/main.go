@@ -27,6 +27,7 @@ import (
 	"github.com/lapingvino/flexkb/internal/ibusengines"
 	"github.com/lapingvino/flexkb/internal/ibushost"
 	"github.com/lapingvino/flexkb/internal/imsession"
+	"github.com/lapingvino/flexkb/internal/imtrace"
 	"github.com/lapingvino/flexkb/internal/imv2bridge"
 	"github.com/lapingvino/flexkb/internal/inputmethod"
 	"github.com/lapingvino/flexkb/internal/model"
@@ -54,6 +55,11 @@ func main() {
 	dryRun := flag.Bool("dry-run", false, "walk through startup (parse data, connect to compositor / session bus, "+
 		"diagnose missing requirements) but do NOT grab the keyboard or claim org.freedesktop.IBus. "+
 		"Read-only verification — safe to run alongside ibus-daemon and a real IME.")
+	traceMode := flag.Bool("trace", false, "enable per-keystroke trace records on every routing tier. "+
+		"Useful for diagnosing 'which tier saw this key' when testing against real IMEs. Off by default.")
+	traceFile := flag.String("trace-file", "", "write trace records to this path (JSON-lines). "+
+		"Use 'auto' for \\$XDG_RUNTIME_DIR/flexkb-imed-trace.jsonl. "+
+		"With --trace but no --trace-file, traces appear inline with normal logs.")
 	flag.Parse()
 
 	if *listEngines {
@@ -64,7 +70,23 @@ func main() {
 	if *verbose {
 		level = slog.LevelDebug
 	}
+	if *traceMode {
+		level = imtrace.LevelTrace
+	}
 	log := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: level}))
+	if *traceMode {
+		f, err := imtrace.OpenTraceFile(*traceFile)
+		if err != nil {
+			log.Warn("trace file unusable; traces will emit inline", "err", err, "path", *traceFile)
+		}
+		defer func() {
+			if f != nil {
+				_ = f.Close()
+			}
+		}()
+		log = imtrace.NewLogger(true, f, log)
+		log.Info("trace mode enabled", "path", *traceFile)
+	}
 
 	// One factory shared across both backends so each
 	// freshly-created input context gets an independent Session

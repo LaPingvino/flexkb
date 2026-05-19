@@ -27,6 +27,7 @@ import (
 
 	"github.com/godbus/dbus/v5"
 
+	"github.com/lapingvino/flexkb/internal/imtrace"
 	"github.com/lapingvino/flexkb/internal/wlim"
 	"github.com/lapingvino/flexkb/internal/wlserver"
 )
@@ -152,11 +153,16 @@ func (b *Bridge) onAccept(d *wlserver.Dispatcher) error {
 // forwarding and records this IM as the current active one.
 func (b *Bridge) OnInputMethodCreated(im *wlim.ServerInputMethod) {
 	im.OnCommitString = func(text string) {
+		imtrace.Trace(b.log, "wlim.commit_string",
+			"stage", "wlim.commit_string", "im", im.ID(), "text", text)
 		b.mu.Lock()
 		b.pendingCommit += text
 		b.mu.Unlock()
 	}
 	im.OnSetPreeditString = func(text string, cb, ce int32) {
+		imtrace.Trace(b.log, "wlim.preedit",
+			"stage", "wlim.preedit", "im", im.ID(),
+			"text", text, "cursor_begin", cb, "cursor_end", ce)
 		b.mu.Lock()
 		b.pendingPreedit = pendingPreedit{text: text, cursorBegin: cb, cursorEnd: ce, set: true}
 		b.mu.Unlock()
@@ -171,6 +177,8 @@ func (b *Bridge) OnInputMethodCreated(im *wlim.ServerInputMethod) {
 			"before", before, "after", after)
 	}
 	im.OnCommit = func(serial uint32) {
+		imtrace.Trace(b.log, "wlim.commit",
+			"stage", "wlim.commit", "im", im.ID(), "serial", serial)
 		b.flushPending()
 	}
 	im.OnGrabKeyboard = func(grab *wlim.ServerKeyboardGrab) {
@@ -297,6 +305,9 @@ func (b *Bridge) RouteKey(ctxPath dbus.ObjectPath, keyval, keycode, state uint32
 	if err := grab.SendKey(b.nextSerial(), 0, evcode, 1 /*pressed*/); err != nil {
 		return false, err
 	}
+	imtrace.Trace(b.log, "wlim.route_key",
+		"stage", "wlim.route_key", "ctx", ctxPath,
+		"evcode", evcode, "mods", mods)
 	return true, nil
 }
 

@@ -61,7 +61,27 @@ func runDoctor(args []string) {
 	}
 	fmt.Fprintln(w)
 
-	// 4. Compositor + session type.
+	// 4. v2 rebroadcast side socket.
+	fmt.Fprintln(w, "## v2 rebroadcast socket")
+	v2Path := flexkbImedV2SocketPath()
+	switch {
+	case v2Path == "":
+		fmt.Fprintln(w, "  XDG_RUNTIME_DIR unset — no default path; flexkb-imed --v2-rebroadcast would refuse")
+	default:
+		if st, err := os.Stat(v2Path); err != nil {
+			fmt.Fprintf(w, "  not listening (no socket at %s)\n", v2Path)
+			fmt.Fprintln(w, "  → enable with: flexkb-imed --v2-rebroadcast --ibus=alongside|replace")
+		} else if st.Mode()&os.ModeSocket == 0 {
+			fmt.Fprintf(w, "  %s exists but is not a socket — refuse to start\n", v2Path)
+			fmt.Fprintf(w, "  → manual cleanup: rm %s\n", v2Path)
+		} else {
+			fmt.Fprintf(w, "  listening: %s\n", v2Path)
+			fmt.Fprintln(w, "  → downstream v2 IMEs: WAYLAND_DISPLAY="+v2Path+" fcitx5 -d  (or your IME of choice)")
+		}
+	}
+	fmt.Fprintln(w)
+
+	// 5. Compositor + session type.
 	fmt.Fprintln(w, "## desktop session")
 	desk := firstNonEmpty(os.Getenv("XDG_CURRENT_DESKTOP"), os.Getenv("XDG_SESSION_DESKTOP"), "(unknown)")
 	sess := firstNonEmpty(os.Getenv("XDG_SESSION_TYPE"), "(unknown)")
@@ -81,7 +101,7 @@ func runDoctor(args []string) {
 	}
 	fmt.Fprintln(w)
 
-	// 5. Data tree.
+	// 6. Data tree.
 	fmt.Fprintln(w, "## flexkb data tree")
 	candidates := []string{}
 	if home, _ := os.UserHomeDir(); home != "" {
@@ -142,6 +162,17 @@ func pidOf(name string) string {
 func flexkbImedSocketPath() string {
 	if xdg := os.Getenv("XDG_RUNTIME_DIR"); xdg != "" {
 		return filepath.Join(xdg, "flexkb-imed.sock")
+	}
+	return ""
+}
+
+// flexkbImedV2SocketPath returns the v2 rebroadcast side socket
+// path the daemon listens on when --v2-rebroadcast is enabled.
+// Mirrors wlserver.DefaultSocketPath() but doesn't import
+// wlserver to avoid drag-in.
+func flexkbImedV2SocketPath() string {
+	if xdg := os.Getenv("XDG_RUNTIME_DIR"); xdg != "" {
+		return filepath.Join(xdg, "flexkb-imed-v2.sock")
 	}
 	return ""
 }

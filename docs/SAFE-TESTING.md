@@ -129,6 +129,57 @@ The daemon's data search path includes `./data` when run from a
 repo checkout, so YAML edits under `data/` are picked up by the
 local build without needing to be copied to `/usr/share/flexkb/data`.
 
+## Testing the v2 rebroadcast tier
+
+`flexkb-imed --v2-rebroadcast` opens a side Wayland socket at
+`$XDG_RUNTIME_DIR/flexkb-imed-v2.sock` so downstream v2 IMEs
+(e.g. fcitx5) can plug into flexkb-imed even on GNOME where the
+compositor itself doesn't speak v2.
+
+The tier is off by default. Enable it only alongside `--ibus`:
+
+```sh
+./flexkb-imed --ibus=alongside --v2-rebroadcast --trace
+```
+
+`--trace` produces per-keystroke trace records on every routing
+tier (v2 → ibushost engine → in-process Session) so you can see
+exactly which tier saw a key and what it did. Add `--trace-file=auto`
+to write traces to `$XDG_RUNTIME_DIR/flexkb-imed-trace.jsonl`
+instead of stderr.
+
+To run a downstream v2 IME against flexkb-imed:
+
+```sh
+# In one terminal: the daemon, listening on both ibus and v2 socket.
+./flexkb-imed --ibus=alongside --v2-rebroadcast
+
+# In another terminal: launch fcitx5 with the side socket as its
+# compositor. Mind: this changes WAYLAND_DISPLAY for fcitx5 ONLY,
+# not your real session.
+WAYLAND_DISPLAY=$XDG_RUNTIME_DIR/flexkb-imed-v2.sock fcitx5 -d
+```
+
+`flexkb doctor` reports whether the v2 socket is reachable. If
+something goes wrong:
+
+```sh
+# 1. Stop the daemon — releases the side socket.
+killall flexkb-imed
+
+# 2. Manually remove a stale socket (next start would do this anyway).
+rm -f $XDG_RUNTIME_DIR/flexkb-imed-v2.sock
+
+# 3. The downstream IME process (fcitx5 etc.) is unaffected by
+#    flexkb-imed crashing — it just sees the socket close and
+#    exits or retries depending on its own logic.
+```
+
+The v2 tier never touches your real compositor's Wayland socket.
+The worst case is "downstream IMEs you launched against the side
+socket stop working"; your normal typing path through ibus
+remains intact.
+
 ## What `flexkb-imed` will NOT do
 
 For honesty about blast radius:
