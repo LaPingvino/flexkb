@@ -30,9 +30,9 @@ type InputContext struct {
 // --- methods (called by clients) ---
 
 // ProcessKeyEvent is the IM hot-path. ibus delivers each
-// keystroke here; we feed it through the session and either
-// commit/preedit (return true = key consumed) or return false
-// (the compositor / app sees the keystroke unchanged).
+// keystroke here; we route it through either an external
+// engine (if one is bound to this input context) or the
+// in-process Session, depending on the engine binding.
 //
 // keyval is an X11 keysym (e.g. 0x0061 = 'a'). keycode is the
 // hardware keycode (X11 convention: Linux evdev + 8). state is
@@ -46,14 +46,33 @@ func (c *InputContext) ProcessKeyEvent(keyval, keycode, state uint32) (bool, *db
 		return false, nil
 	}
 	c.mu.Lock()
-	defer c.mu.Unlock()
 	if !c.focused {
-		// No focus → not our keystroke. Defensive: some clients
-		// send keys before FocusIn during startup.
+		c.mu.Unlock()
 		return false, nil
 	}
+	c.mu.Unlock()
+
+	// Route through an external engine first if one is bound.
+	// The engine has full authority over the keystroke — if it
+	// consumes, we don't double-process via Session. Engines
+	// like libpinyin do their own keysym → committed-text
+	// translation that doesn't need to go through our resolver.
+	if c.srv.host != nil {
+		if eng := c.srv.host.EngineFor(c.path); eng != nil && eng.Connected() {
+			consumed, err := eng.ProcessKeyEvent(keyval, keycode, state)
+			if err != nil {
+				c.srv.log.Warn("engine ProcessKeyEvent failed; falling back to in-process session",
+					"engine", eng.Name(), "err", err)
+			} else if consumed {
+				return true, nil
+			}
+		}
+	}
+
+	// In-process Session path — unchanged from 5.2.
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	c.sess.HandleModifiers(state&0xff, 0, 0)
-	// Linux evdev scancode = X11 keycode - 8.
 	scancode := keycode - 8
 	actions := c.sess.HandleKey(scancode, 1)
 	consumed := false
@@ -66,10 +85,7 @@ func (c *InputContext) ProcessKeyEvent(keyval, keycode, state uint32) (bool, *db
 			c.emitUpdatePreedit(act.Text, uint32(act.CursorEnd))
 			consumed = true
 		case imsession.FinishCommit:
-			// ibus has no batch-commit equivalent. Each
-			// CommitText signal IS the commit. So FinishCommit
-			// is a no-op here — Wayland needed it because v2
-			// has a separate commit() request, ibus doesn't.
+			// ibus has no batch-commit equivalent.
 		case imsession.PassThrough:
 			// false return → client processes the key normally.
 		}
@@ -141,20 +157,52 @@ func (c *InputContext) SetCursorLocation(x, y, w, h int32) *dbus.Error {
 }
 
 // SetEngine selects which IM engine is active for this context.
-// flexkb-imed routes everything through one engine per session;
-// in a future multi-engine deployment this would swap the IM
-// loaded into c.sess. For now we record and acknowledge.
+// Two cases:
+//
+//   1. The named engine is one flexkb-imed hosts itself (a
+//      flexkb-native IM declared in data/inputmethods/). Today
+//      we have one Session per context so the named engine is
+//      informational; future multi-engine support will swap the
+//      loaded IM in c.sess.
+//
+//   2. The named engine is an external ibus engine (libpinyin
+//      etc.) catalogued by ibushost. We tell the host to bind
+//      this input context to the engine; subsequent
+//      ProcessKeyEvent calls route there first.
+//
+// On unknown engines we record the name (so the client's
+// "what's the active engine?" query gets a consistent answer)
+// but don't fail — ibus's protocol semantics tolerate the
+// client requesting engines the daemon doesn't know about.
 func (c *InputContext) SetEngine(name string) *dbus.Error {
 	c.mu.Lock()
 	c.engine = name
 	c.mu.Unlock()
 	c.srv.log.Debug("SetEngine", "path", c.path, "engine", name)
+	if c.srv.host != nil && name != "" {
+		if _, err := c.srv.host.SelectEngine(c.path, name); err != nil {
+			// Bind failure isn't fatal — we just keep using the
+			// in-process Session for this context. Log so the
+			// user can investigate if the engine they wanted
+			// isn't actually available.
+			c.srv.log.Info("engine not bound; using in-process session", "engine", name, "err", err)
+		} else {
+			// Successful bind. Tell the engine the context is
+			// (or about to be) focused so it loads its state.
+			if eng := c.srv.host.EngineFor(c.path); eng != nil && eng.Connected() {
+				_ = eng.FocusIn()
+			}
+		}
+	}
 	return nil
 }
 
 // Destroy tears down the input context. ibus clients call this
 // when the app shuts down or the focus surface disappears.
 func (c *InputContext) Destroy() *dbus.Error {
+	if c.srv.host != nil {
+		c.srv.host.ReleaseEngine(c.path)
+	}
 	c.srv.mu.Lock()
 	delete(c.srv.contexts, c.path)
 	c.srv.mu.Unlock()

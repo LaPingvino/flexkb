@@ -64,6 +64,41 @@ const ServicePath = "/org/freedesktop/IBus"
 // supplies a factory that builds the configured Resolver + IM.
 type SessionFactory func() (*imsession.Session, error)
 
+// EngineHost is the optional engine-routing interface. When the
+// daemon was constructed with one, ProcessKeyEvent first
+// consults the host: if the input context has an engine bound
+// AND that engine consumes the keystroke, we skip the in-process
+// Session. Otherwise we fall back to the Session.
+//
+// The shape is a narrow interface (vs. importing internal/ibushost
+// directly) to avoid a cycle and to let tests substitute a
+// fake host.
+type EngineHost interface {
+	// EngineFor returns the engine bound to an input context, or
+	// nil if no engine is selected.
+	EngineFor(ctxPath dbus.ObjectPath) Engine
+	// SelectEngine binds an input context to a named engine.
+	SelectEngine(ctxPath dbus.ObjectPath, engineName string) (Engine, error)
+	// ReleaseEngine drops the binding on input-context destroy.
+	ReleaseEngine(ctxPath dbus.ObjectPath)
+	// RegisterComponent is invoked when an engine subprocess
+	// calls RegisterComponent on our IBus service.
+	RegisterComponent(componentName string, engineNames []string, objectPath dbus.ObjectPath)
+}
+
+// Engine is the narrow client-side view of one hosted engine.
+// Just enough surface for InputContext to forward keystrokes
+// and focus events; the full client surface lives in
+// internal/ibushost.
+type Engine interface {
+	Name() string
+	Connected() bool
+	ProcessKeyEvent(keyval, keycode, state uint32) (bool, error)
+	FocusIn() error
+	FocusOut() error
+	Reset() error
+}
+
 // Server is one running ibus-side dbus daemon. Start it once
 // per process; it owns a goroutine for the conn's reader.
 type Server struct {
@@ -71,11 +106,24 @@ type Server struct {
 	log     *slog.Logger
 	factory SessionFactory
 	busName string
+	host    EngineHost // optional — nil means "no external engine routing"
 
 	mu       sync.Mutex
 	contexts map[dbus.ObjectPath]*InputContext
 	nextID   uint64
 }
+
+// SetEngineHost attaches an EngineHost to this server. Call
+// before Start so the RegisterComponent service method has the
+// host available when engines register. nil disables routing.
+func (s *Server) SetEngineHost(h EngineHost) {
+	s.host = h
+}
+
+// Conn exposes the underlying dbus connection for callers that
+// need to share it (e.g. the EngineHost lives on the same
+// session bus and uses Conn to call engines back).
+func (s *Server) Conn() *dbus.Conn { return s.conn }
 
 // New constructs a Server bound to the session bus. busName is
 // the dbus well-known name to claim — pass "" to use the
@@ -220,4 +268,70 @@ func (s *service) GetAddress() (string, *dbus.Error) {
 func (s *service) Destroy() *dbus.Error {
 	return dbus.NewError("org.freedesktop.IBus.Error.Forbidden",
 		[]interface{}{"top-level IBus service refuses Destroy from clients"})
+}
+
+// RegisterComponent is called by engine subprocesses (or any
+// process implementing an engine) when they want to expose
+// engines through this daemon. The component variant carries
+// the full descriptor — we extract the engines list and bind
+// each engine's name to its caller's object path via the
+// configured EngineHost.
+//
+// If no EngineHost is configured the daemon ignores the
+// registration but doesn't error; that lets engines coexist
+// with flexkb-imed without forcing it to host them.
+func (s *service) RegisterComponent(component dbus.Variant) *dbus.Error {
+	if s.srv.host == nil {
+		// Quiet success — engine remains usable via the
+		// session bus's own dispatch; we just don't route
+		// through it.
+		return nil
+	}
+	// The component variant's signature is `(sa{sv}sav)` in
+	// real ibus — opaque enough that we parse it defensively.
+	// For v1 we extract just what we need: the component name
+	// and the engines list. Failures to parse are logged and
+	// dropped — the engine will retry or be discovered via
+	// /usr/share/ibus/component on its next startup.
+	name, engines, ok := decodeIBusComponent(component)
+	if !ok {
+		s.srv.log.Warn("RegisterComponent: malformed component variant")
+		return nil
+	}
+	// We use the sender's path as the object root; engines
+	// expose their service at /org/freedesktop/IBus/Engine.
+	objectPath := dbus.ObjectPath("/org/freedesktop/IBus/Engine")
+	s.srv.host.RegisterComponent(name, engines, objectPath)
+	return nil
+}
+
+// decodeIBusComponent peels a `(sa{sv}sav)`-shaped IBusComponent
+// dbus variant. Real ibus uses Variant<IBusComponent> with a
+// nested struct; we only need the top-level name and the engines
+// list. Returns false on shape mismatch (so callers can log
+// and continue without disrupting other clients).
+func decodeIBusComponent(v dbus.Variant) (componentName string, engineNames []string, ok bool) {
+	raw := v.Value()
+	// Try the common shape first: anonymous struct with first
+	// field = name. We'll let dbus's reflection handle the rest.
+	type ibusComponent struct {
+		Name        string
+		Attributes  map[string]dbus.Variant
+		Description string
+		Engines     []dbus.Variant
+	}
+	var c ibusComponent
+	if err := dbus.Store([]interface{}{raw}, &c); err == nil {
+		for _, ev := range c.Engines {
+			type ibusEngineDesc struct {
+				Name string
+			}
+			var ed ibusEngineDesc
+			if err := dbus.Store([]interface{}{ev.Value()}, &ed); err == nil && ed.Name != "" {
+				engineNames = append(engineNames, ed.Name)
+			}
+		}
+		return c.Name, engineNames, true
+	}
+	return "", nil, false
 }

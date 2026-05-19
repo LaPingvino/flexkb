@@ -25,6 +25,7 @@ import (
 	"github.com/lapingvino/flexkb/internal/compose"
 	"github.com/lapingvino/flexkb/internal/ibus"
 	"github.com/lapingvino/flexkb/internal/ibusengines"
+	"github.com/lapingvino/flexkb/internal/ibushost"
 	"github.com/lapingvino/flexkb/internal/imsession"
 	"github.com/lapingvino/flexkb/internal/inputmethod"
 	"github.com/lapingvino/flexkb/internal/model"
@@ -208,17 +209,24 @@ func runMulti(log *slog.Logger, enableWayland bool, ibusMode string, factory fun
 		if err != nil {
 			log.Error("ibus: connect session bus", "err", err)
 		} else {
+			// Engine-hosting layer rides on the same dbus
+			// connection: engines register with our IBus service
+			// (we accept via service.RegisterComponent) and we
+			// call them back as dbus clients.
+			host := ibushost.New(srv.Conn(), log)
+			srv.SetEngineHost(host)
+			log.Info("ibus engine host initialised", "catalog_size", host.CatalogSize())
+
 			replace := ibusMode == "replace"
 			if err := srv.Start(replace); err != nil {
 				log.Error("ibus: start", "err", err, "mode", ibusMode)
 			} else {
 				log.Info("ibus backend started", "mode", ibusMode)
 				state.addBackend("ibus-" + ibusMode)
+				if host.CatalogSize() > 0 {
+					state.addBackend(fmt.Sprintf("ibus-host(%d engines hostable)", host.CatalogSize()))
+				}
 				go func() {
-					// ibus runs as long as the connection lives.
-					// Block here so the goroutine doesn't exit;
-					// the dbus conn will surface errors via its
-					// own loop when it disconnects.
 					select {}
 				}()
 				started++

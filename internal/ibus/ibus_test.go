@@ -272,3 +272,141 @@ func TestConcurrentInputContexts(t *testing.T) {
 		seen[p] = true
 	}
 }
+
+// fakeEngine is the test substitute for an external ibus engine.
+// It implements ibus.Engine but doesn't actually speak dbus —
+// the test asserts the routing decision, not the wire format
+// (which is exercised by the production code path's existing
+// session-bus tests).
+type fakeEngine struct {
+	name      string
+	connected bool
+	calls     int
+	willClaim bool
+}
+
+func (f *fakeEngine) Name() string    { return f.name }
+func (f *fakeEngine) Connected() bool { return f.connected }
+func (f *fakeEngine) ProcessKeyEvent(uint32, uint32, uint32) (bool, error) {
+	f.calls++
+	return f.willClaim, nil
+}
+func (f *fakeEngine) FocusIn() error  { return nil }
+func (f *fakeEngine) FocusOut() error { return nil }
+func (f *fakeEngine) Reset() error    { return nil }
+
+// fakeHost is the test substitute for ibushost.Host. Returns
+// one pre-built fakeEngine for any context that asks.
+type fakeHost struct {
+	engine    *fakeEngine
+	released  map[dbus.ObjectPath]bool
+	selected  map[dbus.ObjectPath]string
+	registered []string
+}
+
+func (h *fakeHost) EngineFor(p dbus.ObjectPath) Engine {
+	if h.selected[p] != "" {
+		return h.engine
+	}
+	return nil
+}
+func (h *fakeHost) SelectEngine(p dbus.ObjectPath, name string) (Engine, error) {
+	if h.selected == nil {
+		h.selected = map[dbus.ObjectPath]string{}
+	}
+	h.selected[p] = name
+	return h.engine, nil
+}
+func (h *fakeHost) ReleaseEngine(p dbus.ObjectPath) {
+	if h.released == nil {
+		h.released = map[dbus.ObjectPath]bool{}
+	}
+	h.released[p] = true
+	delete(h.selected, p)
+}
+func (h *fakeHost) RegisterComponent(name string, engines []string, _ dbus.ObjectPath) {
+	h.registered = append(h.registered, name)
+}
+
+// TestEngineRoutingWhenBound — SetEngine binds the input context
+// to the fake engine; subsequent ProcessKeyEvent calls go to
+// the engine first and are consumed when the engine claims them.
+func TestEngineRoutingWhenBound(t *testing.T) {
+	srv, _, cleanup := withTestServer(t)
+	defer cleanup()
+
+	host := &fakeHost{engine: &fakeEngine{name: "fake", connected: true, willClaim: true}}
+	srv.SetEngineHost(host)
+
+	sess, _ := fakeFactory()()
+	ic := &InputContext{
+		srv:     srv,
+		path:    "/test/ic",
+		sess:    sess,
+		focused: true,
+	}
+	// Bind the engine.
+	if err := ic.SetEngine("fake"); err != nil {
+		t.Fatalf("SetEngine: %v", err)
+	}
+	consumed, _ := ic.ProcessKeyEvent(0x61, 38, 0)
+	if !consumed {
+		t.Error("expected engine-claimed keystroke to be consumed")
+	}
+	if host.engine.calls != 1 {
+		t.Errorf("engine call count: got %d, want 1", host.engine.calls)
+	}
+}
+
+// TestEngineRoutingFallsBackOnNotConsumed — when the engine
+// returns consumed=false, we fall through to the in-process
+// Session. Verifies the "engine first, fall back" semantics.
+func TestEngineRoutingFallsBackOnNotConsumed(t *testing.T) {
+	srv, _, cleanup := withTestServer(t)
+	defer cleanup()
+
+	host := &fakeHost{engine: &fakeEngine{name: "fake", connected: true, willClaim: false}}
+	srv.SetEngineHost(host)
+
+	sess, _ := fakeFactory()()
+	ic := &InputContext{
+		srv:     srv,
+		path:    "/test/ic",
+		sess:    sess,
+		focused: true,
+	}
+	_ = ic.SetEngine("fake")
+	consumed, _ := ic.ProcessKeyEvent(0x61, 38, 0)
+	// The fakeFactory's Session has no IM loaded — it falls
+	// back to "commit the resolved symbol" passthrough. That
+	// commits "a" → consumed=true via Session path.
+	if !consumed {
+		t.Error("Session fallback should have consumed the AC01 keystroke")
+	}
+	if host.engine.calls != 1 {
+		t.Errorf("engine should have been asked first: got %d calls, want 1", host.engine.calls)
+	}
+}
+
+// TestDestroyReleasesEngineBinding — destroying the input
+// context must invoke ReleaseEngine on the host so engines
+// aren't left thinking dead contexts are still active.
+func TestDestroyReleasesEngineBinding(t *testing.T) {
+	srv, _, cleanup := withTestServer(t)
+	defer cleanup()
+
+	host := &fakeHost{engine: &fakeEngine{name: "fake", connected: true}}
+	srv.SetEngineHost(host)
+
+	sess, _ := fakeFactory()()
+	ic := &InputContext{srv: srv, path: "/test/ic", sess: sess}
+	srv.mu.Lock()
+	srv.contexts["/test/ic"] = ic
+	srv.mu.Unlock()
+	_ = ic.SetEngine("fake")
+
+	_ = ic.Destroy()
+	if !host.released["/test/ic"] {
+		t.Error("ReleaseEngine not called on Destroy")
+	}
+}
