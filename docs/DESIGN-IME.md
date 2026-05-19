@@ -359,9 +359,69 @@ same `data/*.yaml` source so behaviour matches; the daemon is just
 the more capable consumer that picks up the stateful IM tier the
 static path can't express.
 
-**X11**: out of scope for the initial implementation. If demand
-materialises, an `ibus-m17n`-shaped backend can be added later that
-exposes the same IM files via the existing ibus engine API.
+**X11**: out of scope for the initial implementation. Inherited via
+the ibus backend (see "Phased backend plan" below) once that's
+done — every X11 IM client supports ibus.
+
+## Phased backend plan
+
+The daemon's *transport* (how it talks to compositors and apps) is
+separable from its *engine* (how it processes keystrokes through
+the rule files). One engine, many backends, picked at runtime
+based on what's available:
+
+```
+                  ┌─ Wayland input-method-v2 ──── KDE, Sway, Hyprland, river,
+                  │                                labwc, niri, …
+flexkb-imed ──────┤
+                  ├─ ibus dbus (incoming) ──────── GNOME, X11 clients
+                  │
+                  └─ ibus engine spawner ──────── existing ibus-engine-* processes
+                                                    routed through flexkb-imed
+       │
+       ▼
+   shared engine: runtime resolver + IM tier + dictionaries
+```
+
+Implementation order, smallest viable scope first:
+
+1. **Wayland v2 backend, native engines only.**
+   Sufficient for KDE / wlroots users running flexkb's own
+   data-driven IMs. The daemon binds zwp_input_method_v2 +
+   keyboard_grab and runs every keystroke through the static
+   resolver and the IM tier in-process. No external IM
+   dependencies.
+
+2. **ibus dbus backend.**
+   flexkb-imed claims `org.freedesktop.IBus` on the session bus
+   and implements the methods compositors and apps actually use
+   (FocusIn, FocusOut, ProcessKeyEvent, Reset, SetCursorLocation,
+   the input-context lifecycle). This lets the SAME daemon serve
+   GNOME / Mutter (which only knows ibus) and X11 clients (also
+   only ibus). No engine-process layer — flexkb-imed answers
+   ibus dbus calls directly from its in-process engine.
+
+3. **Host other IMEs.**
+   The dominant CJK IMs (libpinyin, anthy, mozc, kkc, …) exist
+   as standalone ibus-engine-* binaries with years of language
+   modeling and dictionaries we won't replicate any time soon.
+   flexkb-imed can spawn those binaries as child processes and
+   route the ibus engine-side dbus traffic between them and the
+   IM clients. Users get flexkb's modular layouts AND the
+   existing engine ecosystem from the same daemon.
+
+   Also via the same mechanism: other Wayland v2 IMEs (fcitx5,
+   etc.) plug in by speaking ibus (most already do as a fallback)
+   or — phase 3.1 — by connecting to a re-broadcast
+   input-method-v2 interface flexkb-imed exposes for downstream
+   IMEs.
+
+Each phase is independently shippable: phase 1 gets a working
+daemon on the modern Wayland stack; phase 2 doubles the
+addressable user base to include GNOME and X11; phase 3 makes
+flexkb-imed a drop-in replacement for ibus-daemon. The "remove
+ibus from your system" promise lands at phase 2; "and host the
+engines you used to need ibus for" lands at phase 3.
 
 ## m17n-mim interop
 
