@@ -130,23 +130,13 @@ func extractRaw(src string, offset int, name string) string {
 	if rel == -1 {
 		return ""
 	}
-	// Walk backwards to include any leading modifier keywords (default,
-	// partial, alphanumeric_keys, etc.) — stop at preceding `;` or `}`
-	// (the end of a previous statement).
-	start := rel
-	for start > 0 {
-		c := tail[start-1]
-		if c == '\n' || c == '\t' || c == ' ' {
-			start--
-			continue
-		}
-		// Letters / underscores are modifier keywords; consume them.
-		if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' {
-			start--
-			continue
-		}
-		break
-	}
+	// Walk backwards to include any leading modifier keywords. Only the
+	// closed set of xkb modifier keywords is consumed — a bare unknown
+	// word means we've hit unrelated preceding content (e.g. the tail of
+	// a comment line like `// https://www.neo-layout.org` where `//` was
+	// stripped during comment cleaning would otherwise drag `org` into
+	// the captured raw source and break xkbcomp later).
+	start := walkBackModifiers(tail, rel)
 	// Now scan forward from the needle to find the opening { then walk
 	// braces. Comments and string literals are skipped so we don't count
 	// braces that appear inside `//...` or `/* */` or quoted strings.
@@ -203,6 +193,62 @@ func extractRaw(src string, offset int, name string) string {
 		}
 	}
 	return ""
+}
+
+// xkbSymbolsModifiers lists the keywords that may legally precede an
+// `xkb_symbols "name" {` declaration. Used by walkBackModifiers to
+// distinguish a real preceding modifier (consume) from a stray word
+// that happens to sit before the declaration (stop).
+var xkbSymbolsModifiers = map[string]bool{
+	"default":           true,
+	"partial":           true,
+	"hidden":            true,
+	"alphanumeric_keys": true,
+	"modifier_keys":     true,
+	"keypad_keys":       true,
+	"function_keys":     true,
+	"alternate_group":   true,
+}
+
+// walkBackModifiers walks backward from end through whitespace and
+// modifier keywords from xkbSymbolsModifiers, returning the start
+// index of the captured prefix. Stops at any other character or any
+// word not in the modifier set.
+func walkBackModifiers(s string, end int) int {
+	pos := end
+	for pos > 0 {
+		// Consume whitespace.
+		w := pos
+		for w > 0 {
+			c := s[w-1]
+			if c != ' ' && c != '\t' && c != '\n' && c != '\r' {
+				break
+			}
+			w--
+		}
+		// Try to consume one preceding modifier word.
+		wEnd := w
+		wStart := wEnd
+		for wStart > 0 {
+			c := s[wStart-1]
+			if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' {
+				wStart--
+				continue
+			}
+			break
+		}
+		if wStart == wEnd {
+			// No word here — leave whitespace untouched so the caller
+			// sees a clean boundary.
+			return pos
+		}
+		word := s[wStart:wEnd]
+		if !xkbSymbolsModifiers[word] {
+			return pos
+		}
+		pos = wStart
+	}
+	return pos
 }
 
 // matchBraces takes the index of an opening `{` and returns the index just

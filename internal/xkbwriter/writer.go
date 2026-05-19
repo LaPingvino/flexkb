@@ -119,10 +119,15 @@ func keyPrefix(k string) string {
 
 func writeKey(w io.Writer, keyCol, symCol int, key string, levels []string) error {
 	// `    key <AE01> { [ symbol1, symbol2, ... ] };`
+	// Normalise: trim trailing empties, fill middle holes with NoSymbol.
+	// An empty mid-array slot otherwise serialises as `, ,` which is a
+	// syntax error in xkb. This can happen when locale-fill places a
+	// symbol at L4 of a key that only had L1/L2 defined.
+	normalised := normaliseLevels(levels)
 	keyField := fmt.Sprintf("<%s>", key)
-	parts := make([]string, len(levels))
-	for i, lv := range levels {
-		if i == len(levels)-1 {
+	parts := make([]string, len(normalised))
+	for i, lv := range normalised {
+		if i == len(normalised)-1 {
 			parts[i] = lv // no padding on the last level
 		} else {
 			parts[i] = fmt.Sprintf("%-*s", symCol, lv)
@@ -130,6 +135,55 @@ func writeKey(w io.Writer, keyCol, symCol int, key string, levels []string) erro
 	}
 	_, err := fmt.Fprintf(w, "    key %-*s {[ %s ]};\n", keyCol+2, keyField, strings.Join(parts, ", "))
 	return err
+}
+
+// normaliseLevels drops trailing empty levels, replaces interior empty
+// levels with `NoSymbol`, and replaces invalid tokens (anything that
+// isn't a valid xkb symbol identifier) with `NoSymbol` as well. The
+// xkb parser allows trailing commas in some implementations but
+// rejects them in others; trimming keeps output portable. Interior
+// holes and invalid tokens are illegal everywhere — a single bad
+// token poisons the whole file at xkbcomp parse time.
+func normaliseLevels(levels []string) []string {
+	end := len(levels)
+	for end > 0 && levels[end-1] == "" {
+		end--
+	}
+	if end == 0 {
+		return nil
+	}
+	out := make([]string, end)
+	for i := 0; i < end; i++ {
+		if levels[i] == "" || !isValidSymbolToken(levels[i]) {
+			out[i] = "NoSymbol"
+		} else {
+			out[i] = levels[i]
+		}
+	}
+	return out
+}
+
+// isValidSymbolToken reports whether s is a syntactically valid xkb
+// symbol token. Real xkb symbols are bare identifiers
+// (letters/digits/underscores starting with a letter or underscore),
+// or hex escapes like `U017A` or `0x0100017A`. Anything else (a
+// space-separated multi-token, a stray punctuation char, an empty
+// string) would cause xkbcomp to abort parsing of the whole file.
+func isValidSymbolToken(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		switch {
+		case r >= 'a' && r <= 'z':
+		case r >= 'A' && r <= 'Z':
+		case r >= '0' && r <= '9':
+		case r == '_' || r == '+' || r == '-':
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 // SortedVariants returns variants ordered so that the Default variant is

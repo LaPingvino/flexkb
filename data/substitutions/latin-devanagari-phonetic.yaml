@@ -60,8 +60,11 @@ map:
   V: U0935   # व
   w: U0935   # व
   W: U0935   # व
-  x: U0915U094D U0937   # क्ष conjunct (won't really render; placeholder)
-  X: U0915U094D U0937
+  # x/X intentionally unmapped: the natural target (क्ष conjunct) is a
+  # multi-codepoint sequence which xkb can't bind to a single keypress.
+  # Conjuncts belong in Compose chains, not xkb symbol tables. Leaving
+  # these unmapped lets x/X pass through as Latin x in the phonetic
+  # layout; users typing क्ष should use a Compose sequence or InScript.
   y: U092F   # य
   Y: U092F   # य
   z: U091C   # ज (z → j)
