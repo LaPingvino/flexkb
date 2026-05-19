@@ -782,6 +782,8 @@ header { position: relative; }
   font-family: inherit;
 }
 .theme-toggle:hover { background: var(--bg-panel); }
+.theme-toggle.hidden { display: none; }
+.theme-toggle.ok { background: var(--ok-bg); border-color: var(--ok); color: var(--ok-fg); }
 .active-chip {
   font-family: ui-monospace, monospace;
   font-size: 0.78rem;

@@ -1676,6 +1676,40 @@ loadDaemonStatus();
 
 const activeChip = document.getElementById("activeChip");
 const daemonChip = document.getElementById("daemonChip");
+const v2CopyBtn = document.getElementById("v2CopyBtn");
+
+// extractV2SocketPath scans the daemon's backend list for the
+// "v2-rebroadcast(<path>)" entry the daemon adds when the
+// --v2-rebroadcast flag is enabled. Returns the path (so the GUI
+// can offer a "copy WAYLAND_DISPLAY override" button) or "" if
+// the tier isn't active. Pure string parsing — no extra fetch.
+function extractV2SocketPath(backends) {
+  if (!backends) return "";
+  for (const b of backends) {
+    const m = b.match(/^v2-rebroadcast\((.+)\)$/);
+    if (m) return m[1];
+  }
+  return "";
+}
+
+// Wire the copy button. Uses the modern clipboard API; falls back
+// to a manual prompt for older browsers / non-secure contexts (the
+// embedded webview should always have clipboard access, but a
+// browser-hosted preview opened over plain HTTP may not).
+v2CopyBtn.addEventListener("click", async () => {
+  const path = v2CopyBtn.dataset.path;
+  if (!path) return;
+  const override = `WAYLAND_DISPLAY=${path}`;
+  try {
+    await navigator.clipboard.writeText(override);
+    v2CopyBtn.title = `Copied: ${override}`;
+    v2CopyBtn.classList.add("ok");
+    setTimeout(() => v2CopyBtn.classList.remove("ok"), 1500);
+  } catch (e) {
+    // Fallback: show in a prompt so the user can copy manually.
+    window.prompt("Copy this WAYLAND_DISPLAY override for your v2 IME:", override);
+  }
+});
 
 // Poll the daemon control socket every 5s. The status badge is
 // informational — if flexkb-imed is running, show what backends
@@ -1694,16 +1728,31 @@ async function loadDaemonStatus() {
       daemonChip.textContent = "daemon off";
       daemonChip.className = "daemon-chip off";
       daemonChip.title = "flexkb-imed not running. Start it with `flexkb-imed --wayland=true` or `flexkb-imed --ibus replace`.";
+      v2CopyBtn.classList.add("hidden");
+      v2CopyBtn.dataset.path = "";
     } else {
       const backends = (s.backends && s.backends.length) ? s.backends.join(", ") : "(socket only)";
       daemonChip.textContent = `daemon: ${backends}`;
       daemonChip.className = "daemon-chip ok";
       const stack = s.layout_file ? `${s.layout_file}(${s.variant || "basic"})` : "(stack info unavailable)";
       daemonChip.title = `flexkb-imed active on ${backends}\nstack: ${stack}` + (s.im ? `\nIM: ${s.im}` : "");
+
+      // v2 rebroadcast: surface the copy-WAYLAND_DISPLAY button.
+      const v2Path = extractV2SocketPath(s.backends);
+      if (v2Path) {
+        v2CopyBtn.classList.remove("hidden");
+        v2CopyBtn.dataset.path = v2Path;
+        v2CopyBtn.title = `Copy WAYLAND_DISPLAY=${v2Path} so a v2 IME (e.g. fcitx5) can plug into flexkb-imed`;
+      } else {
+        v2CopyBtn.classList.add("hidden");
+        v2CopyBtn.dataset.path = "";
+      }
     }
   } catch (e) {
     daemonChip.textContent = "daemon ?";
     daemonChip.className = "daemon-chip warn";
+    v2CopyBtn.classList.add("hidden");
+    v2CopyBtn.dataset.path = "";
   }
 }
 // Refresh status every 5s — cheap (one HTTP roundtrip to localhost)
