@@ -20,6 +20,7 @@ import (
 	"syscall"
 
 	"github.com/lapingvino/flexkb/internal/compose"
+	"github.com/lapingvino/flexkb/internal/ibus"
 	"github.com/lapingvino/flexkb/internal/imsession"
 	"github.com/lapingvino/flexkb/internal/inputmethod"
 	"github.com/lapingvino/flexkb/internal/model"
@@ -34,6 +35,9 @@ func main() {
 	layoutFile := flag.String("layout", "us", "data/layouts/<name>.yaml layout file to use as the static-layer stack")
 	variantName := flag.String("variant", "basic", "variant within the layout file")
 	imFile := flag.String("im", "", "data/inputmethods/<name>.yaml input method to load (optional; empty = passthrough)")
+	enableWayland := flag.Bool("wayland", true, "enable the Wayland input-method-v2 backend")
+	ibusMode := flag.String("ibus", "off", "ibus backend: off | alongside | replace. "+
+		"alongside fails if ibus-daemon already owns the name; replace takes it over.")
 	flag.Parse()
 	level := slog.LevelInfo
 	if *verbose {
@@ -41,15 +45,74 @@ func main() {
 	}
 	log := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: level}))
 
-	sess, err := loadSession(log, *layoutFile, *variantName, *imFile)
-	if err != nil {
-		log.Error("load session", "err", err)
-		os.Exit(1)
+	// One factory shared across both backends so each
+	// freshly-created input context gets an independent Session
+	// but identical configuration. ibus calls this per
+	// CreateInputContext (one per app); Wayland reuses a single
+	// session for the whole connection (one per compositor).
+	factory := func() (*imsession.Session, error) {
+		return loadSession(log, *layoutFile, *variantName, *imFile)
 	}
 
-	if err := run(log, sess); err != nil {
+	if err := runMulti(log, *enableWayland, *ibusMode, factory); err != nil {
 		log.Error("daemon exited", "err", err)
 		os.Exit(1)
+	}
+}
+
+// runMulti starts every enabled backend and waits for any of
+// them to error or for a signal. Each backend is independent —
+// failing to start one doesn't tear down the others; if
+// EVERY backend fails to start, that's a fatal error reported
+// to the caller.
+func runMulti(log *slog.Logger, enableWayland bool, ibusMode string, factory func() (*imsession.Session, error)) error {
+	backendErr := make(chan error, 2)
+	started := 0
+
+	if enableWayland {
+		sess, err := factory()
+		if err != nil {
+			log.Error("Wayland: load session", "err", err)
+		} else {
+			go func() { backendErr <- run(log, sess) }()
+			started++
+		}
+	}
+
+	if ibusMode != "off" {
+		srv, err := ibus.New(log, factory)
+		if err != nil {
+			log.Error("ibus: connect session bus", "err", err)
+		} else {
+			replace := ibusMode == "replace"
+			if err := srv.Start(replace); err != nil {
+				log.Error("ibus: start", "err", err, "mode", ibusMode)
+			} else {
+				log.Info("ibus backend started", "mode", ibusMode)
+				go func() {
+					// ibus runs as long as the connection lives.
+					// Block here so the goroutine doesn't exit;
+					// the dbus conn will surface errors via its
+					// own loop when it disconnects.
+					select {}
+				}()
+				started++
+			}
+		}
+	}
+
+	if started == 0 {
+		return fmt.Errorf("no backends started — set --wayland=true or --ibus=alongside|replace")
+	}
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	select {
+	case err := <-backendErr:
+		return err
+	case sig := <-sigs:
+		log.Info("signal received", "sig", sig)
+		return nil
 	}
 }
 
@@ -312,16 +375,9 @@ func run(log *slog.Logger, sess *imsession.Session) error {
 
 	log.Info("ready: keyboard grabbed, awaiting text-input focus")
 
-	// Wait for either dispatch error or a signal.
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-	select {
-	case err := <-dispatchErr:
-		return err
-	case sig := <-sigs:
-		log.Info("signal received", "sig", sig)
-		return nil
-	}
+	// runMulti owns signal handling now — we just surface the
+	// dispatch loop's outcome back to it.
+	return <-dispatchErr
 }
 
 // diagnoseMissingManager produces a helpful error when the
