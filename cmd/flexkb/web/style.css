@@ -1,5 +1,35 @@
 * { box-sizing: border-box; }
 
+/* Accessibility: visible-focus indicator on every interactive
+   element. The default browser outline is often suppressed by
+   themes; explicit rule guarantees keyboard users always see
+   where focus is. :focus-visible (not :focus) keeps the ring
+   off mouse users who don't need it. */
+:focus-visible {
+  outline: 2px solid var(--accent, #58a6ff);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Skip-link: hidden visually until focused (first Tab from page
+   load lands here, lets keyboard users jump past the header to
+   main content). Standard pattern from WAI authoring practices. */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  background: var(--accent, #58a6ff);
+  color: #fff;
+  padding: 8px 16px;
+  text-decoration: none;
+  font-weight: 600;
+  z-index: 10000;
+  transition: top 0.15s;
+}
+.skip-link:focus {
+  top: 0;
+}
+
 /* Default theme = dark. The light theme uses .theme-light on <body>
    and shadows every variable below. Tokens are kept in CSS variables
    so theme switching is a one-attribute flip. */

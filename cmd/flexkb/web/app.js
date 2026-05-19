@@ -2,6 +2,93 @@
 // layers. Talks to /api/layouts, /api/modules, /api/paths,
 // /api/compose, /api/compose-spec, /api/save.
 
+// Accessibility hook: mirror the `hidden` CSS class to the actual
+// `hidden` attribute on overlay/panel elements, plus manage focus
+// trap and return-focus for modal overlays. Many call sites
+// toggle .hidden via classList; without these mirrors, assistive
+// tech would still treat the hidden overlay as live content and
+// keyboard users would Tab out of the modal into the page behind.
+
+// Track the element that had focus before each overlay opened,
+// keyed by overlay id, so we can restore focus on close.
+const _lastFocusByOverlay = new WeakMap();
+
+// trapTabFocus keeps Tab and Shift+Tab inside an overlay. The
+// implementation is deliberately simple: query focusable children
+// at keydown time so dynamically-added controls work without
+// re-registering anything.
+function _trapTabFocus(overlay, event) {
+  if (event.key !== "Tab") return;
+  const focusables = overlay.querySelectorAll(
+    'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  );
+  if (focusables.length === 0) return;
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const selectors = ".inspect-overlay, section.tab";
+  const sync = (el) => {
+    const isHidden = el.classList.contains("hidden");
+    if (isHidden) {
+      el.setAttribute("hidden", "");
+    } else {
+      el.removeAttribute("hidden");
+    }
+    // Modal-overlay only: focus management.
+    if (el.classList.contains("inspect-overlay")) {
+      if (isHidden) {
+        // Restore focus to where the user was before opening.
+        const ret = _lastFocusByOverlay.get(el);
+        if (ret && typeof ret.focus === "function") {
+          ret.focus();
+        }
+        _lastFocusByOverlay.delete(el);
+      } else {
+        // Remember return target, then move focus into the
+        // overlay. Heading first (so the screen reader
+        // announces what dialog opened), then first focusable
+        // control if no heading is reachable.
+        _lastFocusByOverlay.set(el, document.activeElement);
+        const target = el.querySelector("h3, h2, [autofocus], input, button");
+        if (target) {
+          // h3 isn't natively focusable — give it tabindex=-1
+          // so .focus() works without making it Tab-reachable.
+          if (target.tagName === "H3" || target.tagName === "H2") {
+            target.setAttribute("tabindex", "-1");
+          }
+          target.focus();
+        }
+      }
+    }
+  };
+  document.querySelectorAll(selectors).forEach(sync);
+  const obs = new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      if (m.type === "attributes" && m.attributeName === "class") {
+        sync(m.target);
+      }
+    }
+  });
+  document.querySelectorAll(selectors).forEach((el) => {
+    obs.observe(el, { attributes: true, attributeFilter: ["class"] });
+  });
+
+  // Wire Tab-focus-trap on every modal overlay. Listeners stay
+  // installed; they no-op when the overlay isn't visible because
+  // focus would be elsewhere.
+  document.querySelectorAll(".inspect-overlay").forEach((overlay) => {
+    overlay.addEventListener("keydown", (e) => _trapTabFocus(overlay, e));
+  });
+});
+
 const ROWS = [
   ["TLDE", "AE01", "AE02", "AE03", "AE04", "AE05", "AE06", "AE07", "AE08", "AE09", "AE10", "AE11", "AE12", "AE13"],
   ["AD01", "AD02", "AD03", "AD04", "AD05", "AD06", "AD07", "AD08", "AD09", "AD10", "AD11", "AD12", "BKSL"],
@@ -595,14 +682,56 @@ async function activateRequest(file, variant, statusEl) {
 
 function switchTab(name) {
   for (const b of document.querySelectorAll("nav.tabs button")) {
-    b.classList.toggle("active", b.dataset.tab === name);
+    const active = b.dataset.tab === name;
+    b.classList.toggle("active", active);
+    // ARIA: tab role consumers (screen readers, AT) rely on
+    // aria-selected and tabindex to know which tab is current
+    // and which to skip during keyboard navigation. Without
+    // these the tablist behaves as a generic button group.
+    b.setAttribute("aria-selected", active ? "true" : "false");
+    b.setAttribute("tabindex", active ? "0" : "-1");
   }
   for (const s of document.querySelectorAll("section.tab")) {
-    s.classList.toggle("hidden", s.dataset.tab !== name);
+    const active = s.dataset.tab === name;
+    s.classList.toggle("hidden", !active);
+    // hidden attribute (vs. just the class) is what assistive
+    // tech actually honours — CSS display:none would hide it
+    // visually but a screen reader following sequential reading
+    // order could still descend into it.
+    if (active) {
+      s.removeAttribute("hidden");
+    } else {
+      s.setAttribute("hidden", "");
+    }
   }
   if (name === "paths") renderPathsTab();
   if (name === "compose") ensureComposeReady();
 }
+
+// Tablist keyboard navigation: Left/Right arrow keys move focus
+// between tabs, Home/End jump to first/last. Matches the
+// W3C ARIA Authoring Practices for tabs widgets — most desktop
+// users expect this behaviour from screen-reader friendly UIs.
+document.addEventListener("DOMContentLoaded", () => {
+  const tablist = document.querySelector('[role="tablist"]');
+  if (!tablist) return;
+  tablist.addEventListener("keydown", (e) => {
+    const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+    const idx = tabs.indexOf(document.activeElement);
+    if (idx === -1) return;
+    let next = null;
+    switch (e.key) {
+      case "ArrowRight": next = tabs[(idx + 1) % tabs.length]; break;
+      case "ArrowLeft":  next = tabs[(idx - 1 + tabs.length) % tabs.length]; break;
+      case "Home":       next = tabs[0]; break;
+      case "End":        next = tabs[tabs.length - 1]; break;
+      default: return;
+    }
+    e.preventDefault();
+    next.focus();
+    next.click();
+  });
+});
 
 // === Compose tab ===
 const cFile = document.getElementById("cFile");

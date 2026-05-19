@@ -7,23 +7,30 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <header>
     <h1>flexkb</h1>
     <p class="tag">keyboard layout composer</p>
     <div class="header-right">
-      <span class="active-chip hidden" id="activeChip"></span>
-      <button class="theme-toggle" id="unicodeOpenBtn" title="Open Unicode picker">𝓊</button>
-      <button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme">☾</button>
+      <span class="active-chip hidden" id="activeChip" role="status" aria-live="polite"></span>
+      <button class="theme-toggle" id="unicodeOpenBtn" aria-label="Open Unicode picker" title="Open Unicode picker">
+        <span aria-hidden="true">𝓊</span>
+      </button>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle light or dark theme" title="Toggle light/dark theme">
+        <span aria-hidden="true">☾</span>
+      </button>
     </div>
-    <nav class="tabs">
-      <button data-tab="browse" class="active">Browse</button>
-      <button data-tab="compose">Compose your own</button>
-      <button data-tab="paths">Data layers</button>
+    <nav class="tabs" aria-label="Sections">
+      <div role="tablist" aria-label="flexkb sections">
+        <button data-tab="browse" id="tab-browse" role="tab" aria-selected="true" aria-controls="panel-browse" class="active">Browse</button>
+        <button data-tab="compose" id="tab-compose" role="tab" aria-selected="false" aria-controls="panel-compose" tabindex="-1">Compose your own</button>
+        <button data-tab="paths" id="tab-paths" role="tab" aria-selected="false" aria-controls="panel-paths" tabindex="-1">Data layers</button>
+      </div>
     </nav>
   </header>
 
-  <main>
-    <section class="tab" data-tab="browse">
+  <main id="main-content" tabindex="-1">
+    <section class="tab" data-tab="browse" id="panel-browse" role="tabpanel" aria-labelledby="tab-browse">
       <div class="picker">
         <label>
           <span>Layout file <em>(type to filter)</em></span>
@@ -54,7 +61,7 @@
         <button id="bYAML" title="View or edit the raw layout YAML">YAML…</button>
         <button id="bDelete" class="danger hidden" title="Delete this variant from your user data">Delete</button>
         <button id="bOpenSettings" class="hidden" title="Open the OS keyboard panel (Wayland: real layout switching happens here, not via Activate)">OS keyboard settings…</button>
-        <span class="status" id="bStatus"></span>
+        <span class="status" id="bStatus" role="status" aria-live="polite"></span>
       </div>
       <div class="meta" id="meta"></div>
       <div class="coverage" id="coverage"></div>
@@ -70,7 +77,7 @@
       <div class="warnings" id="warnings"></div>
     </section>
 
-    <section class="tab hidden" data-tab="compose">
+    <section class="tab hidden" data-tab="compose" id="panel-compose" role="tabpanel" aria-labelledby="tab-compose" hidden>
       <div class="compose-form">
         <div class="row">
           <label>
@@ -145,7 +152,7 @@
           <button id="cActivate">Save &amp; Activate</button>
           <button id="cShowXKB">View XKB</button>
           <button id="cDelete" class="danger hidden" title="Delete this variant from your user data">Delete</button>
-          <span class="status" id="cStatus"></span>
+          <span class="status" id="cStatus" role="status" aria-live="polite"></span>
         </div>
       </div>
       <div class="meta" id="cMeta"></div>
@@ -165,10 +172,12 @@
 
     <div class="key-popover hidden" id="keyPopover"></div>
 
-    <div class="inspect-overlay hidden" id="saveAdditionOverlay">
+    <div class="inspect-overlay hidden" id="saveAdditionOverlay" role="dialog" aria-modal="true" aria-labelledby="saveAdditionTitle" hidden>
       <div class="inspect-panel">
-        <button class="inspect-close" id="saveAdditionClose">×</button>
-        <h3>Save overrides as addition</h3>
+        <button class="inspect-close" id="saveAdditionClose" aria-label="Close dialog">
+          <span aria-hidden="true">×</span>
+        </button>
+        <h3 id="saveAdditionTitle">Save overrides as addition</h3>
         <p class="inspect-meta">Promote your custom cell assignments into a reusable addition YAML at <code>~/.config/flexkb/data/additions/</code>. Once saved, you can stack it onto any layout the same way as the built-in additions.</p>
         <div class="row">
           <label>
@@ -199,41 +208,47 @@
         <div class="overlays-preview" id="saPreview"></div>
         <div class="row actions">
           <button id="saSave" class="primary">Save</button>
-          <span class="status" id="saStatus"></span>
+          <span class="status" id="saStatus" role="status" aria-live="polite"></span>
         </div>
       </div>
     </div>
 
-    <div class="inspect-overlay hidden" id="unicodeOverlay">
+    <div class="inspect-overlay hidden" id="unicodeOverlay" role="dialog" aria-modal="true" aria-labelledby="unicodeTitle" hidden>
       <div class="inspect-panel">
-        <button class="inspect-close" id="unicodeClose">×</button>
-        <h3>Unicode picker</h3>
+        <button class="inspect-close" id="unicodeClose" aria-label="Close Unicode picker">
+          <span aria-hidden="true">×</span>
+        </button>
+        <h3 id="unicodeTitle">Unicode picker</h3>
         <p class="inspect-meta">Search by character, codepoint (U+1F600), or name (BLACK STAR).</p>
         <input id="unicodeSearch" type="search" placeholder="search 40k codepoints…" autocomplete="off" autofocus>
         <div class="unicode-results" id="unicodeResults"></div>
         <div class="row">
-          <span class="status" id="unicodeStatus"></span>
+          <span class="status" id="unicodeStatus" role="status" aria-live="polite"></span>
         </div>
       </div>
     </div>
 
-    <div class="inspect-overlay hidden" id="yamlOverlay">
+    <div class="inspect-overlay hidden" id="yamlOverlay" role="dialog" aria-modal="true" aria-labelledby="yamlTitle" hidden>
       <div class="inspect-panel">
-        <button class="inspect-close" id="yamlClose">×</button>
+        <button class="inspect-close" id="yamlClose" aria-label="Close YAML editor">
+          <span aria-hidden="true">×</span>
+        </button>
         <h3 id="yamlTitle">Layout YAML</h3>
         <p class="inspect-meta" id="yamlMeta"></p>
         <textarea class="yaml-editor" id="yamlEditor" spellcheck="false"></textarea>
         <div class="row actions">
           <button id="yamlSave" class="primary" title="Write to user data — system-layer files become a user override">Save to user data</button>
           <button id="yamlReload">Reload</button>
-          <span class="status" id="yamlStatus"></span>
+          <span class="status" id="yamlStatus" role="status" aria-live="polite"></span>
         </div>
       </div>
     </div>
 
-    <div class="inspect-overlay hidden" id="inspectOverlay">
+    <div class="inspect-overlay hidden" id="inspectOverlay" role="dialog" aria-modal="true" aria-labelledby="inspectTitle" hidden>
       <div class="inspect-panel">
-        <button class="inspect-close" id="inspectClose">×</button>
+        <button class="inspect-close" id="inspectClose" aria-label="Close inspector">
+          <span aria-hidden="true">×</span>
+        </button>
         <h3 id="inspectTitle"></h3>
         <p class="inspect-meta" id="inspectMeta"></p>
         <p class="inspect-desc" id="inspectDesc"></p>
@@ -246,7 +261,7 @@
       </div>
     </div>
 
-    <section class="tab hidden" data-tab="paths">
+    <section class="tab hidden" data-tab="paths" id="panel-paths" role="tabpanel" aria-labelledby="tab-paths" hidden>
       <p class="hint">
         flexkb walks these data paths in priority order. Files in
         higher-priority directories shadow same-named files lower down,
