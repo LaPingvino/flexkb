@@ -16,11 +16,13 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"sync"
 	"syscall"
 
 	"github.com/lapingvino/flexkb/internal/compose"
 	"github.com/lapingvino/flexkb/internal/ibus"
+	"github.com/lapingvino/flexkb/internal/ibusengines"
 	"github.com/lapingvino/flexkb/internal/imsession"
 	"github.com/lapingvino/flexkb/internal/inputmethod"
 	"github.com/lapingvino/flexkb/internal/model"
@@ -38,7 +40,14 @@ func main() {
 	enableWayland := flag.Bool("wayland", true, "enable the Wayland input-method-v2 backend")
 	ibusMode := flag.String("ibus", "off", "ibus backend: off | alongside | replace. "+
 		"alongside fails if ibus-daemon already owns the name; replace takes it over.")
+	listEngines := flag.Bool("list-engines", false, "print every ibus engine installed on the system and exit. "+
+		"Useful to see what other IMEs flexkb-imed could host in future versions.")
 	flag.Parse()
+
+	if *listEngines {
+		printEngineInventory()
+		return
+	}
 	level := slog.LevelInfo
 	if *verbose {
 		level = slog.LevelDebug
@@ -131,6 +140,51 @@ func runMulti(log *slog.Logger, enableWayland bool, ibusMode string, factory fun
 		log.Info("signal received", "sig", sig)
 		return nil
 	}
+}
+
+// printEngineInventory dumps every installed ibus engine to
+// stdout in a human-readable table. Run as `flexkb-imed
+// --list-engines` to inventory what's hostable. Pure-Latin
+// xkb-wrapper entries (xkb:*) are listed separately at the end
+// since they're not "real" IMEs in the IM-tier sense.
+func printEngineInventory() {
+	components, warnings := ibusengines.Discover()
+	for _, w := range warnings {
+		fmt.Fprintln(os.Stderr, "warn:", w)
+	}
+	engines := ibusengines.AllEngines(components)
+	real := ibusengines.RealEngines(engines)
+	wrappers := len(engines) - len(real)
+
+	fmt.Printf("== ibus engines installed ==\n")
+	fmt.Printf("(parsing /usr/share/ibus/component/*.xml)\n\n")
+	fmt.Printf("Real input methods: %d\n", len(real))
+	fmt.Printf("xkb layout wrappers: %d (redundant with flexkb's static-layer)\n\n", wrappers)
+	if len(real) == 0 {
+		fmt.Printf("No real IM engines found. Install ibus-libpinyin, ibus-anthy,\n")
+		fmt.Printf("ibus-mozc, ibus-hangul, etc. for engines flexkb-imed could host.\n")
+		return
+	}
+	fmt.Printf("%-30s  %-30s  %s\n", "name", "long name", "language")
+	fmt.Printf("%-30s  %-30s  %s\n", strings.Repeat("-", 30), strings.Repeat("-", 30), strings.Repeat("-", 8))
+	for _, e := range real {
+		fmt.Printf("%-30s  %-30s  %s\n", truncate(e.Name, 30), truncate(e.LongName, 30), e.Language)
+	}
+	fmt.Println()
+	fmt.Println("Hosting these engines (routing flexkb-imed → engine subprocess) is")
+	fmt.Println("phase 3 of step 5 per docs/DESIGN-IME.md. Enumeration today, full")
+	fmt.Println("multiplexing in a follow-up. Until then, these engines remain")
+	fmt.Println("usable via the system ibus-daemon if it's running.")
+}
+
+func truncate(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	if n <= 1 {
+		return "…"
+	}
+	return s[:n-1] + "…"
 }
 
 // loadSession builds the runtime stack the daemon will run for

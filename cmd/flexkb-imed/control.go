@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/lapingvino/flexkb/internal/ibusengines"
 )
 
 // controlServer exposes a small Unix-socket control API the GUI
@@ -164,6 +166,31 @@ func (s *controlServer) handleConn(conn net.Conn) {
 			}
 		case "ping":
 			if err := enc.Encode(map[string]string{"pong": "ok"}); err != nil {
+				return
+			}
+		case "list-engines":
+			components, _ := ibusengines.Discover()
+			real := ibusengines.RealEngines(ibusengines.AllEngines(components))
+			// Return a compact form — full Component info is
+			// available via `flexkb-imed --list-engines` and the
+			// XML files themselves; the GUI just needs the
+			// pickable summary.
+			type engineDTO struct {
+				Name      string `json:"name"`
+				LongName  string `json:"long_name"`
+				Language  string `json:"language"`
+				Component string `json:"component"`
+			}
+			out := make([]engineDTO, 0, len(real))
+			for _, e := range real {
+				out = append(out, engineDTO{
+					Name:      e.Name,
+					LongName:  e.LongName,
+					Language:  e.Language,
+					Component: e.ComponentName,
+				})
+			}
+			if err := enc.Encode(out); err != nil {
 				return
 			}
 		default:
