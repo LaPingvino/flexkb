@@ -68,6 +68,8 @@ type Host struct {
 	// hostable?" without re-walking the filesystem.
 	catalog map[string]ibusengines.Engine
 
+	bridge *signalBridge
+
 	mu      sync.Mutex
 	engines map[string]*Engine          // by engine name
 	routes  map[dbus.ObjectPath]*Engine // input-context path → engine
@@ -87,9 +89,33 @@ func New(conn *dbus.Conn, log *slog.Logger) *Host {
 		conn:    conn,
 		log:     log,
 		catalog: cats,
+		bridge:  newSignalBridge(conn, log),
 		engines: map[string]*Engine{},
 		routes:  map[dbus.ObjectPath]*Engine{},
 	}
+}
+
+// SetContextEmitter wires the per-context re-emit hook so
+// engine-side signals (CommitText, UpdatePreedit, …) flow back
+// out via the input-context's dbus path. flexkb-imed calls
+// this after constructing both the ibus.Server and the Host.
+func (h *Host) SetContextEmitter(e ContextEmitter) {
+	h.bridge.setEmitter(e)
+}
+
+// NotifyFocusIn records that ctxPath is the currently-focused
+// context for the given engine. Subsequent engine-side signals
+// route to it. Called from internal/ibus.InputContext.FocusIn
+// when an engine is bound.
+func (h *Host) NotifyFocusIn(engineName string, ctxPath dbus.ObjectPath) {
+	h.bridge.setFocus(engineName, ctxPath)
+}
+
+// NotifyFocusOut clears the focused-context record for the
+// engine. Called from FocusOut. Subsequent engine signals are
+// dropped until another context focuses on the engine.
+func (h *Host) NotifyFocusOut(engineName string) {
+	h.bridge.setFocus(engineName, "")
 }
 
 // CatalogSize reports the number of engines this Host is aware
@@ -213,6 +239,7 @@ func (h *Host) Close() {
 	}
 	h.engines = map[string]*Engine{}
 	h.routes = map[dbus.ObjectPath]*Engine{}
+	h.bridge.close()
 }
 
 // spawnEngine starts an engine binary as a subprocess. Real
@@ -332,12 +359,21 @@ func (w *lineWriter) Write(p []byte) (int, error) {
 // RegisterComponent is the hook internal/ibus.service calls when
 // an engine that we spawned (or that was spawned externally and
 // found our bus name) calls RegisterComponent. We complete the
-// Engine handle by recording its dbus path so subsequent method
-// calls can reach it.
+// Engine handle by recording its dbus path AND ensure the signal
+// bridge is listening so engine-side CommitText / preedit
+// signals get re-emitted on the correct input-context path.
 //
 // component is the descriptor sent by the engine; it carries
 // enough metadata to match against our catalog.
 func (h *Host) RegisterComponent(componentName string, engineNames []string, objectPath dbus.ObjectPath) {
+	// Subscribing on every registration is idempotent — the
+	// bridge tracks its own started state. Failures here mean
+	// the dbus connection refused the match rule; we log and
+	// continue so the engine remains usable for method calls
+	// even if its signals can't be forwarded.
+	if err := h.bridge.installSubscription(); err != nil {
+		h.log.Warn("signal bridge subscription failed", "err", err)
+	}
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	for _, engineName := range engineNames {

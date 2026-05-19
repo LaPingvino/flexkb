@@ -94,24 +94,41 @@ func (c *InputContext) ProcessKeyEvent(keyval, keycode, state uint32) (bool, *db
 }
 
 // FocusIn marks the context as active. Subsequent ProcessKeyEvent
-// calls will route through the session.
+// calls will route through the session. If an engine is bound,
+// tells the engine "this context is now active" so its
+// per-context state loads, AND notifies the host that this is
+// now the focused context for the engine — signals routed back
+// will reach the right path.
 func (c *InputContext) FocusIn() *dbus.Error {
 	c.mu.Lock()
 	c.focused = true
+	engineName := c.engine
 	c.mu.Unlock()
 	c.srv.log.Debug("FocusIn", "path", c.path, "client", c.client)
+	if c.srv.host != nil && engineName != "" {
+		if eng := c.srv.host.EngineFor(c.path); eng != nil && eng.Connected() {
+			_ = eng.FocusIn()
+		}
+		c.srv.host.NotifyFocusIn(engineName, c.path)
+	}
 	return nil
 }
 
 // FocusOut deactivates the context. Pending preedit is cancelled;
 // the client should expect no more commits until FocusIn fires
-// again.
+// again. Tells the bound engine (if any) to release its
+// per-context state and unhooks signal routing.
 func (c *InputContext) FocusOut() *dbus.Error {
 	c.mu.Lock()
 	c.focused = false
+	engineName := c.engine
 	c.mu.Unlock()
-	// Clear preedit on focus-out so a partially-typed sequence
-	// doesn't reappear when focus returns elsewhere.
+	if c.srv.host != nil && engineName != "" {
+		if eng := c.srv.host.EngineFor(c.path); eng != nil && eng.Connected() {
+			_ = eng.FocusOut()
+		}
+		c.srv.host.NotifyFocusOut(engineName)
+	}
 	c.emitHidePreedit()
 	c.srv.log.Debug("FocusOut", "path", c.path)
 	return nil

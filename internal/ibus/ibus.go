@@ -84,6 +84,12 @@ type EngineHost interface {
 	// RegisterComponent is invoked when an engine subprocess
 	// calls RegisterComponent on our IBus service.
 	RegisterComponent(componentName string, engineNames []string, objectPath dbus.ObjectPath)
+	// NotifyFocusIn / NotifyFocusOut tell the host which input
+	// context is currently focused on a given engine.
+	// Engine-side signals (CommitText, UpdatePreedit, …) route
+	// to the focused context.
+	NotifyFocusIn(engineName string, ctxPath dbus.ObjectPath)
+	NotifyFocusOut(engineName string)
 }
 
 // Engine is the narrow client-side view of one hosted engine.
@@ -124,6 +130,76 @@ func (s *Server) SetEngineHost(h EngineHost) {
 // need to share it (e.g. the EngineHost lives on the same
 // session bus and uses Conn to call engines back).
 func (s *Server) Conn() *dbus.Conn { return s.conn }
+
+// ContextEmitter is the small surface ibushost needs to push
+// engine-side signals back out to IM clients. Defined in
+// ibushost (the side that does the dispatching); Server
+// satisfies it by walking the contexts map for each ctxPath.
+// Mirror declaration here lets the daemon pass *Server to
+// host.SetContextEmitter without an adapter — Go auto-satisfies
+// the structural interface.
+
+// EmitCommitText re-emits an engine's CommitText signal on the
+// input context's dbus path. Skips if no context exists at the
+// path (race against Destroy is benign — engine signals arrive
+// asynchronously and a recently-destroyed context is fine to
+// drop).
+func (s *Server) EmitCommitText(ctxPath dbus.ObjectPath, text string) {
+	if ic := s.lookupContext(ctxPath); ic != nil {
+		ic.emitCommitText(text)
+	}
+}
+
+// EmitUpdatePreedit re-emits UpdatePreeditText on the context's
+// path. cursor is the byte offset into text; visible toggles
+// the preedit's display state.
+func (s *Server) EmitUpdatePreedit(ctxPath dbus.ObjectPath, text string, cursor uint32, visible bool) {
+	if ic := s.lookupContext(ctxPath); ic != nil {
+		_ = visible // ibus's UpdatePreeditText carries visible;
+		// flexkb's emitUpdatePreedit currently hard-codes true.
+		// When we add the hide/show distinction explicitly,
+		// this is where it goes.
+		ic.emitUpdatePreedit(text, cursor)
+	}
+}
+
+// EmitHidePreedit re-emits HidePreeditText.
+func (s *Server) EmitHidePreedit(ctxPath dbus.ObjectPath) {
+	if ic := s.lookupContext(ctxPath); ic != nil {
+		ic.emitHidePreedit()
+	}
+}
+
+// EmitShowPreedit re-emits ShowPreeditText. The IBus.InputContext
+// interface has this as a separate signal; we emit unconditionally
+// and let the IM client take care of state.
+func (s *Server) EmitShowPreedit(ctxPath dbus.ObjectPath) {
+	if ic := s.lookupContext(ctxPath); ic != nil {
+		s.conn.Emit(ic.path, "org.freedesktop.IBus.InputContext.ShowPreeditText")
+	}
+}
+
+// EmitForwardKeyEvent re-emits ForwardKeyEvent on the context's
+// path. ibus engines emit this when they decide NOT to consume
+// a keystroke but want to express "treat it as if you saw it
+// fresh" — useful for engines that pre-process keys.
+func (s *Server) EmitForwardKeyEvent(ctxPath dbus.ObjectPath, keyval, keycode, state uint32) {
+	if ic := s.lookupContext(ctxPath); ic != nil {
+		s.conn.Emit(ic.path,
+			"org.freedesktop.IBus.InputContext.ForwardKeyEvent",
+			keyval, keycode, state)
+	}
+}
+
+// lookupContext returns the InputContext at ctxPath under the
+// server lock, or nil if no context lives there. Used by the
+// Emit* methods to translate engine signals to per-context
+// signals.
+func (s *Server) lookupContext(ctxPath dbus.ObjectPath) *InputContext {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.contexts[ctxPath]
+}
 
 // New constructs a Server bound to the session bus. busName is
 // the dbus well-known name to claim — pass "" to use the

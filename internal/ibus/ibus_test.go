@@ -327,6 +327,8 @@ func (h *fakeHost) ReleaseEngine(p dbus.ObjectPath) {
 func (h *fakeHost) RegisterComponent(name string, engines []string, _ dbus.ObjectPath) {
 	h.registered = append(h.registered, name)
 }
+func (h *fakeHost) NotifyFocusIn(engineName string, ctxPath dbus.ObjectPath) {}
+func (h *fakeHost) NotifyFocusOut(engineName string)                        {}
 
 // TestEngineRoutingWhenBound — SetEngine binds the input context
 // to the fake engine; subsequent ProcessKeyEvent calls go to

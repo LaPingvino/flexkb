@@ -212,8 +212,13 @@ func runMulti(log *slog.Logger, enableWayland bool, ibusMode string, factory fun
 			// Engine-hosting layer rides on the same dbus
 			// connection: engines register with our IBus service
 			// (we accept via service.RegisterComponent) and we
-			// call them back as dbus clients.
+			// call them back as dbus clients. The signal bridge
+			// inside the host gets a ContextEmitter pointing
+			// back at the server so engine-side signals
+			// (CommitText etc.) flow out via the right
+			// InputContext's path.
 			host := ibushost.New(srv.Conn(), log)
+			host.SetContextEmitter(srv)
 			srv.SetEngineHost(host)
 			log.Info("ibus engine host initialised", "catalog_size", host.CatalogSize())
 
