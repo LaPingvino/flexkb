@@ -57,6 +57,13 @@ func Dial() (*Conn, error) {
 // Close shuts down the connection.
 func (c *Conn) Close() error { return c.sock.Close() }
 
+// NewConnFromUnixConn wraps an already-connected *net.UnixConn as
+// a Conn. Exposed for tests that want to drive both ends of a
+// socketpair without going through Dial; production code uses Dial.
+func NewConnFromUnixConn(uc *net.UnixConn) *Conn {
+	return &Conn{sock: uc}
+}
+
 // SocketPath returns the socket path the connection was opened
 // against. Useful for error messages and debug logs.
 func SocketPath() (string, error) { return socketPath() }
