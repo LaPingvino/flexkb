@@ -141,6 +141,12 @@ type V2Router interface {
 	// (Pinyin candidate replacement, smart quotes) can see it.
 	// cursorPos and anchorPos are character offsets into text.
 	NotifySurroundingText(ctxPath dbus.ObjectPath, text string, cursorPos, anchorPos uint32)
+	// NotifyContentType forwards the application's hint/purpose
+	// bitmask pair so engines can adapt (disable on password
+	// fields, switch script on URL fields, etc.). hint is a
+	// bitmask (completion, spellcheck, hidden_text, sensitive…);
+	// purpose is an enum (normal, password, email, url…).
+	NotifyContentType(ctxPath dbus.ObjectPath, hint, purpose uint32)
 }
 
 // Server is one running ibus-side dbus daemon. Start it once

@@ -399,6 +399,7 @@ type fakeV2 struct {
 	focusInCalls      []dbus.ObjectPath
 	focusOutCalls     []dbus.ObjectPath
 	surroundingCalls  []fakeV2Surrounding
+	contentTypeCalls  []fakeV2Content
 }
 
 type fakeV2Surrounding struct {
@@ -406,6 +407,12 @@ type fakeV2Surrounding struct {
 	Text      string
 	CursorPos uint32
 	AnchorPos uint32
+}
+
+type fakeV2Content struct {
+	Path    dbus.ObjectPath
+	Hint    uint32
+	Purpose uint32
 }
 
 type fakeV2Key struct {
@@ -424,6 +431,9 @@ func (f *fakeV2) NotifyFocusIn(p dbus.ObjectPath)  { f.focusInCalls = append(f.f
 func (f *fakeV2) NotifyFocusOut(p dbus.ObjectPath) { f.focusOutCalls = append(f.focusOutCalls, p) }
 func (f *fakeV2) NotifySurroundingText(p dbus.ObjectPath, text string, c, a uint32) {
 	f.surroundingCalls = append(f.surroundingCalls, fakeV2Surrounding{p, text, c, a})
+}
+func (f *fakeV2) NotifyContentType(p dbus.ObjectPath, hint, purpose uint32) {
+	f.contentTypeCalls = append(f.contentTypeCalls, fakeV2Content{p, hint, purpose})
 }
 
 // TestV2RoutingTakesPriority — when a v2 IME has grabbed and
@@ -506,6 +516,32 @@ func TestV2RoutingDeclineFallsThrough(t *testing.T) {
 	}
 	if host.engine.calls != 1 {
 		t.Errorf("engine calls: %d, want 1", host.engine.calls)
+	}
+}
+
+// TestV2SetContentTypeRoutes — ibus SetContentType from the app
+// must arrive at the v2 router so the bridge can forward it to
+// the downstream IME (engines disable themselves on password
+// fields, etc.). ibus's arg order is (purpose, hint); the router
+// receives (hint, purpose) matching v2 wire order.
+func TestV2SetContentTypeRoutes(t *testing.T) {
+	srv, _, cleanup := withTestServer(t)
+	defer cleanup()
+
+	v2 := &fakeV2{}
+	srv.SetV2Router(v2)
+
+	sess, _ := fakeFactory()()
+	ic := &InputContext{srv: srv, path: "/test/ic", sess: sess}
+	// purpose=8 (PASSWORD), hint=128 (SENSITIVE).
+	_ = ic.SetContentType(8, 128)
+
+	if len(v2.contentTypeCalls) != 1 {
+		t.Fatalf("contentType calls: %d, want 1", len(v2.contentTypeCalls))
+	}
+	got := v2.contentTypeCalls[0]
+	if got.Path != "/test/ic" || got.Hint != 128 || got.Purpose != 8 {
+		t.Errorf("contentType: %+v", got)
 	}
 }
 

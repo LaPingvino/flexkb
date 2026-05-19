@@ -213,6 +213,32 @@ func (c *InputContext) SetCapabilities(caps uint32) *dbus.Error {
 	return nil
 }
 
+// SetContentType records the application's input-purpose hints
+// and forwards them to whatever IM tier is active.
+//
+// ibus method signature: SetContentType(u purpose, u hint).
+// (Note arg order — ibus puts purpose FIRST, while the v2
+// protocol's content_type event puts hint first. The bridge
+// reverses to match v2 wire order.)
+//
+// purpose is one of (per IBus.input-purpose):
+//   0=NORMAL, 1=ALPHA, 2=DIGITS, 3=NUMBER, 4=PHONE, 5=URL,
+//   6=EMAIL, 7=NAME, 8=PASSWORD, 9=PIN, 10=DATE, 11=TIME,
+//   12=DATETIME, 13=TERMINAL
+// hint is a bitmask (per IBus.input-hints):
+//   1=COMPLETION, 2=SPELLCHECK, 4=AUTO_CAPITALIZATION, 8=LOWERCASE,
+//   16=UPPERCASE, 32=TITLECASE, 64=HIDDEN_TEXT, 128=SENSITIVE,
+//   256=LATIN, 512=MULTILINE
+//
+// Common downstream behaviour: password (purpose=8) or hidden_text
+// (hint bit 64) disables the IM entirely.
+func (c *InputContext) SetContentType(purpose, hint uint32) *dbus.Error {
+	if c.srv.v2 != nil {
+		c.srv.v2.NotifyContentType(c.path, hint, purpose)
+	}
+	return nil
+}
+
 // SetSurroundingText records the application's cursor-area text
 // and forwards it to whatever IM tier currently holds focus.
 // Real IMEs (Pinyin candidate replacement, smart-quote engines)

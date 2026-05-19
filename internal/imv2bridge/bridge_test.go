@@ -378,6 +378,52 @@ func TestBridgeNotifySurroundingTextRoutesToActiveIM(t *testing.T) {
 	}
 }
 
+// TestBridgeNotifyContentTypeRoutesToActiveIM — app-side content
+// type (password field marker, URL purpose, etc.) reaches the
+// active downstream IME as a content_type + done batch.
+func TestBridgeNotifyContentTypeRoutesToActiveIM(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "v2-ct.sock")
+	em := &fakeEmitter{}
+	b := New(em, nil)
+	if err := b.Listen(path); err != nil {
+		t.Fatal(err)
+	}
+	defer b.Close()
+
+	cli := dialAndBindIM(t, path)
+	defer cli.Close()
+
+	const ctxPath = dbus.ObjectPath("/test/ct")
+	b.NotifyFocusIn(ctxPath)
+	cli.SetReadDeadline(time.Now().Add(time.Second))
+	wlwire.ReadMessage(cli)
+	wlwire.ReadMessage(cli)
+
+	// hint=128 (SENSITIVE), purpose=8 (PASSWORD).
+	b.NotifyContentType(ctxPath, 128, 8)
+
+	cli.SetReadDeadline(time.Now().Add(time.Second))
+	h, body, err := wlwire.ReadMessage(cli)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if h.Opcode != 4 /*content_type*/ {
+		t.Errorf("opcode: got %d, want 4 (content_type)", h.Opcode)
+	}
+	dec := wlwire.NewDecoder(body)
+	hint := dec.Uint()
+	purpose := dec.Uint()
+	if hint != 128 || purpose != 8 {
+		t.Errorf("content_type body: hint=%d purpose=%d, want 128/8", hint, purpose)
+	}
+	// done follows.
+	h, _, err = wlwire.ReadMessage(cli)
+	if err != nil || h.Opcode != 5 {
+		t.Errorf("expected done after content_type, got opcode %d err=%v", h.Opcode, err)
+	}
+}
+
 // TestBridgeNotifySurroundingTextIgnoredWhenUnfocused — if the
 // notified path isn't the currently-focused context, the bridge
 // drops the call rather than potentially confusing the IME.

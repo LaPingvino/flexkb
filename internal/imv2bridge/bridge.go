@@ -335,6 +335,33 @@ func (b *Bridge) NotifyFocusIn(ctxPath dbus.ObjectPath) {
 	}
 }
 
+// NotifyContentType forwards the application's input-purpose
+// bitmask + enum to the downstream v2 IME. Engines that adapt
+// (disable on password fields, switch script on URL fields)
+// receive this as a content_type + done event pair.
+//
+// Same drop-on-stale-focus rule as NotifySurroundingText: if the
+// notified path isn't the focused context, drop silently.
+func (b *Bridge) NotifyContentType(ctxPath dbus.ObjectPath, hint, purpose uint32) {
+	b.mu.Lock()
+	im := b.currentIM
+	focused := b.focusedPath
+	b.mu.Unlock()
+	if im == nil || focused != ctxPath {
+		return
+	}
+	imtrace.Trace(b.log, "wlim.content_type",
+		"stage", "wlim.content_type", "ctx", ctxPath,
+		"hint", hint, "purpose", purpose)
+	if err := im.SendContentType(hint, purpose); err != nil {
+		b.log.Debug("v2 bridge: SendContentType failed", "err", err)
+		return
+	}
+	if err := im.SendDone(); err != nil {
+		b.log.Debug("v2 bridge: SendDone after content_type failed", "err", err)
+	}
+}
+
 // NotifySurroundingText pushes application surrounding text to
 // the downstream v2 IME. Per v2 protocol, surrounding_text is
 // part of the activate-then-state-then-done batch — for runtime
