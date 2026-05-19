@@ -136,6 +136,8 @@ flexkb info --xkb /path us                     # per-layout modular/passthrough 
 flexkb migrate-suggest us dvorak-intl          # heuristic mapping of old name
 flexkb activate pt dvorak                      # generate to ~/.xkb + setxkbmap
                                                # + ~/.XCompose if compose: set
+flexkb validate be nl-intl                     # per-locale coverage report
+                                               # with actionable layer suggestions
 ```
 
 ## Per-user customisation

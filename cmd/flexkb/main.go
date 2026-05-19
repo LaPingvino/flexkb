@@ -26,6 +26,7 @@ import (
 	"github.com/lapingvino/flexkb/internal/dropincheck"
 	"github.com/lapingvino/flexkb/internal/model"
 	"github.com/lapingvino/flexkb/internal/rulespatch"
+	"github.com/lapingvino/flexkb/internal/validate"
 	"github.com/lapingvino/flexkb/internal/xkbparser"
 	"github.com/lapingvino/flexkb/internal/xkbwriter"
 )
@@ -92,6 +93,8 @@ func main() {
 		runActivate(args)
 	case "info":
 		runInfo(args)
+	case "validate":
+		runValidate(args)
 	case "migrate-suggest":
 		runMigrateSuggest(args)
 	case "dropin-check":
@@ -892,6 +895,62 @@ func runInfo(args []string) {
 // guess. Pure heuristic — token-match against known transformations,
 // additions, substitutions — but covers the common cases and gives the
 // user a starting point to drop into their layouts/ file.
+// runValidate walks a variant's full layer stack, compares the
+// produced character set against the target locale's required set,
+// and reports any gaps plus which OTHER layers in data/ would
+// supply each missing character. The actionable form of "are my
+// composition choices right for what I'm trying to type?"
+func runValidate(args []string) {
+	paths, rest := dataPaths(args)
+	if len(rest) < 1 || len(rest) > 2 {
+		fmt.Fprintln(os.Stderr, "usage: flexkb validate <layout-file> [variant]")
+		fmt.Fprintln(os.Stderr, "  with no variant: report on every variant in the file")
+		os.Exit(2)
+	}
+	root := makeRoot(paths)
+	lf, err := root.LayoutFile(rest[0])
+	check(err)
+
+	var specs []model.LayoutSpec
+	if len(rest) == 2 {
+		for _, v := range lf.Variants {
+			if v.Name == rest[1] {
+				specs = append(specs, v)
+				break
+			}
+		}
+		if len(specs) == 0 {
+			fmt.Fprintf(os.Stderr, "variant %q not found in %s\n", rest[1], rest[0])
+			os.Exit(1)
+		}
+	} else {
+		specs = lf.Variants
+	}
+
+	gaps := false
+	for _, spec := range specs {
+		reports, err := validate.ValidateVariant(root, lf, spec)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s/%s: %v\n", lf.File, spec.Name, err)
+			os.Exit(1)
+		}
+		if len(reports) == 0 {
+			fmt.Printf("%s(%s): no locale to validate against (skipped)\n", lf.File, spec.Name)
+			continue
+		}
+		for _, r := range reports {
+			fmt.Print(validate.FormatReport(r))
+			if len(r.Missing) > 0 {
+				gaps = true
+			}
+		}
+	}
+	if gaps {
+		// Exit 1 so CI / scripts can gate on "all stacks complete".
+		os.Exit(1)
+	}
+}
+
 func runMigrateSuggest(args []string) {
 	if len(args) < 2 {
 		fmt.Fprintln(os.Stderr, "usage: flexkb migrate-suggest <layout-file> <variant-name>")
