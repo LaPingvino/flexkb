@@ -1,0 +1,26 @@
+[Unit]
+Description=flexkb input-method daemon
+# Run after the graphical user session is ready. flexkb-imed needs
+# either WAYLAND_DISPLAY (for the Wayland v2 backend) or the dbus
+# session bus (for the ibus backend) to do anything useful; both
+# are populated by the time graphical-session.target reaches Wants.
+After=graphical-session.target dbus.socket
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+# Default invocation is "try Wayland v2; fall back to nothing".
+# Users who want flexkb to replace ibus-daemon on GNOME / serve
+# X11 apps can override via:
+#   systemctl --user edit flexkb-imed.service
+# adding [Service] ExecStart lines with --ibus replace.
+ExecStart=/usr/bin/flexkb-imed --wayland=true --ibus=off
+Restart=on-failure
+RestartSec=5
+# Don't accumulate restart attempts forever — surface persistent
+# failures as journal entries the user can investigate.
+StartLimitBurst=5
+StartLimitIntervalSec=120
+
+[Install]
+WantedBy=graphical-session.target

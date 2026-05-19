@@ -1,24 +1,16 @@
-# flexkb pacman install hook — purely informational.
-#
-# THE DROP-IN COMPATIBILITY IS NOT IMPLEMENTED HERE. It's enforced at
-# build time by `flexkb dropin-check`, which fails the package build if
-# anything from upstream is missing in the generated tree. This hook
-# only prints diagnostic info — if pacman skipped running it for any
-# reason, the package would still be drop-in correct because the
-# correctness is baked into the file contents and metadata
-# (provides=, conflicts=).
-#
-# What this hook does:
-#  - Snapshots /etc/X11/xorg.conf.d/00-keyboard.conf etc. to
-#    /var/lib/flexkb/ so the user has a record of pre-install state
-#    if they ever need to debug.
-#  - Prints a banner explaining what just happened and how to customise.
+## flexkb-xkb pacman install hook — purely informational.
+##
+## The drop-in compatibility is NOT enforced here; build-time
+## `flexkb dropin-check` fails the package build if anything from
+## upstream is missing. This hook only prints diagnostics and
+## snapshots prior keyboard config to /var/lib/flexkb/ so a user
+## can recover their original setup if they need to.
 
 _snapshot_keyboard() {
     local snapshot="/var/lib/flexkb/pre-install-keyboard.txt"
     install -d -m 755 /var/lib/flexkb
     {
-        echo "# Captured by flexkb pre_install on $(date -Iseconds)"
+        echo "# Captured by flexkb-xkb pre_install on $(date -Iseconds)"
         echo
         if command -v localectl >/dev/null 2>&1; then
             localectl status 2>/dev/null
@@ -40,7 +32,7 @@ _post_install_banner() {
         variant=$(grep -oP 'XkbVariant"\s*"\K[^"]+' /etc/X11/xorg.conf.d/00-keyboard.conf 2>/dev/null | head -1)
     fi
     echo
-    echo "  flexkb is now providing /usr/share/X11/xkb."
+    echo "  flexkb-xkb is now providing /usr/share/X11/xkb."
     if [[ -n "$layout" ]]; then
         echo "  Your current X11 layout: ${layout}${variant:+($variant)}"
         echo "  This variant is preserved in flexkb's tree — your session keeps working."
@@ -52,14 +44,18 @@ _post_install_banner() {
     echo "    flexkb migrate-suggest us dvorak-intl     # suggest a modular form"
     echo "    flexkb activate ru phonetic-dvorak        # apply a new variant"
     echo
+    echo "  For Wayland users: install/start flexkb-imed (in the flexkb"
+    echo "  package) for native input-method-v2 support. The static xkb"
+    echo "  tree here is the fallback / X11 path."
+    echo
     echo "  Per-user customisation: drop YAML files in ~/.config/flexkb/data/."
     echo "  See /usr/share/doc/flexkb/README.md."
     echo
-    echo "  Rollback: pacman -S xkeyboard-config  (will remove flexkb)."
+    echo "  Rollback: pacman -S xkeyboard-config  (will remove flexkb-xkb)."
 }
 
 pre_install() {
-    echo ":: flexkb: snapshotting current keyboard configuration..."
+    echo ":: flexkb-xkb: snapshotting current keyboard configuration..."
     _snapshot_keyboard
 }
 
@@ -77,8 +73,11 @@ post_upgrade() {
 
 post_remove() {
     echo
-    echo "  flexkb removed. If pacman has just installed xkeyboard-config in its"
-    echo "  place, your keyboard should continue to work unchanged."
-    echo "  Saved keyboard snapshots are in /var/lib/flexkb/."
+    echo "  flexkb-xkb removed. If pacman has just installed"
+    echo "  xkeyboard-config in its place, your keyboard should continue"
+    echo "  to work unchanged. Saved keyboard snapshots are in"
+    echo "  /var/lib/flexkb/."
+    echo "  Note: the flexkb-imed daemon (in the flexkb package) is"
+    echo "  unaffected and continues to provide IME support."
     echo
 }
