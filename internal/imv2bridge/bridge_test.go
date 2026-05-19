@@ -2,6 +2,7 @@ package imv2bridge
 
 import (
 	"net"
+	"os"
 	"path/filepath"
 	"sync"
 	"testing"
@@ -479,6 +480,28 @@ func TestBridgeFocusOutClearsPendingState(t *testing.T) {
 	}
 	if em.commits[0].Path != ctxB || em.commits[0].Text != "fresh" {
 		t.Errorf("commit leaked across focus change: %+v", em.commits[0])
+	}
+}
+
+// TestBridgeCloseRemovesSocketFile — defensive: after Close the
+// socket file must be gone. The daemon's signal-driven shutdown
+// relies on this so a restart can re-bind the same path cleanly.
+func TestBridgeCloseRemovesSocketFile(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "v2-close.sock")
+	em := &fakeEmitter{}
+	b := New(em, nil)
+	if err := b.Listen(path); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(path); err != nil {
+		t.Fatalf("socket file should exist after Listen: %v", err)
+	}
+	if err := b.Close(); err != nil {
+		t.Errorf("Close: %v", err)
+	}
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Errorf("socket file should be gone after Close; stat err=%v", err)
 	}
 }
 

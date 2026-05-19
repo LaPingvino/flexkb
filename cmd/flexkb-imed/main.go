@@ -297,7 +297,16 @@ func runMulti(log *slog.Logger, enableWayland bool, ibusMode string, v2Rebroadca
 			}
 		}
 	}
-	_ = bridge // retained for shutdown via defer below if we wire that path later
+	// Bridge cleanup on shutdown. defer runs on every return path
+	// from this function — signal, backendErr, or the early-return
+	// at started==0. Skips the file-leak risk that bit us before.
+	defer func() {
+		if bridge != nil {
+			if err := bridge.Close(); err != nil {
+				log.Debug("bridge close error", "err", err)
+			}
+		}
+	}()
 
 	if started == 0 {
 		return fmt.Errorf("no backends started — set --wayland=true or --ibus=alongside|replace")
