@@ -15,9 +15,15 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"sync"
 	"syscall"
 
+	"github.com/lapingvino/flexkb/internal/compose"
+	"github.com/lapingvino/flexkb/internal/imsession"
+	"github.com/lapingvino/flexkb/internal/inputmethod"
+	"github.com/lapingvino/flexkb/internal/model"
+	"github.com/lapingvino/flexkb/internal/runtime"
 	"github.com/lapingvino/flexkb/internal/wlclient"
 	"github.com/lapingvino/flexkb/internal/wlim"
 	"github.com/lapingvino/flexkb/internal/wlwire"
@@ -25,21 +31,117 @@ import (
 
 func main() {
 	verbose := flag.Bool("v", false, "verbose logging")
+	layoutFile := flag.String("layout", "us", "data/layouts/<name>.yaml layout file to use as the static-layer stack")
+	variantName := flag.String("variant", "basic", "variant within the layout file")
+	imFile := flag.String("im", "", "data/inputmethods/<name>.yaml input method to load (optional; empty = passthrough)")
 	flag.Parse()
-
 	level := slog.LevelInfo
 	if *verbose {
 		level = slog.LevelDebug
 	}
 	log := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: level}))
 
-	if err := run(log); err != nil {
+	sess, err := loadSession(log, *layoutFile, *variantName, *imFile)
+	if err != nil {
+		log.Error("load session", "err", err)
+		os.Exit(1)
+	}
+
+	if err := run(log, sess); err != nil {
 		log.Error("daemon exited", "err", err)
 		os.Exit(1)
 	}
 }
 
-func run(log *slog.Logger) error {
+// loadSession builds the runtime stack the daemon will run for
+// every keystroke: static layers (Physical→Substitutions baked
+// into a ComposedLayout via internal/compose) plus an optional
+// IM file. Picks data root from the standard flexkb search path.
+func loadSession(log *slog.Logger, layoutFile, variantName, imPath string) (*imsession.Session, error) {
+	root := model.DataRoot{Paths: defaultDataPaths()}
+	lf, err := root.LayoutFile(layoutFile)
+	if err != nil {
+		return nil, fmt.Errorf("load layout %s: %w", layoutFile, err)
+	}
+	var spec model.LayoutSpec
+	for _, v := range lf.Variants {
+		if v.Name == variantName {
+			spec = v
+			break
+		}
+	}
+	if spec.Name == "" {
+		return nil, fmt.Errorf("variant %q not found in %s.yaml", variantName, layoutFile)
+	}
+	res, err := compose.Compose(root, spec)
+	if err != nil {
+		return nil, fmt.Errorf("compose %s(%s): %w", layoutFile, variantName, err)
+	}
+	for _, w := range res.Warnings {
+		log.Debug("compose warning", "msg", w)
+	}
+	resolver := runtime.NewResolver(res.Layout)
+	log.Info("loaded static stack", "layout", layoutFile, "variant", variantName,
+		"keys", len(res.Layout.Symbols))
+
+	var im *inputmethod.InputMethod
+	if imPath != "" {
+		// Two forms accepted: bare name → looks up
+		// data/inputmethods/<name>.yaml in the search path;
+		// absolute or contains-slash → loaded directly.
+		if isPath(imPath) {
+			im, err = inputmethod.Load(imPath)
+		} else {
+			// Use the data-root loader, mirroring how
+			// substitutions/additions are loaded.
+			path, ferr := root.Find("inputmethods", imPath)
+			if ferr != nil {
+				return nil, fmt.Errorf("find input method %s: %w", imPath, ferr)
+			}
+			im, err = inputmethod.Load(path)
+		}
+		if err != nil {
+			return nil, fmt.Errorf("load input method %s: %w", imPath, err)
+		}
+		log.Info("loaded input method", "name", im.Name, "states", len(im.States))
+	}
+	return imsession.New(resolver, im)
+}
+
+// defaultDataPaths mirrors model.DataRoot's standard XDG-aware
+// search path. The daemon doesn't go through cmd/flexkb's
+// makeRoot helper because it's a separate binary.
+func defaultDataPaths() []string {
+	var paths []string
+	if home, err := os.UserHomeDir(); err == nil {
+		paths = append(paths, filepath.Join(home, ".config", "flexkb", "data"))
+	}
+	if xdg := os.Getenv("XDG_DATA_HOME"); xdg != "" {
+		paths = append(paths, filepath.Join(xdg, "flexkb", "data"))
+	}
+	if wd, err := os.Getwd(); err == nil {
+		paths = append(paths, filepath.Join(wd, "data"))
+	}
+	paths = append(paths, "/usr/share/flexkb/data")
+	return paths
+}
+
+// isPath reports whether s looks like a filesystem path. Bare
+// names like "zh-pinyin" go through the data root; "./test.yaml"
+// or "/tmp/foo.yaml" are loaded directly.
+func isPath(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		if r == '/' || r == '\\' {
+			return true
+		}
+	}
+	return s[0] == '.' || (len(s) > 1 && s[1] == ':')
+}
+
+func run(log *slog.Logger, sess *imsession.Session) error {
 	conn, err := wlwire.Dial()
 	if err != nil {
 		return fmt.Errorf("connect to Wayland: %w", err)
@@ -142,7 +244,73 @@ func run(log *slog.Logger) error {
 	if _, err := mgr.GetInputMethod(seat.ID(), im); err != nil {
 		return fmt.Errorf("get_input_method: %w", err)
 	}
-	log.Info("ready: awaiting text-input focus")
+
+	// Grab the keyboard so we receive raw keycodes (the
+	// compositor stops delivering them to focused apps until the
+	// grab is released or the IM commits / leaves preedit). The
+	// grab object's callbacks feed every key event through the
+	// session and emit the resulting actions back via the IM.
+	grab := &wlim.KeyboardGrab{}
+	grab.OnKeymap = func(format uint32, fd int, size uint32) {
+		log.Debug("keymap", "format", format, "size", size, "fd", fd)
+		// We resolve via our own ComposedLayout; the compositor-
+		// supplied keymap is informational. Mark the session
+		// keymap-pending until the next done() event so we don't
+		// process keystrokes against a stale layout.
+		sess.MarkKeymapPending()
+		// Close the fd — we don't read it. (A future version may
+		// read it to sanity-check the active layout matches what
+		// we composed against.)
+		syscall.Close(fd)
+	}
+	grab.OnModifiers = func(serial, depressed, latched, locked, group uint32) {
+		log.Debug("modifiers", "depressed", depressed, "latched", latched, "locked", locked, "group", group)
+		sess.HandleModifiers(depressed, latched, locked)
+	}
+	grab.OnKey = func(serial, time, key, state uint32) {
+		log.Debug("key", "scancode", key, "state", state)
+		actions := sess.HandleKey(key, state)
+		for _, a := range actions {
+			switch act := a.(type) {
+			case imsession.CommitText:
+				if err := im.CommitString(act.Text); err != nil {
+					log.Error("commit_string", "err", err)
+				}
+			case imsession.SetPreedit:
+				if err := im.SetPreeditString(act.Text, act.CursorBegin, act.CursorEnd); err != nil {
+					log.Error("set_preedit_string", "err", err)
+				}
+			case imsession.FinishCommit:
+				if err := im.Commit(act.Serial); err != nil {
+					log.Error("commit", "err", err)
+				}
+			case imsession.PassThrough:
+				// Wayland input-method-v2 routes unconsumed key
+				// events back to the focused client automatically
+				// when we don't commit. Nothing to do here beyond
+				// the log line below.
+				log.Debug("passthrough", "symbol", act.Symbol)
+			}
+		}
+	}
+	grab.OnRepeatInfo = func(rate, delay int32) {
+		log.Debug("repeat_info", "rate", rate, "delay", delay)
+	}
+	if _, err := im.GrabKeyboard(grab); err != nil {
+		return fmt.Errorf("grab_keyboard: %w", err)
+	}
+
+	// done() closes the keymap-pending window. The IM emits done
+	// after a batch; for keymap purposes we just clear the flag.
+	prevOnDone := im.OnDone
+	im.OnDone = func() {
+		if prevOnDone != nil {
+			prevOnDone()
+		}
+		sess.MarkKeymapApplied()
+	}
+
+	log.Info("ready: keyboard grabbed, awaiting text-input focus")
 
 	// Wait for either dispatch error or a signal.
 	sigs := make(chan os.Signal, 1)
