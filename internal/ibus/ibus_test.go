@@ -393,11 +393,19 @@ func TestEngineRoutingFallsBackOnNotConsumed(t *testing.T) {
 // fakeV2 is the test substitute for V2Router. RouteCalls captures
 // every key passed in so tests can assert what the tier saw.
 type fakeV2 struct {
-	hasGrab        bool
-	willConsume    bool
-	routeCalls     []fakeV2Key
-	focusInCalls   []dbus.ObjectPath
-	focusOutCalls  []dbus.ObjectPath
+	hasGrab           bool
+	willConsume       bool
+	routeCalls        []fakeV2Key
+	focusInCalls      []dbus.ObjectPath
+	focusOutCalls     []dbus.ObjectPath
+	surroundingCalls  []fakeV2Surrounding
+}
+
+type fakeV2Surrounding struct {
+	Path      dbus.ObjectPath
+	Text      string
+	CursorPos uint32
+	AnchorPos uint32
 }
 
 type fakeV2Key struct {
@@ -414,6 +422,9 @@ func (f *fakeV2) RouteKey(p dbus.ObjectPath, kv, kc, st uint32) (bool, error) {
 }
 func (f *fakeV2) NotifyFocusIn(p dbus.ObjectPath)  { f.focusInCalls = append(f.focusInCalls, p) }
 func (f *fakeV2) NotifyFocusOut(p dbus.ObjectPath) { f.focusOutCalls = append(f.focusOutCalls, p) }
+func (f *fakeV2) NotifySurroundingText(p dbus.ObjectPath, text string, c, a uint32) {
+	f.surroundingCalls = append(f.surroundingCalls, fakeV2Surrounding{p, text, c, a})
+}
 
 // TestV2RoutingTakesPriority — when a v2 IME has grabbed and
 // claims the key, both the engine and the in-process Session

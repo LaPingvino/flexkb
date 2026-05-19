@@ -21,6 +21,13 @@ type fakeEmitter struct {
 	commits  []emitCommit
 	preedits []emitPreedit
 	hides    []dbus.ObjectPath
+	deletes  []emitDelete
+}
+
+type emitDelete struct {
+	Path   dbus.ObjectPath
+	Before uint32
+	After  uint32
 }
 
 type emitCommit struct {
@@ -48,6 +55,11 @@ func (e *fakeEmitter) EmitHidePreedit(p dbus.ObjectPath) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	e.hides = append(e.hides, p)
+}
+func (e *fakeEmitter) EmitDeleteSurroundingText(p dbus.ObjectPath, before, after uint32) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.deletes = append(e.deletes, emitDelete{p, before, after})
 }
 
 // TestBridgeEndToEnd — stand up the bridge listener, connect a
@@ -262,6 +274,137 @@ func TestBridgePreeditFlow(t *testing.T) {
 	defer em.mu.Unlock()
 	if len(em.preedits) != 1 || em.preedits[0].Text != "ni" {
 		t.Errorf("preedits: %+v", em.preedits)
+	}
+}
+
+// TestBridgeDeleteSurroundingText — the downstream IME emits
+// delete_surrounding_text; the bridge forwards it to the
+// emitter on the focused context's path.
+func TestBridgeDeleteSurroundingText(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "v2-delete.sock")
+	em := &fakeEmitter{}
+	b := New(em, nil)
+	if err := b.Listen(path); err != nil {
+		t.Fatal(err)
+	}
+	defer b.Close()
+
+	cli := dialAndBindIM(t, path)
+	defer cli.Close()
+	b.NotifyFocusIn("/test/delete")
+	// Drain activate + done.
+	cli.SetReadDeadline(time.Now().Add(time.Second))
+	wlwire.ReadMessage(cli)
+	wlwire.ReadMessage(cli)
+
+	// delete_surrounding_text(before=2, after=0).
+	const imID = 5
+	dr := wlwire.NewEncoder()
+	dr.PutUint(2)
+	dr.PutUint(0)
+	wlwire.WriteMessage(cli, imID, 2 /*delete_surrounding_text*/, dr.Bytes())
+
+	deadline := time.Now().Add(time.Second)
+	for time.Now().Before(deadline) {
+		em.mu.Lock()
+		n := len(em.deletes)
+		em.mu.Unlock()
+		if n > 0 {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	em.mu.Lock()
+	defer em.mu.Unlock()
+	if len(em.deletes) != 1 {
+		t.Fatalf("deletes recorded: %d, want 1", len(em.deletes))
+	}
+	if em.deletes[0].Path != "/test/delete" || em.deletes[0].Before != 2 || em.deletes[0].After != 0 {
+		t.Errorf("delete: %+v", em.deletes[0])
+	}
+}
+
+// TestBridgeNotifySurroundingTextRoutesToActiveIM — when the
+// application reports its surrounding text via ibus.InputContext.
+// SetSurroundingText, the bridge forwards it as a v2
+// surrounding_text + done batch to the downstream IME.
+func TestBridgeNotifySurroundingTextRoutesToActiveIM(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "v2-surr.sock")
+	em := &fakeEmitter{}
+	b := New(em, nil)
+	if err := b.Listen(path); err != nil {
+		t.Fatal(err)
+	}
+	defer b.Close()
+
+	cli := dialAndBindIM(t, path)
+	defer cli.Close()
+
+	const ctxPath = dbus.ObjectPath("/test/surr")
+	b.NotifyFocusIn(ctxPath)
+	// Drain activate + done from the focus.
+	cli.SetReadDeadline(time.Now().Add(time.Second))
+	wlwire.ReadMessage(cli)
+	wlwire.ReadMessage(cli)
+
+	b.NotifySurroundingText(ctxPath, "hello", 5, 5)
+
+	// Read surrounding_text event + done.
+	cli.SetReadDeadline(time.Now().Add(time.Second))
+	h, body, err := wlwire.ReadMessage(cli)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if h.Opcode != 2 /*surrounding_text*/ {
+		t.Errorf("expected surrounding_text opcode 2, got %d", h.Opcode)
+	}
+	dec := wlwire.NewDecoder(body)
+	gotText := dec.String()
+	gotCursor := dec.Uint()
+	gotAnchor := dec.Uint()
+	if gotText != "hello" || gotCursor != 5 || gotAnchor != 5 {
+		t.Errorf("surrounding body: text=%q cursor=%d anchor=%d", gotText, gotCursor, gotAnchor)
+	}
+	// done.
+	h, _, err = wlwire.ReadMessage(cli)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if h.Opcode != 5 /*done*/ {
+		t.Errorf("expected done after surrounding_text, got opcode %d", h.Opcode)
+	}
+}
+
+// TestBridgeNotifySurroundingTextIgnoredWhenUnfocused — if the
+// notified path isn't the currently-focused context, the bridge
+// drops the call rather than potentially confusing the IME.
+func TestBridgeNotifySurroundingTextIgnoredWhenUnfocused(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "v2-surr-ignored.sock")
+	em := &fakeEmitter{}
+	b := New(em, nil)
+	if err := b.Listen(path); err != nil {
+		t.Fatal(err)
+	}
+	defer b.Close()
+
+	cli := dialAndBindIM(t, path)
+	defer cli.Close()
+
+	b.NotifyFocusIn("/test/focused")
+	cli.SetReadDeadline(time.Now().Add(time.Second))
+	wlwire.ReadMessage(cli)
+	wlwire.ReadMessage(cli)
+
+	// Notify for a DIFFERENT path — should be dropped silently.
+	b.NotifySurroundingText("/test/other", "x", 1, 1)
+
+	// Make sure no event arrived.
+	cli.SetReadDeadline(time.Now().Add(150 * time.Millisecond))
+	if h, _, err := wlwire.ReadMessage(cli); err == nil {
+		t.Errorf("unexpected event for unfocused path: opcode=%d", h.Opcode)
 	}
 }
 

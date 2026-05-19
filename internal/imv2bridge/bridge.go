@@ -40,6 +40,11 @@ type Emitter interface {
 	EmitCommitText(ctxPath dbus.ObjectPath, text string)
 	EmitUpdatePreedit(ctxPath dbus.ObjectPath, text string, cursor uint32, visible bool)
 	EmitHidePreedit(ctxPath dbus.ObjectPath)
+	// EmitDeleteSurroundingText requests the application delete
+	// characters around its cursor. Triggered when a downstream
+	// v2 IME emits delete_surrounding_text — Pinyin candidate
+	// replacement is the canonical use case.
+	EmitDeleteSurroundingText(ctxPath dbus.ObjectPath, before, after uint32)
 }
 
 // Bridge holds the wlserver listener and the per-connection state
@@ -168,13 +173,16 @@ func (b *Bridge) OnInputMethodCreated(im *wlim.ServerInputMethod) {
 		b.mu.Unlock()
 	}
 	im.OnDeleteSurroundingText = func(before, after uint32) {
-		// flexkb-imed's ibus emitter doesn't yet flow
-		// delete_surrounding_text to clients (the IBus signal
-		// exists but our context.go doesn't wire it). Log and
-		// drop for now; surrounding text deletion is rare in
-		// the IM-tier hot path.
-		b.log.Debug("v2 bridge: delete_surrounding_text dropped",
+		imtrace.Trace(b.log, "wlim.delete_surrounding_text",
+			"stage", "wlim.delete_surrounding_text", "im", im.ID(),
 			"before", before, "after", after)
+		b.mu.Lock()
+		path := b.focusedPath
+		b.mu.Unlock()
+		if path == "" {
+			return
+		}
+		b.emitter.EmitDeleteSurroundingText(path, before, after)
 	}
 	im.OnCommit = func(serial uint32) {
 		imtrace.Trace(b.log, "wlim.commit",
@@ -324,6 +332,32 @@ func (b *Bridge) NotifyFocusIn(ctxPath dbus.ObjectPath) {
 	b.mu.Unlock()
 	if im != nil {
 		b.sendActivate(im)
+	}
+}
+
+// NotifySurroundingText pushes application surrounding text to
+// the downstream v2 IME. Per v2 protocol, surrounding_text is
+// part of the activate-then-state-then-done batch — for runtime
+// updates the IME sees a fresh activate cycle. We follow the same
+// pattern: emit surrounding_text → done; if the IME is currently
+// inactive (no grab), the events are still queued and applied.
+func (b *Bridge) NotifySurroundingText(ctxPath dbus.ObjectPath, text string, cursorPos, anchorPos uint32) {
+	b.mu.Lock()
+	im := b.currentIM
+	focused := b.focusedPath
+	b.mu.Unlock()
+	if im == nil || focused != ctxPath {
+		return
+	}
+	imtrace.Trace(b.log, "wlim.surrounding_text",
+		"stage", "wlim.surrounding_text", "ctx", ctxPath,
+		"text_len", len(text), "cursor", cursorPos, "anchor", anchorPos)
+	if err := im.SendSurroundingText(text, cursorPos, anchorPos); err != nil {
+		b.log.Debug("v2 bridge: SendSurroundingText failed", "err", err)
+		return
+	}
+	if err := im.SendDone(); err != nil {
+		b.log.Debug("v2 bridge: SendDone after surrounding_text failed", "err", err)
 	}
 }
 

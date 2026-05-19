@@ -136,6 +136,11 @@ type V2Router interface {
 	// right path. Mirror of EngineHost's focus methods.
 	NotifyFocusIn(ctxPath dbus.ObjectPath)
 	NotifyFocusOut(ctxPath dbus.ObjectPath)
+	// NotifySurroundingText forwards application cursor-area text
+	// to the downstream v2 IME so engines that look at context
+	// (Pinyin candidate replacement, smart quotes) can see it.
+	// cursorPos and anchorPos are character offsets into text.
+	NotifySurroundingText(ctxPath dbus.ObjectPath, text string, cursorPos, anchorPos uint32)
 }
 
 // Server is one running ibus-side dbus daemon. Start it once
@@ -231,6 +236,27 @@ func (s *Server) EmitForwardKeyEvent(ctxPath dbus.ObjectPath, keyval, keycode, s
 		s.conn.Emit(ic.path,
 			"org.freedesktop.IBus.InputContext.ForwardKeyEvent",
 			keyval, keycode, state)
+	}
+}
+
+// EmitDeleteSurroundingText emits the DeleteSurroundingText
+// signal on the input context. Apps that subscribed (most ibus
+// clients do) delete `before` characters left of cursor and
+// `after` right. Used by IMEs that need to rewrite already-
+// committed text — most notably Pinyin candidate replacement,
+// where the IME picks a longer candidate and replaces previously
+// committed pinyin syllables.
+//
+// Signature per IBus.InputContext.xml: DeleteSurroundingText(i, u)
+// — `offset` (signed, character offset from cursor; negative = left)
+// and `nchars` (unsigned, count of characters to delete).
+// flexkb-imed's bridge passes (before, after) from the v2 delete
+// request; we map that to (offset=-before, nchars=before+after).
+func (s *Server) EmitDeleteSurroundingText(ctxPath dbus.ObjectPath, before, after uint32) {
+	if ic := s.lookupContext(ctxPath); ic != nil {
+		s.conn.Emit(ic.path,
+			"org.freedesktop.IBus.InputContext.DeleteSurroundingText",
+			-int32(before), before+after)
 	}
 }
 

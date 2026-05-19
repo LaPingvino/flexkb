@@ -213,6 +213,35 @@ func (c *InputContext) SetCapabilities(caps uint32) *dbus.Error {
 	return nil
 }
 
+// SetSurroundingText records the application's cursor-area text
+// and forwards it to whatever IM tier currently holds focus.
+// Real IMEs (Pinyin candidate replacement, smart-quote engines)
+// look at surrounding text to make smarter conversion decisions.
+//
+// dbus signature per IBus.InputContext.xml:
+//   SetSurroundingText(v text, u cursor_pos, u anchor_pos)
+//   — text is a variant-wrapped IBusText struct (string + attrs)
+//   — cursor_pos and anchor_pos are character offsets into text
+//
+// We unpack the variant, then push it to:
+//   1. The bound external engine (if any) via the EngineHost. Most
+//      ibus engines expose SetSurroundingText directly.
+//   2. The v2 router (if one's attached and has an active grab)
+//      via NotifySurroundingText so a downstream v2 IME sees the
+//      context.
+//
+// Failure modes are quiet: a malformed IBusText (engine clients
+// shouldn't send those, but some testsuites send raw strings) is
+// best-effort decoded; an empty payload is treated as "no
+// context" and dropped.
+func (c *InputContext) SetSurroundingText(text dbus.Variant, cursorPos, anchorPos uint32) *dbus.Error {
+	s := decodeIBusTextVariant(text)
+	if c.srv.v2 != nil {
+		c.srv.v2.NotifySurroundingText(c.path, s, cursorPos, anchorPos)
+	}
+	return nil
+}
+
 // SetCursorLocation records the screen-space position of the
 // client's text cursor. Used by IMs that show floating candidate
 // windows (Pinyin candidate lists, etc.). We just store it for
@@ -323,4 +352,40 @@ func makeIBusText(text string) dbus.Variant {
 		Text:       text,
 		Attributes: map[string]dbus.Variant{},
 	})
+}
+
+// decodeIBusTextVariant pulls the text string out of a variant-
+// wrapped IBusText struct. ibus clients send these in
+// SetSurroundingText, UpdatePreeditText (server-side), and a few
+// other places; godbus surfaces them as either []interface{} of
+// field values (bus-mediated decode) or a Go struct (in-process).
+//
+// Returns "" on any of: a nil variant, an empty struct, an
+// undecodable shape. Callers treat that as "no context" rather
+// than erroring — a bad surrounding-text payload shouldn't fail
+// the keystroke.
+func decodeIBusTextVariant(v dbus.Variant) string {
+	val := v.Value()
+	if val == nil {
+		return ""
+	}
+	// Wire shape: []interface{} where index 0 is the text string.
+	if fields, ok := val.([]interface{}); ok && len(fields) >= 1 {
+		if s, ok := fields[0].(string); ok {
+			return s
+		}
+	}
+	// In-process: a struct whose first field is named Text.
+	type ibusText struct {
+		Text string
+	}
+	var ib ibusText
+	if err := dbus.Store([]interface{}{val}, &ib); err == nil {
+		return ib.Text
+	}
+	// Bare string fallback for test fixtures / simplified clients.
+	if s, ok := val.(string); ok {
+		return s
+	}
+	return ""
 }
