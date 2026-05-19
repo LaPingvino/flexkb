@@ -95,6 +95,8 @@ func main() {
 		runInfo(args)
 	case "validate":
 		runValidate(args)
+	case "doctor":
+		runDoctor(args)
 	case "migrate-suggest":
 		runMigrateSuggest(args)
 	case "dropin-check":

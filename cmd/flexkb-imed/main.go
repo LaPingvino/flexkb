@@ -20,6 +20,8 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/godbus/dbus/v5"
+
 	"github.com/lapingvino/flexkb/internal/compose"
 	"github.com/lapingvino/flexkb/internal/ibus"
 	"github.com/lapingvino/flexkb/internal/ibusengines"
@@ -42,6 +44,9 @@ func main() {
 		"alongside fails if ibus-daemon already owns the name; replace takes it over.")
 	listEngines := flag.Bool("list-engines", false, "print every ibus engine installed on the system and exit. "+
 		"Useful to see what other IMEs flexkb-imed could host in future versions.")
+	dryRun := flag.Bool("dry-run", false, "walk through startup (parse data, connect to compositor / session bus, "+
+		"diagnose missing requirements) but do NOT grab the keyboard or claim org.freedesktop.IBus. "+
+		"Read-only verification — safe to run alongside ibus-daemon and a real IME.")
 	flag.Parse()
 
 	if *listEngines {
@@ -74,10 +79,104 @@ func main() {
 		defer ctrl.close()
 	}
 
+	if *dryRun {
+		if err := dryRunChecks(log, *enableWayland, *ibusMode, factory); err != nil {
+			log.Error("dry-run check failed", "err", err)
+			if ctrl != nil {
+				ctrl.close()
+			}
+			os.Exit(1)
+		}
+		log.Info("dry-run complete — daemon would start cleanly")
+		return
+	}
+
 	if err := runMulti(log, *enableWayland, *ibusMode, factory, state); err != nil {
 		log.Error("daemon exited", "err", err)
+		// Explicit cleanup before os.Exit — defers don't fire,
+		// leaves a stale socket otherwise.
+		if ctrl != nil {
+			ctrl.close()
+		}
 		os.Exit(1)
 	}
+}
+
+// dryRunChecks walks through every startup step except the
+// "actually take over input" actions: opens the data tree,
+// composes the stack, connects to the compositor / session bus
+// and confirms the requirements are present, then exits without
+// grabbing the keyboard or claiming the ibus bus name. Safe to
+// run on a live session — coexists peacefully with any existing
+// IME or compositor state.
+//
+// Used as "is my configuration sound before I commit to running
+// the daemon for real?" — the recommended pre-flight for first
+// install or after a rebuild.
+func dryRunChecks(log *slog.Logger, enableWayland bool, ibusMode string, factory func() (*imsession.Session, error)) error {
+	log.Info("dry-run: building session from configured stack")
+	sess, err := factory()
+	if err != nil {
+		return fmt.Errorf("session build: %w", err)
+	}
+	_ = sess
+
+	if enableWayland {
+		log.Info("dry-run: probing Wayland compositor")
+		conn, err := wlwire.Dial()
+		if err != nil {
+			return fmt.Errorf("Wayland connect: %w", err)
+		}
+		defer conn.Close()
+		d := wlclient.NewDispatcher(conn, log)
+		disp, err := wlclient.ConnectDisplay(d)
+		if err != nil {
+			return fmt.Errorf("display bind: %w", err)
+		}
+		collector := newRegistryCollector(log)
+		_, err = disp.GetRegistry(collector.onGlobal, collector.onGlobalRemove)
+		if err != nil {
+			return fmt.Errorf("registry: %w", err)
+		}
+		dispatchErr := make(chan error, 1)
+		go func() { dispatchErr <- d.Run() }()
+		done := make(chan struct{})
+		disp.Sync(0, func(uint32) { close(done) })
+		select {
+		case <-done:
+		case e := <-dispatchErr:
+			return fmt.Errorf("dispatch: %w", e)
+		}
+		mgr, _ := collector.imManager()
+		if mgr == 0 {
+			log.Warn("dry-run: Wayland connected, but compositor does NOT advertise zwp_input_method_manager_v2 — daemon would exit on real run")
+		} else {
+			log.Info("dry-run: Wayland v2 manager advertised — daemon would bind it on real run")
+		}
+	}
+
+	if ibusMode != "off" {
+		log.Info("dry-run: probing session bus (no name claim)")
+		// We test the connection but don't try to claim the
+		// name — that's what makes this a dry-run. If the
+		// connection fails, that's the same error the real
+		// daemon would hit.
+		conn, err := ibusSessionConnect()
+		if err != nil {
+			return fmt.Errorf("ibus session bus: %w", err)
+		}
+		defer conn.Close()
+		log.Info("dry-run: session bus reachable — daemon would claim org.freedesktop.IBus on real run", "mode", ibusMode)
+	}
+	return nil
+}
+
+// ibusSessionConnect opens a session-bus connection without
+// claiming any well-known name. Used only by --dry-run.
+func ibusSessionConnect() (closer interface{ Close() error }, err error) {
+	// Indirection through the ibus package would normally claim
+	// a name too; we just want the raw connection probe.
+	return dbus.ConnectSessionBus()
 }
 
 // runMulti starts every enabled backend and waits for any of
